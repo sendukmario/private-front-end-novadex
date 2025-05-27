@@ -31,8 +31,11 @@ const StatBadge = React.memo(
     valueColor: string;
     suffix?: string;
     isMigrating?: boolean;
-  }) => (
-    <LightTooltip tip={tooltipLabel} position="top">
+  }) => {
+    // Only show tooltip for certain badges
+    const shouldShowTooltip = !["Insiders", "T10", "DH"].includes(label);
+
+    const badgeContent = (
       <div
         className={cn(
           "flex h-5 items-center justify-center gap-x-1 rounded-[4px] border border-[rgba(255,255,255,0.03)] bg-[#21212C] pl-1 pr-1.5",
@@ -61,8 +64,16 @@ const StatBadge = React.memo(
           {suffix || ""}
         </span>
       </div>
-    </LightTooltip>
-  ),
+    );
+
+    return shouldShowTooltip ? (
+      <LightTooltip tip={tooltipLabel} position="top">
+        {badgeContent}
+      </LightTooltip>
+    ) : (
+      badgeContent
+    );
+  },
 );
 StatBadge.displayName = "StatBadge";
 export default StatBadge;

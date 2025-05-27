@@ -765,21 +765,19 @@ const CosmoCard = memo(
             <CosmoQuickBuyButton
               mintAddress={data?.mint}
               className={cn(
-                `absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center xl:top-2/3 ${
+                `absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center xl:top-[75%] ${
                   (currentButtonPreset === "tripleextralarge" &&
                     currentAvatarPreset !== "normal" &&
                     currentAvatarPreset !== "large") ||
                   (currentButtonPreset === "quadripleextralarge" &&
                     currentAvatarPreset !== "normal" &&
                     currentAvatarPreset !== "large")
-                    ? "2xl:top-2/3"
-                    : "2xl:top-[55%]"
+                    ? "2xl:top-[75%]"
+                    : "2xl:top-[75%]"
                 }`,
                 isSnapOpen && "right-0 scale-[0.9]",
                 isSmallScreen &&
                   `${currentButtonPreset === "tripleextralarge" || currentButtonPreset === "quadripleextralarge" ? "!top-[calc(100%_-_42px)]" : "!top-[calc(100%_-_32px)]"} ${remainingScreenWidth < 1350 || width! < 1380 ? "opacity-0" : "opacity-100"} transition-all duration-300 ease-in-out group-hover:opacity-100`,
-                // remainingScreenWidth < 1200 &&
-                //   `${currentButtonPreset === "tripleextralarge" || currentButtonPreset === "quadripleextralarge" ? "!top-[calc(100%_-_42px)]" : "!top-[calc(100%_-_32px)]"} opacity-0 transition-all duration-300 ease-in-out group-hover:opacity-100`,
               )}
             />
           )}
