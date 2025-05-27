@@ -53,6 +53,7 @@ import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settin
 import { presetPriority, setHeight } from "./NewlyCreatedList";
 import { AvatarSetting } from "@/apis/rest/settings/settings";
 import { useSnapStateStore } from "@/stores/use-snap-state";
+import { useCopyDropdownState } from "@/stores/cosmo/card-state/use-copy-dropdown-state.store";
 
 export type AboutToGraduateListProps = {
   sizeVariant: "desktop" | "mobile";
@@ -82,8 +83,13 @@ function AboutToGraduateList({
     CosmoDataMessageType[]
   >([]);
 
+  const isAnyDropdownOpen = useCopyDropdownState(
+    (state) => state.isAnyDropdownOpen,
+  );
+
   // Filter & Hovered Configuration ✨
   const [isListHovered, setIsListHovered] = useState(false);
+
   const {
     checkBoxes,
     showKeywords,
@@ -495,7 +501,21 @@ function AboutToGraduateList({
   //   };
   // }, [handleSendFilterMessage, handleApplyFilterAndSendMessage]);
 
-  const [showList, setShowList] = useState(false);
+  // const [showList, setShowList] = useState(false);
+
+  // Add ref to track if mouse is currently over the list
+  const listRef = useRef<HTMLDivElement>(null);
+  const [isMouseOverList, setIsMouseOverList] = useState(false);
+
+  // Watch for dropdown state changes
+  useEffect(() => {
+    if (!isAnyDropdownOpen && isListHovered) {
+      if (!isMouseOverList) {
+        setIsListHovered(false);
+        setCurrentMintWhenListHovered([]);
+      }
+    }
+  }, [isAnyDropdownOpen, isListHovered, isMouseOverList]);
 
   const handleMouseMoveOnList = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -505,24 +525,24 @@ function AboutToGraduateList({
 
     const isOverVerticalScrollbar = e.clientX >= rect.right - scrollBarWidth;
 
-    // console.log("COSMO MOUSE MOVE ON LIST ✨ | DHSC", {
-    //   x: e.clientX,
-    //   right: rect.right,
-    //   scrollBarWidth,
-    //   isOverVerticalScrollbar,
-    // });
-
     if (isOverVerticalScrollbar) {
       setIsListHovered(false);
     } else {
-      setIsListHovered(true);
+      // Don't update hover state if dropdown is open
+      if (!isAnyDropdownOpen) {
+        setIsListHovered(true);
+      }
     }
   };
 
   // Memoize the items data to prevent unnecessary re-renders
   const itemData = useMemo(
     () => ({
-      items: isLoadingFilterFetch ? ([] as any) : isLoading && filteredList.length === 0 ? ([] as any) : filteredList,
+      items: isLoadingFilterFetch
+        ? ([] as any)
+        : isLoading && filteredList.length === 0
+          ? ([] as any)
+          : filteredList,
       column: 2,
     }),
     [filteredList, isLoading, isLoadingFilterFetch],
@@ -721,20 +741,24 @@ function AboutToGraduateList({
           </div>
 
           <div
+            ref={listRef}
             onMouseMove={(e) => {
               if (
                 isLoading ||
                 isLoadingFilterFetch ||
-                filteredList.length === 0
+                filteredList.length === 0 ||
+                isAnyDropdownOpen
               )
                 return;
               handleMouseMoveOnList(e);
             }}
             onMouseEnter={() => {
+              setIsMouseOverList(true);
               if (
                 isLoading ||
                 isLoadingFilterFetch ||
-                filteredList.length === 0
+                filteredList.length === 0 ||
+                isAnyDropdownOpen
               )
                 return;
               setIsListHovered(true);
@@ -743,8 +767,12 @@ function AboutToGraduateList({
               }
             }}
             onMouseLeave={() => {
-              setIsListHovered(false);
-              setCurrentMintWhenListHovered([]);
+              setIsMouseOverList(false);
+              // Only reset if dropdown is not open
+              if (!isAnyDropdownOpen) {
+                setIsListHovered(false);
+                setCurrentMintWhenListHovered([]);
+              }
             }}
             className="nova-scroller relative w-full flex-grow"
           >
@@ -756,9 +784,7 @@ function AboutToGraduateList({
                 }
                 width="100%"
                 itemCount={
-                  isLoadingFilterFetch
-                    ? 30
-                    : filteredList?.length || 0
+                  isLoadingFilterFetch ? 30 : filteredList?.length || 0
                 }
                 itemSize={setHeight(avatarSetting as AvatarSetting)}
                 overscanCount={3}
@@ -781,7 +807,18 @@ function AboutToGraduateList({
       )}
 
       {sizeVariant === "mobile" && (
-        <div className="nova-scroller flex h-full w-full flex-grow flex-col px-4 pt-3 xl:px-0">
+        <div
+          ref={listRef}
+          className="nova-scroller flex h-full w-full flex-grow flex-col px-4 pt-3 xl:px-0"
+          onMouseEnter={() => setIsMouseOverList(true)}
+          onMouseLeave={() => {
+            setIsMouseOverList(false);
+            if (!isAnyDropdownOpen) {
+              setIsListHovered(false);
+              setCurrentMintWhenListHovered([]);
+            }
+          }}
+        >
           {filteredList.length > 0 || isLoading || isLoadingFilterFetch ? (
             <FixedSizeList
               height={window.innerHeight! - 325}

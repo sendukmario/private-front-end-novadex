@@ -25,10 +25,6 @@ type TokenCardsFilterState = {
     max: number;
   };
   setTradesTotal: (value: { min: number; max: number }) => void;
-  tradesValue: SolUsdc;
-  setTradesValue: (value: SolUsdc) => void;
-  tradesTokenSol: SolUsdc;
-  setTradesTokenSol: (value: SolUsdc) => void;
   holdersBought: SolUsdc;
   setHoldersBought: (value: SolUsdc) => void;
   holdersSold: SolUsdc;
@@ -63,10 +59,6 @@ export const useTokenCardsFilter = create<TokenCardsFilterState>()((set) => ({
   },
   setTradesTotal: (value) => set({ tradesTotal: value }),
   setTradesType: (value) => set({ tradesType: value }),
-  tradesValue: "SOL",
-  setTradesValue: (value) => set({ tradesValue: value }),
-  tradesTokenSol: "SOL",
-  setTradesTokenSol: (value) => set({ tradesTokenSol: value }),
   holdersBought: "SOL",
   setHoldersBought: (value) => set({ holdersBought: value }),
   holdersSold: "SOL",
@@ -95,8 +87,6 @@ export const useTokenCardsFilter = create<TokenCardsFilterState>()((set) => ({
         min: 0,
         max: 0,
       },
-      tradesValue: "SOL",
-      tradesTokenSol: "SOL",
       holdersBought: "SOL",
       holdersSold: "SOL",
       topTradersBought: "SOL",

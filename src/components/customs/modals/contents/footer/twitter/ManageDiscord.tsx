@@ -80,10 +80,19 @@ const ManageDiscordContent = ({
       setMonitorDraftAccounts(
         newMonitorChannels as DiscordChannel[],
       );
-      setGroups(newMonitorChannels as DiscordChannel[] | string[]);
+
+      const finalGroups = groups.filter(
+        (group) =>
+          (typeof group === "string" && group !== discord.name) ||
+          (typeof group === "object" &&
+            "name" in group &&
+            group.name !== discord.name),
+      );
+
+      setGroups(finalGroups as DiscordChannel[] | string[]);
 
       const result = await updateDiscordMonitorChannel(
-        newMonitorChannels.map((acc) =>
+        finalGroups.map((acc) =>
           typeof acc === "string" ? acc : acc.name,
         ),
       );
@@ -97,7 +106,7 @@ const ManageDiscordContent = ({
       toast.custom((t) => (
         <CustomToast
           tVisibleState={t.visible}
-          message={`Success Delete @${discord.name}`}
+          message={`Success Delete ${discord.name}`}
         />
       ));
     } catch (error) {

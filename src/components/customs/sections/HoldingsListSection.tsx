@@ -44,11 +44,11 @@ import { dummyfilteredTokenBasedOnSelectedWalletData } from "@/constants/dummy-d
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import { useWebSocket } from "@/hooks/useWebsocketNew";
 
-type HoldingsDataQueuedMessage = {
+export type HoldingsDataQueuedMessage = {
   data: HoldingsConvertedMessageType | HoldingsConvertedMessageType[];
   timestamp: number;
 };
-type HoldingsChartPriceDataQueuedMessage = {
+export type HoldingsChartPriceDataQueuedMessage = {
   data: BatchPriceMessage;
   timestamp: number;
 };

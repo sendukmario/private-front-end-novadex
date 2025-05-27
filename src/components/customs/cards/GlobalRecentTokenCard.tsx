@@ -14,23 +14,13 @@ import {
   RecentToken,
   useRecentSearchTokensStore,
 } from "@/stores/use-recent-search-tokens";
+import { DEX } from "@/types/ws-general";
 
 export type GlobalRecentTokenCardProps = {
   symbol: string;
   mint: string;
   image: string;
-  dex:
-    | "Pump.Fun"
-    | "Believe"
-    | "Bonk"
-    | "Moonshot"
-    | "LaunchLab"
-    | "Boop"
-    | "Dynamic Bonding Curve"
-    | "Meteora AMM V2"
-    | "Meteora AMM"
-    | "Raydium"
-    | "Pump.Swap";
+  dex: DEX;
   setOpenDialog: (value: boolean) => void;
 };
 

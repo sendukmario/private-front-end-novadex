@@ -32,6 +32,7 @@ axios.interceptors.response.use(
       cookies.remove("isNew");
       localStorage.removeItem("loginStep");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("quick-buy-settings");
 
       // If you're using next/navigation
       window.location.href = "/login";

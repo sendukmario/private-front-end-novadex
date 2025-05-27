@@ -2,7 +2,7 @@
 
 import { Tweet } from "react-tweet";
 import React, { useState } from "react";
-import { TwitterUserStatusData } from "@/apis/rest/twitter";
+import { TwitterUserData } from "@/apis/rest/twitter";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -95,7 +95,7 @@ const TwitterCommentHoverPopover = React.memo(
     isWithAnimation?: boolean;
     align?: "center" | "end" | "start";
     variant?: "primary" | "secondary";
-    data?: TwitterUserStatusData;
+    data?: TwitterUserData;
     test?: boolean;
     containerSize?: string;
     iconSize?: string;
@@ -104,7 +104,7 @@ const TwitterCommentHoverPopover = React.memo(
     const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const postId = href.match(/\/status\/(\d+)/) || "";
-
+    const tweetRef = React.useRef<HTMLDivElement>(null);
     return (
       <>
         <TooltipProvider>
@@ -146,15 +146,28 @@ const TwitterCommentHoverPopover = React.memo(
               align={align}
               showTriangle={false}
               side="bottom"
-              className="nova-scroller darker tooltip-content-tweet z-[1000] max-h-[500px] w-[284px] overflow-y-scroll rounded-[8px] border border-border bg-transparent p-0"
+              className="nova-scroller darker tooltip-content-tweet relative z-[1000] max-h-[500px] w-[284px] rounded-[8px] border border-border bg-transparent p-0"
               data-theme="dark"
               onPointerEnter={() => setIsHovering(true)}
               onPointerLeave={() => setIsHovering(false)}
             >
-              <Tweet
-                components={{ TweetNotFound: EmptyState }}
-                apiUrl={`/api/tweet/${postId[1]}?url=${href}`}
+              <iframe
+                className={cn(
+                  // height of the iframe should be dynamic based on the tweet content
+                  "absolute left-0 top-0 z-[1000] w-full h-auto",
+                )}
+                style={{
+                  height: tweetRef.current?.clientHeight
+                    ? `${tweetRef.current.clientHeight}px`
+                    : "auto",
+                }}
               />
+              <div ref={tweetRef} className="size-full z-[1000] overflow-y-auto">
+                <Tweet
+                  components={{ TweetNotFound: EmptyState }}
+                  apiUrl={`/api/tweet/${postId[1]}?url=${href}`}
+                />
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

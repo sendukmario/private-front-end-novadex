@@ -262,10 +262,13 @@ export default function TSMonitorCard({
   const timeDisplay = useTimeUpdater(data.created_at);
 
   return (
-    <Link
-      href={data.url}
-      target="_blank"
-      className="flex w-full flex-col overflow-hidden rounded-[8px] border border-border bg-white/[4%]"
+    <div
+      onClick={() => {
+        if (data.url) {
+          window.open(data.url, "_blank");
+        }
+      }}
+      className="flex w-full cursor-pointer flex-col overflow-hidden rounded-[8px] border border-border bg-white/[4%]"
     >
       <div
         className={cn(
@@ -552,6 +555,6 @@ export default function TSMonitorCard({
           )}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

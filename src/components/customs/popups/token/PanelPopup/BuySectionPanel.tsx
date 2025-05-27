@@ -489,9 +489,9 @@ const BuySectionPanel = ({
                     onClick={() => handleInstaBuyTrade(quickPickValue)}
                     disabled={isLoadingBuy}
                     className={cn(
-                      "flex h-[32px] items-center justify-center disabled:opacity-[70%]",
+                      "flex h-[32px] items-center justify-center border-white/[8%] hover:border-success hover:bg-success/[8%] hover:text-success disabled:opacity-[70%]",
                       isSelected &&
-                        "border-primary bg-primary/[8%] text-primary",
+                        "border-success bg-success/[8%] text-success",
                       parentWidth < 400 && "gap-0.5 px-1.5",
                     )}
                     style={buttonStyle}

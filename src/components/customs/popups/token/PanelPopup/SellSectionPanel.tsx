@@ -540,6 +540,7 @@ const SellSectionPanel = ({
     >
       <Separator
         className={cn(isSmallScreen ? "mt-0" : "mt-4")}
+        color="#ffffff0a"
         fixedHeight={1}
       />
       <div className="flex w-full flex-col justify-between gap-y-1.5">
@@ -626,9 +627,9 @@ const SellSectionPanel = ({
                     disabled={sellMutation.isPending}
                     isLoading={sellMutation.isPending}
                     className={cn(
-                      "flex h-[32px] items-center justify-center disabled:opacity-[70%]",
+                      "flex h-[32px] items-center justify-center border-white/[8%] hover:border-destructive hover:bg-destructive/[8%] hover:text-destructive disabled:opacity-[70%]",
                       isSelected &&
-                        "border-primary bg-primary/[8%] text-primary",
+                        "border-destructive bg-destructive/[8%] text-destructive",
                       parentWidth < 400 && "gap-0.5 px-1.5",
                     )}
                     style={buttonStyle}

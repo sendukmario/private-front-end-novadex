@@ -1,6 +1,9 @@
 "use client";
 
 // ######## Libraries 📦 & Hooks 🪝 ########
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useWalletTrackerMessageStore } from "@/stores/footer/use-wallet-tracker-message.store";
 import { useSelectedWalletTrackerTradeAddressesFilterStore } from "@/stores/footer/use-selected-wallet-tracker-trade-filter.store";
 import { useTrackedWalletsOfToken } from "@/hooks/use-tracked-wallets-of-token";
 import { useQuery } from "@tanstack/react-query";
@@ -30,9 +33,6 @@ import {
   formatAmountWithoutLeadingZero,
   parseFormattedNumber,
 } from "@/utils/formatAmount";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useWalletTrackerMessageStore } from "@/stores/footer/use-wallet-tracker-message.store";
-import { usePathname } from "next/navigation";
 
 export type IVariant = "normal" | "pop-out";
 type ISortType = "DESC" | "ASC" | "NONE";
@@ -305,18 +305,18 @@ export default function WalletTrackerTable({
       {
         label: "Token",
         tooltipContent: "Token Name",
-        className: "min-w-[340px]",
+        className: "min-w-[250px]",
       },
       {
         label: "Wallet Name",
         tooltipContent: "The name provided for the wallet",
-        className: "min-w-[100px] max-w-[200px]",
+        className: "min-w-[100px]",
       },
       {
         label: "Amount",
         tooltipContent:
           "Amount of SOL put in by the tracked wallet and the amount of tokens bought",
-        className: " w-full",
+        className: "w-full min-w-[135px]",
         sortButton: (
           <>
             <WalletTrackerTotalFilter />
@@ -546,7 +546,10 @@ export default function WalletTrackerTable({
                       <HeadCol
                         key={index}
                         {...item}
-                        className={cn("w-full min-w-[340px]")}
+                        className={cn(
+                          "w-full min-w-[250px]",
+                          size.width > 800 && "min-w-[340px]",
+                        )}
                         style={{
                           minWidth:
                             size.width < 500
@@ -563,7 +566,8 @@ export default function WalletTrackerTable({
                     <HeadCol
                       key={index}
                       {...item}
-                      className="w-full min-w-[120px] max-w-[200px]"
+                      label="Wallet"
+                      className="w-full min-w-[80px]"
                       isWithBorder={true}
                     />
                   );
@@ -607,11 +611,19 @@ export default function WalletTrackerTable({
           />
         ) : trackedWalletsList.length === 0 ? (
           <div className="absolute left-0 top-0 flex h-full w-full flex-grow items-center justify-center">
-            <EmptyState state="Wallet" className="-mt-5 xl:mt-0" />
+            <EmptyState
+              windowSize={size}
+              state="Wallet"
+              className="-mt-5 xl:mt-0"
+            />
           </div>
         ) : filteredFinalData?.length === 0 ? (
           <div className="absolute left-0 top-0 flex h-full w-full flex-grow items-center justify-center">
-            <EmptyState state="No Result" className="-mt-5 xl:mt-0" />
+            <EmptyState
+              windowSize={size}
+              state="No Result"
+              className="-mt-5 xl:mt-0"
+            />
           </div>
         ) : (
           <TableBody
@@ -658,7 +670,7 @@ const TableBody = ({
       // if there is snap window and mobile
       return isSnapOpen || width! < 1280 ? 165 : 88;
     } else {
-      return width! > 1280 ? 40 : 180;
+      return width! >= 1280 ? 40 : 180;
     }
   }, [width, isSnapOpen]);
 
@@ -677,7 +689,7 @@ const TableBody = ({
             ? width! > 1630
               ? window.innerHeight! - 195
               : window.innerHeight! - 238
-            : width! > 1280
+            : width! >= 1280
               ? window.innerHeight! - 250
               : window.innerHeight! - 238
         }

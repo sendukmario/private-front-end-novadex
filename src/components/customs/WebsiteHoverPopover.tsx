@@ -119,12 +119,12 @@ const WebsiteHoverPopoverContent = React.memo(({ href }: { href: string }) => {
   // Show loading indicator only if actually fetching data
   if (isLoading && isFetching) {
     return (
-      <div className="flex h-12 items-center justify-center">
+      <div className="flex h-12 items-center justify-center z-[1000]">
         <div className="relative size-6 animate-spin">
           <Image
             src="/icons/search-loading.png"
             alt="Loading"
-            fill 
+            fill
             className="object-contain"
           />
         </div>
@@ -133,7 +133,7 @@ const WebsiteHoverPopoverContent = React.memo(({ href }: { href: string }) => {
   }
 
   return (
-    <div className="flex w-full items-start justify-between gap-x-2">
+    <div className="flex w-full items-start justify-between gap-x-2 z-[1000]">
       <div className="flex min-w-0 flex-1 flex-col gap-y-0.5">
         <p className="font-geistRegular text-[10px] font-normal leading-[14px] text-fontColorPrimary">
           {extractDomain(href)}
@@ -202,6 +202,7 @@ const WebsiteHoverPopover = React.memo(
             side="bottom"
             className="gb__white__popover z-[1000] w-[220px] rounded-[8px] border border-border bg-card p-3 !transition-none"
           >
+            <iframe className="absolute inset-0 h-full w-full opacity-0" />
             <WebsiteHoverPopoverContent href={href} />
           </TooltipContent>
         </Tooltip>

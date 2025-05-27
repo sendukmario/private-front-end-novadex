@@ -61,6 +61,7 @@ import { AvatarHighlightWrapper } from "@/components/customs/AvatarHighlightWrap
 import { useTrackedWalletsOfToken } from "@/hooks/use-tracked-wallets-of-token";
 import { TokenText } from "./partials/TokenText";
 import { AnimatedGradient } from "@/components/customs/cards/footer/DiscordMonitorCard";
+import CosmoCardCopyDropdown from "../CosmoCardCopyDropdown";
 
 type CosmoCardProps = {
   data: CosmoDataMessageType;
@@ -487,12 +488,7 @@ const CosmoCard = memo(
                 />
               </div>
               <div className="z-[10] flex items-center gap-x-1">
-                <Copy
-                  value={data?.mint}
-                  dataDetail={data}
-                  sizeConstant={16}
-                  withAnimation={false}
-                />
+                <CosmoCardCopyDropdown data={data} />
                 <Link
                   href={`https://x.com/search?q=${data?.mint}`}
                   target="_blank"
@@ -592,7 +588,7 @@ const CosmoCard = memo(
                           data?.launchpad === "Bonk"
                           ? "bonk"
                           : data?.origin_dex === "Dynamic Bonding Curve" &&
-                              data?.launchpad === "Believe"
+                              data?.launchpad === "Launch a Coin"
                             ? "believe"
                             : (data?.origin_dex
                                 ?.replace(/\./g, "")
@@ -604,7 +600,7 @@ const CosmoCard = memo(
                       data?.dex === "LaunchLab" && data?.launchpad === "Bonk"
                         ? "bonk"
                         : data?.dex === "Dynamic Bonding Curve" &&
-                            data?.launchpad === "Believe"
+                            data?.launchpad === "Launch a Coin"
                           ? "believe"
                           : (data?.dex
                               ?.replace(/\./g, "")
@@ -750,7 +746,16 @@ const CosmoCard = memo(
             <SnipeButton
               data={data}
               className={cn(
-                "absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center",
+                `absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center ${
+                  (currentButtonPreset === "tripleextralarge" &&
+                    currentAvatarPreset !== "normal" &&
+                    currentAvatarPreset !== "large") ||
+                  (currentButtonPreset === "quadripleextralarge" &&
+                    currentAvatarPreset !== "normal" &&
+                    currentAvatarPreset !== "large")
+                    ? "2xl:top-2/3"
+                    : "2xl:top-[55%]"
+                }`,
                 isSnapOpen && "right-0 scale-[0.9]",
                 isSmallScreen &&
                   "opacity-0 transition-all duration-300 ease-in-out group-hover:opacity-100",

@@ -36,7 +36,7 @@ const TruthSocialContent = ({ url }: { url: string }) => {
 
   if (isLoading) {
     return (
-      <div className="mt-4 flex h-24 items-center justify-center">
+      <div className="mt-4 flex h-24 items-center justify-center z-[1000]">
         <div className="relative size-6 animate-spin">
           <Image
             src="/icons/search-loading.png"
@@ -51,7 +51,7 @@ const TruthSocialContent = ({ url }: { url: string }) => {
 
   if (error) {
     return (
-      <div className="mt-4 flex h-24 items-center justify-center">
+      <div className="mt-4 flex h-24 items-center justify-center z-[1000]">
         <p className="font-geistRegular text-sm font-normal text-[#9191A4]">
           Error loading posts. Please try again later.
         </p>
@@ -197,6 +197,7 @@ const TruthSocialHoverPopover = React.memo(
               side="bottom"
               className="gb__white__popover nova-scroller z-[1000] max-h-[50dvh] w-[284px] rounded-[6px] border border-border bg-[#17171F] p-0 !transition-none"
             >
+              <iframe className="absolute left-0 top-0 size-full" />
               <TruthSocialContent url={url} />
             </TooltipContent>
           </Tooltip>

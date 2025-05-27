@@ -293,7 +293,7 @@ export default React.memo(function TokenInformation({
                         ? "bonk"
                         : finalTokenInfo?.origin_dex ===
                               "Dynamic Bonding Curve" &&
-                            finalTokenInfo?.launchpad === "Believe"
+                            finalTokenInfo?.launchpad === "Launch a Coin"
                           ? "believe"
                           : (finalTokenInfo?.origin_dex
                               ?.replace(/\./g, "")
@@ -306,7 +306,7 @@ export default React.memo(function TokenInformation({
                     finalTokenInfo?.launchpad === "Bonk"
                       ? "bonk"
                       : finalTokenInfo?.dex === "Dynamic Bonding Curve" &&
-                          finalTokenInfo?.launchpad === "Believe"
+                          finalTokenInfo?.launchpad === "Launch a Coin"
                         ? "believe"
                         : (finalTokenInfo?.dex
                             ?.replace(/\./g, "")
@@ -386,8 +386,8 @@ export default React.memo(function TokenInformation({
                         className="z-[10000] w-full max-w-[260px] rounded-[4px] bg-[#202037] px-2 py-1"
                       >
                         <p className="inline-block text-xs">
-                          Watch up to 5 tokens at a time. If you add more than 5
-                          tokens, the newest watched token will replace the
+                          Watch up to 10 tokens at a time. If you add more than
+                          10 tokens, the newest watched token will replace the
                           oldest
                         </p>
                       </TooltipContent>

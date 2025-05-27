@@ -167,7 +167,7 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
       }
 
       if (wsRef?.OPEN) {
-        setAccounts(suggestedDiscordChannelDraft);
+        setAccounts(finalGroups);
         const currentGroups = groups.map((acc) => acc);
         const newGroups = suggestedDiscordChannelDraft.map((acc) => acc.name);
 
@@ -293,7 +293,13 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
                   (discord: SuggestedDiscordChannel, index: number) => (
                     <div
                       key={discord.name + index}
-                      className="flex h-[50px] w-full items-center gap-x-3 rounded-[4px] bg-white/[4%] px-3 py-[10px] transition-all duration-200 ease-out hover:bg-white/[8%]"
+                      className="cursor-pointer flex h-[50px] w-full items-center gap-x-3 rounded-[4px] bg-white/[4%] px-3 py-[10px] transition-all duration-200 ease-out hover:bg-white/[8%]"
+                      onClick={() =>
+                        handleAddSuggestedChannel({
+                          name: discord.name,
+                          image: discord.image,
+                        })
+                      }
                     >
                       <div className="relative aspect-square h-8 w-8 flex-shrink-0 cursor-pointer overflow-hidden rounded-full">
                         <Image

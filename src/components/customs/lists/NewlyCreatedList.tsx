@@ -8,6 +8,7 @@ import {
   memo,
   useCallback,
   ChangeEvent,
+  useRef,
 } from "react";
 import { useNewlyCreatedFilterStore } from "@/stores/cosmo/use-newly-created-filter.store";
 import { useCosmoListsStore } from "@/stores/cosmo/use-cosmo-lists.store";
@@ -45,6 +46,7 @@ import CosmoCardRow from "../cards/VirtualizedCosmoCard";
 import { AvatarSetting } from "@/apis/rest/settings/settings";
 import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settings.store";
 import { useSnapStateStore } from "@/stores/use-snap-state";
+import { useCopyDropdownState } from "@/stores/cosmo/card-state/use-copy-dropdown-state.store";
 
 export const setHeight = (type: AvatarSetting) => {
   switch (type) {
@@ -92,6 +94,10 @@ function NewlyCreatedList({
   const [filterFetchList, setFilterFetchListState] = useState<
     CosmoDataMessageType[]
   >([]);
+
+  const isAnyDropdownOpen = useCopyDropdownState(
+    (state) => state.isAnyDropdownOpen,
+  );
 
   // Filter & Hovered Configuration ✨
   const [isListHovered, setIsListHovered] = useState(false);
@@ -444,7 +450,9 @@ function NewlyCreatedList({
           : !hiddenTokens.includes(item?.mint),
       );
 
-    return filtered.length > 0 ? filtered : list;
+    return (filtered.length > 0 ? filtered : list).sort(
+      (a, b) => b.created - a.created,
+    );
   }, [
     currentMintWhenListHovered,
     newlyCreatedList,
@@ -511,32 +519,44 @@ function NewlyCreatedList({
 
   // const [showList, setShowList] = useState(false);
 
+  // Add ref to track if mouse is currently over the list
+  const listRef = useRef<HTMLDivElement>(null);
+  const [isMouseOverList, setIsMouseOverList] = useState(false);
+
+  // Watch for dropdown state changes
+  useEffect(() => {
+    if (!isAnyDropdownOpen && isListHovered) {
+      if (!isMouseOverList) {
+        setIsListHovered(false);
+        setCurrentMintWhenListHovered([]);
+      }
+    }
+  }, [isAnyDropdownOpen, isListHovered, isMouseOverList]);
+
   const handleMouseMoveOnList = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-
     const rect = target.getBoundingClientRect();
     const scrollBarWidth = 20;
-
     const isOverVerticalScrollbar = e.clientX >= rect.right - scrollBarWidth;
-
-    // console.log("COSMO MOUSE MOVE ON LIST ✨ | DHSC", {
-    //   x: e.clientX,
-    //   right: rect.right,
-    //   scrollBarWidth,
-    //   isOverVerticalScrollbar,
-    // });
 
     if (isOverVerticalScrollbar) {
       setIsListHovered(false);
     } else {
-      setIsListHovered(true);
+      // Don't update hover state if dropdown is open
+      if (!isAnyDropdownOpen) {
+        setIsListHovered(true);
+      }
     }
   };
 
   // Memoize the items data to prevent unnecessary re-renders
   const itemData = useMemo(
     () => ({
-      items: isLoadingFilterFetch ? ([] as any) : isLoading && filteredList.length === 0 ? ([] as any) : filteredList,
+      items: isLoadingFilterFetch
+        ? ([] as any)
+        : isLoading && filteredList.length === 0
+          ? ([] as any)
+          : filteredList,
       column: 1,
     }),
     [filteredList, isLoading, isLoadingFilterFetch],
@@ -736,20 +756,24 @@ function NewlyCreatedList({
           </div>
 
           <div
+            ref={listRef}
             onMouseMove={(e) => {
               if (
                 isLoading ||
                 isLoadingFilterFetch ||
-                filteredList.length === 0
+                filteredList.length === 0 ||
+                isAnyDropdownOpen
               )
                 return;
               handleMouseMoveOnList(e);
             }}
             onMouseEnter={() => {
+              setIsMouseOverList(true);
               if (
                 isLoading ||
                 isLoadingFilterFetch ||
-                filteredList.length === 0
+                filteredList.length === 0 ||
+                isAnyDropdownOpen
               )
                 return;
               setIsListHovered(true);
@@ -758,8 +782,12 @@ function NewlyCreatedList({
               }
             }}
             onMouseLeave={() => {
-              setIsListHovered(false);
-              setCurrentMintWhenListHovered([]);
+              setIsMouseOverList(false);
+              // Only reset if dropdown is not open
+              if (!isAnyDropdownOpen) {
+                setIsListHovered(false);
+                setCurrentMintWhenListHovered([]);
+              }
             }}
             className="nova-scroller relative w-full flex-grow"
           >
@@ -770,7 +798,9 @@ function NewlyCreatedList({
                   (remainingScreenWidth >= 1314.9 ? 260 : 315)
                 }
                 width="100%"
-                itemCount={isLoadingFilterFetch ? 30 : filteredList?.length || 0}
+                itemCount={
+                  isLoadingFilterFetch ? 30 : filteredList?.length || 0
+                }
                 itemSize={setHeight(avatarSetting as AvatarSetting)}
                 overscanCount={3}
                 itemKey={getItemKey}
@@ -792,7 +822,18 @@ function NewlyCreatedList({
       )}
 
       {sizeVariant === "mobile" && (
-        <div className="nova-scroller flex h-full w-full flex-grow flex-col px-4 pt-3 xl:px-0">
+        <div
+          ref={listRef}
+          className="nova-scroller flex h-full w-full flex-grow flex-col px-4 pt-3 xl:px-0"
+          onMouseEnter={() => setIsMouseOverList(true)}
+          onMouseLeave={() => {
+            setIsMouseOverList(false);
+            if (!isAnyDropdownOpen) {
+              setIsListHovered(false);
+              setCurrentMintWhenListHovered([]);
+            }
+          }}
+        >
           {filteredList.length > 0 || isLoading || isLoadingFilterFetch ? (
             <FixedSizeList
               height={window.innerHeight! - 325}

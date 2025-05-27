@@ -509,28 +509,28 @@ export default React.memo(function SellForm({
         !isEqual(previousSettingsRef.current, formValues)
       ) {
         // Check for minimum tip value when auto-tip is disabled
-        if (!formValues.auto_tip && formValues.tip < 0.0001) {
-          toast.custom((t: any) => (
-            <CustomToast
-              tVisibleState={t.visible}
-              message="Sell Tip must be at least 0.0001 SOL"
-              state="ERROR"
-            />
-          ));
-          return; // Don't proceed with saving
-        }
+        // if (!formValues.auto_tip && formValues.tip < 0.001) {
+        //   toast.custom((t: any) => (
+        //     <CustomToast
+        //       tVisibleState={t.visible}
+        //       message="We recommend a minimum tip of 0.001 for faster transaction"
+        //       state="ERROR"
+        //     />
+        //   ));
+        //   return; // Don't proceed with saving
+        // }
 
         // Check for minimum fee value when auto-fee is disabled
-        if (!formValues.auto_tip && formValues.fee < 0.0001) {
-          toast.custom((t: any) => (
-            <CustomToast
-              tVisibleState={t.visible}
-              message="Priority Fee must be at least 0.0001 SOL"
-              state="ERROR"
-            />
-          ));
-          return; // Don't proceed with saving
-        }
+        // if (!formValues.auto_tip && formValues.fee < 0.001) {
+        //   toast.custom((t: any) => (
+        //     <CustomToast
+        //       tVisibleState={t.visible}
+        //       message="We recommend a minimum tip of 0.001 for faster transaction"
+        //       state="ERROR"
+        //     />
+        //   ));
+        // return; // Don't proceed with saving
+        // }
 
         if (!formValues?.slippage) {
           toast.custom((t: any) => (
@@ -598,11 +598,11 @@ export default React.memo(function SellForm({
   // 💵Wallet Settings
   const onSubmit = (data: SubmitTransactionRequest) => {
     // Check if auto-tip is disabled and tip is less than the minimum
-    // if (!data.auto_tip && data.tip < 0.0001 && data.tip !== 0) {
+    // if (!data.auto_tip && data.tip < 0.001 && data.tip !== 0) {
     //   toast.custom((t: any) => (
     //     <CustomToast
     //       tVisibleState={t.visible}
-    //       message="Sell Tip must be at least 0.0001 SOL"
+    //       message="We recommend a minimum tip of 0.001 for faster transaction"
     //       state="ERROR"
     //     />
     //   ));
@@ -610,11 +610,11 @@ export default React.memo(function SellForm({
     // }
 
     // Check if auto-tip is disabled and fee is less than the minimum
-    // if (!data.auto_tip && data.fee < 0.0001 && data.fee !== 0) {
+    // if (!data.auto_tip && data.fee < 0.001 && data.fee !== 0) {
     //   toast.custom((t: any) => (
     //     <CustomToast
     //       tVisibleState={t.visible}
-    //       message="Priority Fee must be at least 0.0001 SOL"
+    //       message="We recommend a minimum tip of 0.001 for faster transaction"
     //       state="ERROR"
     //     />
     //   ));
@@ -1415,19 +1415,19 @@ export default React.memo(function SellForm({
                                   field.onChange(newValue);
 
                                   // Show toast if value is invalid and not empty/zero
-                                  if (
-                                    !form.getValues().auto_tip &&
-                                    newValue < 0.0001 &&
-                                    newValue !== 0
-                                  ) {
-                                    toast.custom((t: any) => (
-                                      <CustomToast
-                                        tVisibleState={t.visible}
-                                        message="Priority Fee must be at least 0.0001 SOL"
-                                        state="ERROR"
-                                      />
-                                    ));
-                                  }
+                                  // if (
+                                  //   !form.getValues().auto_tip &&
+                                  //   newValue < 0.001 &&
+                                  //   newValue !== 0
+                                  // ) {
+                                  //   toast.custom((t: any) => (
+                                  //     <CustomToast
+                                  //       tVisibleState={t.visible}
+                                  //       message="We recommend a minimum tip of 0.001 for faster transaction"
+                                  //       state="ERROR"
+                                  //     />
+                                  //   ));
+                                  // }
 
                                   form.trigger("fee");
                                 }}
@@ -1448,7 +1448,11 @@ export default React.memo(function SellForm({
                                 }
                               />
                             </FormControl>
-                            <FormMessage />
+                            {form.watch("fee") < 0.001 ? (
+                              <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                            ) : (
+                              <FormMessage />
+                            )}
                           </FormItem>
                         )}
                       />
@@ -1476,19 +1480,19 @@ export default React.memo(function SellForm({
                                   field.onChange(newValue);
 
                                   // Show toast if value is invalid and not empty/zero
-                                  if (
-                                    !form.getValues().auto_tip &&
-                                    newValue < 0.0001 &&
-                                    newValue !== 0
-                                  ) {
-                                    toast.custom((t: any) => (
-                                      <CustomToast
-                                        tVisibleState={t.visible}
-                                        message="Buy Tip must be at least 0.0001 SOL"
-                                        state="ERROR"
-                                      />
-                                    ));
-                                  }
+                                  // if (
+                                  //   !form.getValues().auto_tip &&
+                                  //   newValue < 0.001 &&
+                                  //   newValue !== 0
+                                  // ) {
+                                  //   toast.custom((t: any) => (
+                                  //     <CustomToast
+                                  //       tVisibleState={t.visible}
+                                  //       message="We recommend a minimum tip of 0.001 for faster transaction"
+                                  //       state="ERROR"
+                                  //     />
+                                  //   ));
+                                  // }
 
                                   form.trigger("tip");
                                 }}
@@ -1509,7 +1513,11 @@ export default React.memo(function SellForm({
                                 }
                               />
                             </FormControl>
-                            <FormMessage />
+                            {form.watch("tip") < 0.001 ? (
+                              <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                            ) : (
+                              <FormMessage />
+                            )}
                           </FormItem>
                         )}
                       />

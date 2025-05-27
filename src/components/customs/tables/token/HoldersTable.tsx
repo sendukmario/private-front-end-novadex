@@ -177,7 +177,7 @@ function HoldersTable() {
         className={cn(
           "grid w-full grid-cols-2 items-center gap-2 border-border px-4 py-3 xl:border-b",
           isOldToken ? "xl:grid-cols-2" : "xl:grid-cols-5",
-          remainingScreenWidth <= 1280 && "xl:grid-cols-2",
+          remainingScreenWidth > 1280 && "xl:grid-cols-2",
         )}
       >
         <div
@@ -329,7 +329,7 @@ function HoldersTable() {
             className={cn(
               "sticky top-0 z-[9] hidden h-[40px] min-w-max flex-shrink-0 items-center border-b border-border bg-[#080811] xl:flex",
               isLoading ? "pr-0" : "pr-10",
-              remainingScreenWidth <= 1280 && "xl:hidden",
+              remainingScreenWidth > 1280 && "xl:hidden",
             )}
           >
             {isLoading && selectedHoldersFilter !== "Amount Of Holders" ? (
@@ -356,7 +356,7 @@ function HoldersTable() {
                   height={listHeight}
                   width="100%"
                   itemCount={amountOfHolders?.length}
-                  itemSize={remainingScreenWidth > 1280 ? 72 : 164}
+                  itemSize={remainingScreenWidth >= 1280 ? 72 : 164}
                   itemData={{
                     items: amountOfHolders,
                   }}
@@ -393,7 +393,7 @@ function HoldersTable() {
                   height={listHeight}
                   width="100%"
                   itemCount={filteredHolders.length}
-                  itemSize={remainingScreenWidth > 1280 ? 72 : 164}
+                  itemSize={remainingScreenWidth >= 1280 ? 72 : 164}
                   itemData={{
                     items: filteredHolders,
                   }}

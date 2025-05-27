@@ -148,10 +148,13 @@ export default function HoldingsListMobile({
   const setListSubscribedMints = useHoldingsMessageStore(
     (state) => state.setListSubscribedMints,
   );
+  const marqueeMints = useHoldingsMessageStore((state) => state.marqueeMint);
 
   const sendMessage = debounce(() => {
-    const mintsToSubscribe =
-      paginatedList?.map((item) => item.token.mint) || [];
+    const mintsToSubscribe = [
+      ...paginatedList?.map((item) => item.token.mint),
+      ...marqueeMints,
+    ];
     if (mintsToSubscribe.length === 0) return;
     handleSendMessage(mintsToSubscribe);
     setListSubscribedMints(mintsToSubscribe);
@@ -159,7 +162,7 @@ export default function HoldingsListMobile({
 
   useEffect(() => {
     sendMessage();
-  }, [sortedList?.length, currentPage]);
+  }, [sortedList?.length, currentPage, marqueeMints.join(",")]);
 
   const handlePrevPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));

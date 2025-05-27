@@ -133,7 +133,7 @@ export default function TrendingCard({
                 tokenData?.launchpad === "Bonk"
                   ? "bonk"
                   : tokenData?.dex === "Dynamic Bonding Curve" &&
-                      tokenData?.launchpad === "Believe"
+                      tokenData?.launchpad === "Launch a Coin"
                     ? "believe"
                     : (tokenData?.dex
                         ?.replace(/\./g, "")

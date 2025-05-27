@@ -66,7 +66,7 @@ export default function NewFeatureModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -110,7 +110,7 @@ const NewFeaturesView = ({
 
   useEffect(() => {
     setIsLoading(true);
-    
+
     // Cleanup function when component unmounts or when step changes
     return () => {
       setIsLoading(false);
@@ -119,10 +119,10 @@ const NewFeaturesView = ({
 
   const handleTryItOut = () => {
     if (isLoading) return;
-    
+
     // Close modal first for better UX
     handleClose();
-    
+
     // Use a small timeout to ensure modal animation completes
     setTimeout(() => {
       router.push(currentFeature.route);
@@ -269,7 +269,7 @@ const NavigationButton = forwardRef<HTMLButtonElement, NavigationButtonProps>(
         ref={ref}
         onClick={onTap}
         className={cn(
-          "flex text-start flex-row items-center rounded-lg bg-opacity-10 hover:bg-[#DF74FF] hover:bg-opacity-10",
+          "flex flex-row items-center rounded-lg bg-opacity-10 text-start hover:bg-[#DF74FF] hover:bg-opacity-10",
           "px-1 py-1 sm:px-2 sm:py-2",
           "w-32 sm:w-full",
           "text-base sm:text-sm",

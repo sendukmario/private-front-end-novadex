@@ -245,7 +245,7 @@ export default function WalletTrackerCard({
                             tracker?.launchpad === "Bonk"
                               ? "bonk"
                               : tracker?.dex === "Dynamic Bonding Curve" &&
-                                  tracker?.launchpad === "Believe"
+                                  tracker?.launchpad === "Launch a Coin"
                                 ? "believe"
                                 : (tracker?.dex
                                     ?.replace(/\./g, "")
@@ -539,7 +539,7 @@ export default function WalletTrackerCard({
                           tracker?.launchpad === "Bonk"
                             ? "bonk"
                             : tracker?.dex === "Dynamic Bonding Curve" &&
-                                tracker?.launchpad === "Believe"
+                                tracker?.launchpad === "Launch a Coin"
                               ? "believe"
                               : (tracker?.dex
                                   ?.replace(/\./g, "")
@@ -790,7 +790,7 @@ export default function WalletTrackerCard({
                         tracker?.launchpad === "Bonk"
                           ? "bonk"
                           : tracker?.dex === "Dynamic Bonding Curve" &&
-                              tracker?.launchpad === "Believe"
+                              tracker?.launchpad === "Launch a Coin"
                             ? "believe"
                             : (tracker?.dex
                                 ?.replace(/\./g, "")
@@ -941,7 +941,7 @@ export default function WalletTrackerCard({
                       tracker?.launchpad === "Bonk"
                         ? "bonk"
                         : tracker?.dex === "Dynamic Bonding Curve" &&
-                            tracker?.launchpad === "Believe"
+                            tracker?.launchpad === "Launch a Coin"
                           ? "believe"
                           : (tracker?.dex
                               ?.replace(/\./g, "")

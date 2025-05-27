@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "nextjs-toploader/app";
@@ -24,6 +24,7 @@ import GradientProgressBar from "@/components/customs/GradientProgressBar";
 import StatTexts from "@/components/customs/cards/partials/StatTexts";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import { usePopupByName, usePopupStore } from "@/stores/use-popup-state";
+import { DEX } from "@/types/ws-general";
 
 interface DiscordMonitorCardProps {
   data: FinalDiscordMessage;
@@ -161,6 +162,12 @@ const DiscordMonitorCard: React.FC<DiscordMonitorCardProps> = ({
     (group) => group.pinged_first,
   );
 
+  const handleCardContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(`/token/${data.address}`, "_blank");
+  }, []);
+
   return (
     <div
       onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -168,6 +175,13 @@ const DiscordMonitorCard: React.FC<DiscordMonitorCardProps> = ({
         e.stopPropagation();
         router.push(`/token/${data.address}`);
       }}
+      onMouseDown={(e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+          handleCardContextMenu(e);
+        }
+      }}
+      onContextMenu={handleCardContextMenu}
       className={cn(
         "group cursor-pointer rounded-lg bg-gradient-to-t from-[#1A1A23] to-[#080811] p-[1px]",
         border,
@@ -213,8 +227,8 @@ const DiscordMonitorCard: React.FC<DiscordMonitorCardProps> = ({
               <Image
                 src={gradientMap[gradient].icon}
                 alt="Token Medal"
-                layout="fill"
-                objectFit="contain"
+                fill
+                className="object-contain"
               />
             </div>
             <span className="z-10 text-nowrap font-geistSemiBold text-base text-fontColorPrimary">
@@ -234,22 +248,14 @@ const DiscordMonitorCard: React.FC<DiscordMonitorCardProps> = ({
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center gap-x-2">
+          <div
+            className="flex items-center gap-x-2"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
             <SocialLinks
-              dex={
-                data.token_data?.token_dex as
-                  | "Pump.Fun"
-                  | "Believe"
-                  | "Bonk"
-                  | "Moonshot"
-                  | "LaunchLab"
-                  | "Boop"
-                  | "Dynamic Bonding Curve"
-                  | "Meteora AMM V2"
-                  | "Meteora AMM"
-                  | "Raydium"
-                  | "Pump.Swap"
-              }
+              dex={data.token_data?.token_dex as DEX}
               isFirst={false}
               twitter={data.token_data?.token_twitter}
               mint={data.token_data?.token_mint}
@@ -375,11 +381,12 @@ const DiscordMonitorCard: React.FC<DiscordMonitorCardProps> = ({
                     {/* Amount */}
                     <div
                       className={cn(
-                        "flex w-full items-center rounded-[4px] border border-white border-opacity-[0.03] bg-white/[8%] p-[2px] pl-[6px] xl:w-full",
+                        "flex items-center rounded-[4px] border border-white border-opacity-[0.03] bg-white/[8%] p-[2px] pl-[6px]",
                         variant === "small" && "items-start",
                         variant === "small" &&
                           data.group_counts.length < 3 &&
                           "!w-min",
+                        remainingScreenWidth < 1300 && "!w-min",
                         isOpenPopUp && isSnapOpen && "!w-min",
                       )}
                     >

@@ -21,6 +21,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQuickBuySettingsStore } from "@/stores/setting/use-quick-buy-settings.store";
 import { useLatestTransactionMessageStore } from "@/stores/use-latest-transactions.store";
 import { useNotificationSettingsStore } from "@/stores/setting/use-notification-settings.store";
+import { useWatchlistTokenStore } from "@/stores/use-watchlist-token.store";
 import toast from "react-hot-toast";
 import cookies from "js-cookie";
 import axios from "axios";
@@ -289,6 +290,9 @@ export default function AllWSProvider({
   // const notificationsMuted = useNotificationToggleStore(
   //   (state) => state.isNotMuted,
   // );
+  const setWatchlistToken = useWatchlistTokenStore(
+    (state) => state.setWatchlistToken,
+  );
   const setFeeTipData = useFeeTip((state) => state.setFeeTipData);
 
   useQuery({
@@ -999,6 +1003,24 @@ export default function AllWSProvider({
             timestamp: Math.floor(Date.now() / 1000),
           });
         }
+      }
+    },
+  });
+
+  useWebSocket({
+    channel: "watchlist",
+    initialMessage: {
+      channel: "watchlist",
+      action: "join",
+    },
+    onMessage: (event) => {
+      if (event?.channel === "ping" && event.success === true) {
+        return;
+      }
+      const message: { channel: "watchlist"; data: any } = event;
+      if (message.channel === "watchlist" && message.data) {
+        console.log("WATCHLIST ⭐", message);
+        setWatchlistToken(message?.data?.data);
       }
     },
   });
@@ -2056,9 +2078,9 @@ export default function AllWSProvider({
       if (type === "twitter-init") {
         const result = await getTwitterMonitorAccounts();
 
-        setAccounts(result);
+        setAccounts(result || []);
 
-        if (result.length === 0) {
+        if ((result && result.length === 0) || !result) {
           setTwitterMonitorIsLoading(false);
           return;
         }
@@ -2073,9 +2095,9 @@ export default function AllWSProvider({
       } else if (type === "ts-init") {
         const result = await getTSMonitorAccounts();
 
-        setTSAccounts(result);
+        setTSAccounts(result || []);
 
-        if (result.length === 0) {
+        if ((result && result.length === 0) || !result) {
           setTSMonitorIsLoading(false);
           return;
         }
@@ -2090,9 +2112,9 @@ export default function AllWSProvider({
       } else if (type === "discord-init") {
         const result = await getDiscordMonitorChannel();
 
-        setDiscordAccounts(result);
+        setDiscordAccounts(result || []);
 
-        if (result.length === 0) {
+        if ((result && result.length === 0) || !result) {
           setDiscordMonitorIsLoading(false);
           return;
         }

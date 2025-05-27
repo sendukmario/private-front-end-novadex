@@ -99,7 +99,7 @@ export default function TopTradersCard({
         "max-xl:rounded-[8px] max-xl:border max-xl:border-border max-xl:bg-card xl:border-none",
         "transition-colors duration-200 ease-out xl:flex xl:h-[72px] xl:min-w-max xl:border-b xl:border-border xl:pr-[16px] xl:hover:bg-white/[8%]",
         rank % 2 === 0 ? "" : "xl:bg-shadeTable xl:hover:bg-shadeTableHover",
-        remainingScreenWidth <= 1280 &&
+        remainingScreenWidth < 1280 &&
           "!m-4 !rounded-[8px] !bg-card xl:flex xl:h-auto xl:min-w-fit xl:border-border xl:pr-0",
       )}
     >

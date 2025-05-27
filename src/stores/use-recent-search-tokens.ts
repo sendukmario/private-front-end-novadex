@@ -1,3 +1,4 @@
+import { DEX } from "@/types/ws-general";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -5,18 +6,7 @@ export type RecentToken = {
   symbol: string;
   mint: string;
   image: string;
-  dex:
-    | "Pump.Fun"
-    | "Believe"
-    | "Bonk"
-    | "Moonshot"
-    | "LaunchLab"
-    | "Boop"
-    | "Dynamic Bonding Curve"
-    | "Meteora AMM V2"
-    | "Meteora AMM"
-    | "Raydium"
-    | "Pump.Swap";
+  dex: DEX;
 };
 
 type RecentSearchTokensState = {

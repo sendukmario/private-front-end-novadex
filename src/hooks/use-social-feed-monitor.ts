@@ -79,8 +79,13 @@ const useSocialFeedMonitor = () => {
   const isLoadingDiscord = useDiscordMonitorMessageStore(
     (state) => state.isLoading,
   );
-  const isLoading = isLoadingTwitter || isLoadingTS || isLoadingDiscord;
 
+  console.log("isLoading", {
+    isLoadingTwitter,
+    isLoadingTS,
+    isLoadingDiscord,
+  });
+  const isLoading = isLoadingTwitter || isLoadingTS || isLoadingDiscord;
 
   // Helper functions
   const normalizeTimestamp = (timestamp: any): number => {
@@ -176,7 +181,7 @@ const useSocialFeedMonitor = () => {
       return (
         combinedMessagesByType[
           contentType as keyof typeof combinedMessagesByType
-          ] || []
+        ] || []
       );
     }
 
@@ -188,7 +193,7 @@ const useSocialFeedMonitor = () => {
         ...messages,
         ...(twitterMessagesByType[
           contentType as keyof typeof twitterMessagesByType
-          ] || []),
+        ] || []),
       ];
     }
 
@@ -205,7 +210,7 @@ const useSocialFeedMonitor = () => {
         ...messages,
         ...(discordMessagesByType[
           contentType as keyof typeof discordMessagesByType
-          ] || []),
+        ] || []),
       ];
     }
 
@@ -269,7 +274,7 @@ const useSocialFeedMonitor = () => {
         return (
           combinedMessagesByType[
             contentType as keyof typeof combinedMessagesByType
-            ] || []
+          ] || []
         );
       }
 

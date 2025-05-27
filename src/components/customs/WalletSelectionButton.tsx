@@ -190,6 +190,8 @@ export default React.memo(function WalletSelectionButton({
                 "relative flex h-[32px] w-full flex-grow items-center overflow-hidden rounded-[8px] border bg-secondary",
                 finalValue.length > 0 && "bg-[#17171F]",
                 isOpen ? "border-primary bg-primary/[8%]" : "border-border",
+                variant === "instant-trade" &&
+                  "border-white/[8%] bg-transparent",
                 triggerClassName,
               )}
             >
@@ -222,7 +224,14 @@ export default React.memo(function WalletSelectionButton({
                 </div>
               </div>
               {/* from-[secondary] from-[60%] to-transparent */}
-              <div className="absolute right-0 top-0 flex h-full w-[40px] flex-shrink-0 items-center justify-center bg-gradient-to-l from-secondary from-[60%] to-secondary/0">
+
+              <div
+                className={cn(
+                  "absolute right-0 top-0 flex h-full w-[40px] flex-shrink-0 items-center justify-center bg-gradient-to-l from-secondary from-[60%] to-secondary/0",
+                  variant === "instant-trade" &&
+                    "from-transparent to-transparent",
+                )}
+              >
                 <div className="absolute inset-0 size-full" />
                 <div
                   title="Select Wallets"

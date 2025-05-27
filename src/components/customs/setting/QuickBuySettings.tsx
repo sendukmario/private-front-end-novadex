@@ -234,28 +234,28 @@ export default function QuickBuySettings({
     // }
 
     // Add validation for minimum tip amount if auto-tip is disabled
-    if (!data.autoTipEnabled && data.tip < 0.0001) {
-      toast.custom((t: any) => (
-        <CustomToast
-          tVisibleState={t.visible}
-          message="Buy Tip must be at least 0.0001 SOL"
-          state="ERROR"
-        />
-      ));
-      return;
-    }
+    // if (!data.autoTipEnabled && data.tip < 0.001) {
+    //   toast.custom((t: any) => (
+    //     <CustomToast
+    //       tVisibleState={t.visible}
+    //       message="We recommend a minimum tip of 0.001 for faster transaction"
+    //       state="ERROR"
+    //     />
+    //   ));
+    //   return;
+    // }
 
     // Add validation for minimum fee amount if auto-tip is disabled
-    if (!data.autoTipEnabled && data.fee < 0.0001) {
-      toast.custom((t: any) => (
-        <CustomToast
-          tVisibleState={t.visible}
-          message="Priority Fee must be at least 0.0001 SOL"
-          state="ERROR"
-        />
-      ));
-      return;
-    }
+    // if (!data.autoTipEnabled && data.fee < 0.001) {
+    //   toast.custom((t: any) => (
+    //     <CustomToast
+    //       tVisibleState={t.visible}
+    //       message="We recommend a minimum tip of 0.001 for faster transaction"
+    //       state="ERROR"
+    //     />
+    //   ));
+    //   return;
+    // }
 
     const submitData = {
       ...data,
@@ -417,19 +417,19 @@ export default function QuickBuySettings({
                               field.onChange(newValue);
 
                               // Show toast if value is invalid and not empty/zero
-                              if (
-                                !form.getValues().autoTipEnabled &&
-                                newValue < 0.0001 &&
-                                newValue !== 0
-                              ) {
-                                toast.custom((t: any) => (
-                                  <CustomToast
-                                    tVisibleState={t.visible}
-                                    message="Priority Fee must be at least 0.0001 SOL"
-                                    state="ERROR"
-                                  />
-                                ));
-                              }
+                              // if (
+                              //   !form.getValues().autoTipEnabled &&
+                              //   newValue < 0.001 &&
+                              //   newValue !== 0
+                              // ) {
+                              //   toast.custom((t: any) => (
+                              //     <CustomToast
+                              //       tVisibleState={t.visible}
+                              //       message="We recommend a minimum tip of 0.001 for faster transaction"
+                              //       state="ERROR"
+                              //     />
+                              //   ));
+                              // }
 
                               form.trigger("fee");
                             }}
@@ -448,7 +448,11 @@ export default function QuickBuySettings({
                             parentClassName="md:max-w-[240px]"
                           />
                         </FormControl>
-                        <FormMessage />
+                        {form.watch("fee") < 0.001 ? (
+                          <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                        ) : (
+                          <FormMessage />
+                        )}
                       </FormItem>
                     )}
                   />

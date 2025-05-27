@@ -55,9 +55,9 @@ export function PopupWindow({
   // Constants
   const MIN_DRAG_DISTANCE = 2;
   const SNAP_THRESHOLD = 30;
-  const HEADER_HEIGHT = 42.8;
+  const HEADER_HEIGHT = 88;
   const FOOTER_HEIGHT = 48.8;
-  const PAGE_MARGIN = 10;
+  const PAGE_MARGIN = 5;
   const TOTAL_PAGE_HEIGHT = HEADER_HEIGHT + FOOTER_HEIGHT + PAGE_MARGIN;
 
   // Get window size
@@ -192,24 +192,52 @@ export function PopupWindow({
     };
   }, []);
 
+  // useEffect(() => {
+  //   const isLeftSnapped = popups.some(
+  //     (popup) => popup.isOpen && popup.snappedSide === "left",
+  //   );
+
+  //   const isRightSnapped = popups.some(
+  //     (popup) => popup.isOpen && popup.snappedSide === "right",
+  //   );
+
+  //   if (!isDragging) {
+  //     hideSnapHint("left");
+  //     hideSnapHint("right");
+  //     return;
+  //   }
+
+  //   if (!isLeftSnapped) showSnapHint("left");
+  //   if (!isRightSnapped) showSnapHint("right");
+  // }, [isDragging]);
+
   useEffect(() => {
     const isLeftSnapped = popups.some(
-      (popup) => popup.isOpen && popup.snappedSide === "left",
+      (popup) =>
+        popup.name === name && popup.isOpen && popup.snappedSide === "left",
     );
 
     const isRightSnapped = popups.some(
-      (popup) => popup.isOpen && popup.snappedSide === "right",
+      (popup) =>
+        popup.name === name && popup.isOpen && popup.snappedSide === "right",
     );
 
-    if (!isDragging) {
-      hideSnapHint("left");
-      hideSnapHint("right");
+    if (nearSnappedSide === "left" && !isLeftSnapped) {
+      showSnapHint("left");
+      return;
+    }
+    if (nearSnappedSide === "right" && !isRightSnapped) {
+      showSnapHint("right");
       return;
     }
 
-    if (!isLeftSnapped) showSnapHint("left");
-    if (!isRightSnapped) showSnapHint("right");
-  }, [isDragging]);
+    hideSnapHint("left");
+    hideSnapHint("right");
+
+    if (!isDragging) {
+      return;
+    }
+  }, [isDragging, nearSnappedSide]);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -565,12 +593,12 @@ export function PopupWindow({
       if (!isSnappedRef.current) {
         previousSizeRef.current = { width: newWidth, height: newHeight };
       }
-      setLocalSize(prev => {
+      setLocalSize((prev) => {
         if (prev.width === newWidth && prev.height === newHeight) return prev;
         return { width: newWidth, height: newHeight };
       });
 
-      setLocalPosition(prev => {
+      setLocalPosition((prev) => {
         if (prev.x === newPosX && prev.y === newPosY) return prev;
         return { x: newPosX, y: newPosY };
       });

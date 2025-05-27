@@ -178,6 +178,7 @@ const MobileNav = React.memo(() => {
     cookies.remove("isNew");
     localStorage.removeItem("loginStep");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("quick-buy-settings");
     
     window.location.replace("/login");
   };

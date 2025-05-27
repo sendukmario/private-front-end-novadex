@@ -5,6 +5,7 @@ import { useUserWalletStore } from "@/stores/wallet/use-user-wallet.store";
 import { useEffect, useMemo } from "react";
 
 interface UsePnlTrackerFooterData {
+  totalStoredBalance: number;
   totalBalance: number;
   totalProfitAndLoss: number;
   totalProfitAndLossPercentage: number;
@@ -123,6 +124,7 @@ export const usePnlTrackerFooterData = (): UsePnlTrackerFooterData => {
   };
 
   return {
+    totalStoredBalance,
     totalBalance: totalCurrentBalance,
     totalProfitAndLoss,
     totalProfitAndLossPercentage,

@@ -34,6 +34,7 @@ import { usePopupStore } from "@/stores/use-popup-state";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import { useTokenMarketCapToggleState } from "@/stores/token/use-token-market-cap-toggle.store";
 import { useTradesTableSettingStore } from "@/stores/table/token/use-trades-table-setting.store";
+import { useTokenPersist } from "@/stores/token/use-token-persist.store";
 
 interface TradesCardProps {
   index?: number;
@@ -833,8 +834,8 @@ const TradesCard = memo(
     const tradesDateType = useTokenCardsFilterStorePersist(
       (state) => state.tradesDateType,
     );
-    const tradesValue = useTokenCardsFilter((state) => state.tradesValue);
-    const tradesTokenSol = useTokenCardsFilter((state) => state.tradesTokenSol);
+
+    const { tradesValue, tradesTokenSol } = useTokenPersist();
 
     // Memoize expensive computations
     const trackedWallets = useWalletTrackerMessageStore(

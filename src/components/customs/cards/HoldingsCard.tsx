@@ -58,7 +58,7 @@ const TokenInfo = React.memo(
             token?.dex === "LaunchLab" && token?.launchpad === "Bonk"
               ? "bonk"
               : token?.dex === "Dynamic Bonding Curve" &&
-                  token?.launchpad === "Believe"
+                  token?.launchpad === "Launch a Coin"
                 ? "believe"
                 : (token?.dex
                     ?.replace(/\./g, "")

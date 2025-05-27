@@ -15,7 +15,10 @@ import { Resizable, ResizableProps } from "re-resizable";
 import { cn } from "@/libraries/utils";
 import { useQuickBuySettingsStore } from "@/stores/setting/use-quick-buy-settings.store";
 import { useQuickSellSettingsStore } from "@/stores/setting/use-quick-sell-settings.store";
-import { convertNumberToPresetKey } from "@/utils/convertPreset";
+import {
+  convertNumberToPresetKey,
+  convertPresetKeyToNumber,
+} from "@/utils/convertPreset";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import WalletSelectionButton from "@/components/customs/WalletSelectionButton";
 import { useQuickAmountStore } from "@/stores/dex-setting/use-quick-amount.store";
@@ -32,8 +35,26 @@ export default function PanelPopUp() {
   const [amountLength, setAmountLength] = useState(0);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const positionRef = useRef(position);
-  const [activeBuyPreset, setActiveBuyPreset] = useState(1);
-  const [activeSellPreset, setActiveSellPreset] = useState(1);
+  // const [activeBuyPreset, setActiveBuyPreset] = useState(1);
+  // const [activeSellPreset, setActiveSellPreset] = useState(1);
+  const activeBuyPreset = convertPresetKeyToNumber(
+    useQuickBuySettingsStore((s) => s.buyPanelPreset),
+  );
+  const setBuyPanelPreset = useQuickBuySettingsStore(
+    (s) => s.setBuyPanelPreset,
+  );
+  const setActiveBuyPreset = (preset: number) => {
+    setBuyPanelPreset(convertNumberToPresetKey(preset));
+  };
+  const activeSellPreset = convertPresetKeyToNumber(
+    useQuickBuySettingsStore((s) => s.sellPanelPreset),
+  );
+  const setSellPanelPreset = useQuickBuySettingsStore(
+    (s) => s.setSellPanelPreset,
+  );
+  const setActiveSellPreset = (preset: number) => {
+    setSellPanelPreset(convertNumberToPresetKey(preset));
+  };
   const autoFeeEnabled = useQuickBuySettingsStore(
     (state) => state.autoFeeEnabled,
   );
@@ -459,7 +480,7 @@ export default function PanelPopUp() {
       }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn(
-        "relative z-[100] cursor-grab rounded-[8px] border border-border bg-[#313149] shadow-[0_0_20px_0_#000000] overflow-hidden",
+        "relative z-[100] overflow-hidden rounded-[8px] border border-border bg-[#313149] shadow-[0_0_20px_0_#000000]",
         isDragging
           ? "cursor-grabbing border-dashed border-primary bg-secondary"
           : "gb__white__popover",
@@ -471,9 +492,9 @@ export default function PanelPopUp() {
         )}
         <div
           onMouseDown={handleMouseDown}
-          className="flex h-[56px] w-full items-center justify-between"
+          className="flex h-[56px] w-full cursor-grab items-center justify-between"
         >
-          <div className="flex w-full items-center justify-between border-b border-border px-3 pb-2">
+          <div className="flex w-full items-center justify-between border-b border-white/[4%] px-3 pb-2">
             <h4 className="mr-2 text-nowrap font-geistSemiBold text-sm leading-[18px] text-fontColorPrimary">
               Instant Trade
             </h4>
@@ -516,7 +537,7 @@ export default function PanelPopUp() {
           walletSelectionClassName="max-w-full"
           buttonStyle={{
             // height: size.height < 320 ? size.height / 5 : size.height / 10,
-            height: "auto"
+            height: "auto",
           }}
           activeBuyPreset={activeBuyPreset}
           setActiveBuyPreset={setActiveBuyPreset}
@@ -531,7 +552,7 @@ export default function PanelPopUp() {
           // walletSelectionClassName="max-w-full"
           buttonStyle={{
             // height: size.height < 320 ? size.height / 5 : size.height / 10,
-            height: "auto"
+            height: "auto",
           }}
           activeSellPreset={activeSellPreset}
           setActiveSellPreset={setActiveSellPreset}

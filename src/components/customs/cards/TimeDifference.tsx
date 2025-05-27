@@ -1,5 +1,6 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/libraries/utils";
+import { DEX } from "@/types/ws-general";
 
 // Helper function to get formatted time difference
 const getFormattedTimeDiff = (timestamp: number, threshold = 0.5) => {
@@ -34,18 +35,7 @@ const TimeDifference = memo(
   }: {
     created?: number;
     migrated_time?: number;
-    dex?:
-      | "Pump.Fun"
-      | "Believe"
-      | "Bonk"
-      | "Moonshot"
-      | "LaunchLab"
-      | "Boop"
-      | "Dynamic Bonding Curve"
-      | "Meteora AMM V2"
-      | "Meteora AMM"
-      | "Raydium"
-      | "Pump.Swap";
+    dex?: DEX;
     className?: string;
     hoursOnly?: boolean;
   }) => {

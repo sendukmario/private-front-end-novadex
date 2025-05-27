@@ -146,6 +146,7 @@ function SettingsClient() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("quick-buy-amount");
     localStorage.removeItem("phantom_public_key");
+    localStorage.removeItem("quick-buy-settings");
 
     window.location.replace("/login");
   };

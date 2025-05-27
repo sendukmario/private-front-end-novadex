@@ -42,6 +42,7 @@ import { truncateAddress } from "@/utils/truncateAddress";
 // ######## Types 🗨️ ########
 import { TokenDataMessageType, TransactionInfo } from "@/types/ws-general";
 import { Trade } from "@/types/nova_tv.types";
+import { useTokenPersist } from "@/stores/token/use-token-persist.store";
 
 // Constants
 const TRADES_LIMIT = 50; // Default limit for non-realtime fetches
@@ -86,17 +87,10 @@ export default React.memo(function TradesTable({
   const [openWalletMakerFilter, setOpenWalletMakerFilter] = useState(false);
 
   // Zustand Stores
-  const {
-    tradesDate,
-    setTradesDate,
-    tradesType,
-    tradesValue,
-    tradesTokenSol,
-    tradesTotal,
-    setTradesValue,
-    setTradesTokenSol,
-    resetFilters,
-  } = useTokenCardsFilter();
+  const { tradesDate, setTradesDate, tradesType, tradesTotal, resetFilters } =
+    useTokenCardsFilter();
+  const { tradesValue, tradesTokenSol, setTradesValue, setTradesTokenSol } =
+    useTokenPersist();
   const { setTradesDateType, tradesDateType } =
     useTokenCardsFilterStorePersist();
   const tokenMarketCap = useTokenMarketCapToggleState((state) => state.column);

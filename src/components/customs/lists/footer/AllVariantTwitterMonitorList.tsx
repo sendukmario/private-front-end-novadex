@@ -175,13 +175,13 @@ const AllVariantTwitterMonitorList = forwardRef<
       };
     });
 
-    if (accounts.length === 0 && tsAccounts.length === 0 && discordAccounts.length === 0) {
+    if (accounts?.length === 0 && tsAccounts?.length === 0 && discordAccounts?.length === 0) {
       return <NoAccountsEmptyState />;
     }
 
     return (
       <div className={cn("col-span-1 flex w-full flex-grow", className)}>
-        {list.length > 0 ? (
+        {list?.length > 0 ? (
           <OverlayScrollbarsComponent
             ref={osRef}
             defer

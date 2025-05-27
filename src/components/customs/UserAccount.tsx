@@ -40,6 +40,7 @@ const UserAccount = () => {
     localStorage.removeItem("loginStep");
     localStorage.removeItem("authToken");
     localStorage.removeItem("quick-buy-amount");
+    localStorage.removeItem("quick-buy-settings");
     window.location.href = "/login";
 
     // set is initialized to false for reset the pnl tracker when logged out
