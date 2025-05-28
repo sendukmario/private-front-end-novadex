@@ -71,12 +71,12 @@ const settingMenus = [
     description: "2FA Authentication",
     href: "/verify-2fa",
   },
-  //   {
-  //     icon: "/icons/paper.svg",
-  //     label: "Documentation",
-  //     description: "Nova Documentation",
-  //     component: QuickBuySettings,
-  //   },
+  {
+    icon: "/icons/paper.svg",
+    label: "Documentation",
+    description: "Nova Documentation",
+    href: "https://docs.nova.trade/",
+  },
 ];
 
 const tradeMenus = [
@@ -145,8 +145,9 @@ function SettingsClient() {
     localStorage.removeItem("loginStep");
     localStorage.removeItem("authToken");
     localStorage.removeItem("quick-buy-amount");
-    localStorage.removeItem("phantom_public_key");
     localStorage.removeItem("quick-buy-settings");
+    localStorage.removeItem("wallet-addresses-filter-storage");
+    localStorage.removeItem("cosmo-hidden-tokens");
 
     window.location.replace("/login");
   };
@@ -219,7 +220,7 @@ function SettingsClient() {
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between font-geistSemiBold text-sm text-fontColorSecondary">
             <span>TRADE SETTINGS</span>
-            <motion.div
+            {/* <motion.div
               variants={switchModeVariants}
               initial="initial"
               animate="animate"
@@ -253,7 +254,7 @@ function SettingsClient() {
               >
                 ADVANCE
               </motion.span>
-            </motion.div>
+            </motion.div> */}
           </div>
 
           {/* Trade Menu */}
@@ -357,6 +358,7 @@ const TradeSettingItem = ({
       {href ? (
         <Link
           href={href}
+          target={href.startsWith("http") ? "_blank" : "_self"}
           className="flex w-full items-center gap-4 rounded-[8px] p-4 pr-3 hover:bg-[#17171F]"
         >
           {triggerContent}

@@ -22,6 +22,7 @@ import {
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import WalletSelectionButton from "@/components/customs/WalletSelectionButton";
 import { useQuickAmountStore } from "@/stores/dex-setting/use-quick-amount.store";
+import { useActivePresetStore } from "@/stores/dex-setting/use-active-preset.store";
 
 type ResizeHandler = NonNullable<ResizableProps["onResizeStop"]>;
 
@@ -38,19 +39,19 @@ export default function PanelPopUp() {
   // const [activeBuyPreset, setActiveBuyPreset] = useState(1);
   // const [activeSellPreset, setActiveSellPreset] = useState(1);
   const activeBuyPreset = convertPresetKeyToNumber(
-    useQuickBuySettingsStore((s) => s.buyPanelPreset),
+    useActivePresetStore((s) => s.buyPanelActivePreset),
   );
-  const setBuyPanelPreset = useQuickBuySettingsStore(
-    (s) => s.setBuyPanelPreset,
+  const setBuyPanelPreset = useActivePresetStore(
+    (s) => s.setBuyPanelActivePreset,
   );
   const setActiveBuyPreset = (preset: number) => {
     setBuyPanelPreset(convertNumberToPresetKey(preset));
   };
   const activeSellPreset = convertPresetKeyToNumber(
-    useQuickBuySettingsStore((s) => s.sellPanelPreset),
+    useActivePresetStore((s) => s.sellPanelActivePreset),
   );
-  const setSellPanelPreset = useQuickBuySettingsStore(
-    (s) => s.setSellPanelPreset,
+  const setSellPanelPreset = useActivePresetStore(
+    (s) => s.setSellPanelActivePreset,
   );
   const setActiveSellPreset = (preset: number) => {
     setSellPanelPreset(convertNumberToPresetKey(preset));

@@ -37,7 +37,9 @@ export type WebsocketName =
   | "trending"
   | "chartHoldings"
   | "chartPrice"
-  | "mint";
+  | "mint"
+  | "watchlist"
+;
 
 export const websocketNames: WebsocketName[] = [
   "alerts",
@@ -47,6 +49,7 @@ export const websocketNames: WebsocketName[] = [
   "sniper",
   "walletBalances",
   "notifications",
+  "watchlist",
   "tracker",
   "transactions",
   "cosmo2",

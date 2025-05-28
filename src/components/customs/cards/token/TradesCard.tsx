@@ -327,7 +327,7 @@ const DesktopView = memo(
         )}
 
         {/* SOL Amount column */}
-        {selectedTableColumns.find((col) => col === "total") && (
+        {/* {selectedTableColumns.find((col) => col === "total") && (
           <div className={cn("flex h-full w-full min-w-[115px] items-center")}>
             <div className="flex items-center gap-x-1">
               {tradesTokenSol == "SOL" ? (
@@ -359,7 +359,7 @@ const DesktopView = memo(
               </span>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Maker column */}
         {isTradeMatchWithExistingTrackedWallet ? (
@@ -622,7 +622,7 @@ const MobileView = React.memo(
                 )}
               </span>
             </div>
-            <div className="flex flex-col gap-y-1">
+            {/* <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">
                 Value
               </span>
@@ -631,21 +631,8 @@ const MobileView = React.memo(
               >
                 {formatAmountWithoutLeadingZero(transactionData.value, 3, 2)}
               </span>
-            </div>
-            <div className="flex flex-col gap-y-1">
-              <span className="text-nowrap text-xs text-fontColorSecondary">
-                Tokens
-              </span>
-              <span
-                className={cn("font-geistSemiBold text-sm", transactionClass)}
-              >
-                {formatAmountWithoutLeadingZero(
-                  transactionData.tokenAmount,
-                  3,
-                  2,
-                )}
-              </span>
-            </div>
+            </div> */}
+
             <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">
                 SOL
@@ -670,6 +657,20 @@ const MobileView = React.memo(
                   )}
                 </span>
               </div>
+            </div>
+            <div className="flex flex-col gap-y-1">
+              <span className="text-nowrap text-xs text-fontColorSecondary">
+                Tokens
+              </span>
+              <span
+                className={cn("font-geistSemiBold text-sm", transactionClass)}
+              >
+                {formatAmountWithoutLeadingZero(
+                  transactionData.tokenAmount,
+                  3,
+                  2,
+                )}
+              </span>
             </div>
             <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">

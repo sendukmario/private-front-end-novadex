@@ -876,7 +876,7 @@ export default function AllWSProvider({
             );
 
             // If we already have 3 or more toasts, dismiss all and reset counter
-            if (isTabActiveRef.current) {
+            if (isTabActiveRef.current && isNotMutedRef.current) {
               if (toastCounterRef.current >= 3) {
                 toast.dismiss();
                 toastCounterRef.current = 0;
@@ -1313,6 +1313,7 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
+          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error")
         ) {
@@ -1358,6 +1359,7 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
+          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error")
         ) {
@@ -1403,6 +1405,7 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
+          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error") ||
           event.data.includes("subscribe")

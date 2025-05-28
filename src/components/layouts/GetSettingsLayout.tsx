@@ -168,9 +168,15 @@ const GetSettingsLayout = ({ children }: { children?: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    let loadingTimeout: NodeJS.Timeout;
     if (!isLoading) {
-      setIsLoading(isLoading);
+      loadingTimeout = setTimeout(() => {
+        setIsLoading(isLoading);
+      }, 500);
     }
+    return () => {
+      clearTimeout(loadingTimeout);
+    };
   }, [isLoading]);
 
   const isNew = cookies.get("isNew") === "true";

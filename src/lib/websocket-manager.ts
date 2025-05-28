@@ -1,6 +1,5 @@
 import { getServerTime } from "@/apis/rest/settings/server-time";
 import sentryLogger from "@/utils/sentry/SentryLogger";
-import * as Sentry from "@sentry/nextjs";
 
 type OpenHandler = () => void;
 type MessageHandler = (data: any) => void;
@@ -34,7 +33,6 @@ class WebSocketManager {
   private errorHandlers = new Set<ErrorHandler>();
   private connectionStateHandlers = new Set<ConnectionStateHandler>();
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
   private reconnectDelay = 1000;
   private url: string = "";
   private shouldReconnect = true;
@@ -42,7 +40,7 @@ class WebSocketManager {
   private heartbeatTimeout: NodeJS.Timeout | null = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private heartbeatInterval: number = 4000;
-  private messageQueue: any[] = [];
+  private messageQueue: Map<string, any> = new Map();
   private isConnecting: boolean = false;
   private lastMessageTimestamp: number = Date.now();
   private staleConnectionTimeout: number = 16000;
@@ -78,7 +76,7 @@ class WebSocketManager {
   }
 
   private startHeartbeat(): void {
-    console.log("ws manager start heartbeat...")
+    console.log("WS MANAGER - start heartbeat...")
     if (this.heartbeatTimeout) clearInterval(this.heartbeatTimeout);
 
     this.heartbeatTimeout = setInterval(async () => {
@@ -100,17 +98,11 @@ class WebSocketManager {
   }
 
   private updateConnectionState(connected: boolean): void {
+    console.log("WS MANAGER - update connection state ", connected)
     if (this.isConnected !== connected) {
       this.isConnected = connected;
       this.connectionStateHandlers.forEach((handler) => handler(connected));
     }
-  }
-
-  public connect({ url, token }: { url: string, token?: string }): void {
-    this.url = url;
-    this.token = token;
-    this.shouldReconnect = true;
-    this.internalConnect();
   }
 
   private async isServerHealthy(): Promise<boolean> {
@@ -122,18 +114,44 @@ class WebSocketManager {
     }
   }
 
+  private flushMessageQueue(): void {
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      for (const [_, msg] of this.messageQueue) {
+        const msgWithToken = {
+          ...msg,
+          token: this.token,
+        };
+        console.log("WS MANAGER - queuing messages", msgWithToken);
+        this.socket.send(JSON.stringify(msgWithToken));
+      }
+      this.messageQueue.clear();
+    }
+  }
+
+  private getMessageKey(message: any): string {
+    if (!message) return Math.random().toString(36).substring(2, 10);
+
+    const channel = message.channel ?? '';
+    const action = message.action ?? '';
+
+    const key = channel + action;
+
+    return key || JSON.stringify(message);
+  }
+
   private internalConnect(): void {
     if (this.url === "" || this.isConnecting || this.isConnected || this.socket?.readyState === WebSocket.CONNECTING) {
       return;
     }
 
     this.isConnecting = true;
-    this.disconnect();
+    this.cleanUp();
     this.updateConnectionState(false);
 
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
+      console.log("WS MANAGER - connected")
       this.isConnecting = false;
       this.reconnectAttempts = 0;
       this.isConnected = true;
@@ -145,15 +163,8 @@ class WebSocketManager {
         this.reconnectTimeout = null;
       }
 
-      while (this.messageQueue.length > 0) {
-        const msg = this.messageQueue.shift();
-        const msgWithToken = {
-          ...msg,
-          token: this.token,
-        };
-        console.warn("WebSocket not connected. Queuing message.", this.messageQueue);
-        this.socket?.send(JSON.stringify(msgWithToken));
-      }
+      // flush message queue
+      this.flushMessageQueue()
     };
 
     this.socket.onmessage = (event) => {
@@ -173,6 +184,7 @@ class WebSocketManager {
     };
 
     this.socket.onclose = async (event) => {
+      console.log("WS MANAGER - closing...")
       this.isConnecting = false;
       this.updateConnectionState(false);
 
@@ -196,9 +208,10 @@ class WebSocketManager {
           }
         };
 
-        tryReconnect(); // Start the first reconnect attempt
+        tryReconnect();
       }
 
+      console.log("WS MANAGER - closed")
       sentryLogger({
         title: "WebSocket closed",
         context: {
@@ -217,14 +230,14 @@ class WebSocketManager {
         title: "WebSocket error",
         context: {
           details: {
-            ...event,
+            ...error,
           },
           time: new Date().toLocaleTimeString(),
         },
         level: "error",
       })
 
-      console.log("ws manager onerror...")
+      console.log("WS MANAGER - onerror...")
       this.isConnecting = false;
       this.errorHandlers.forEach((handler) => handler(error));
       console.error("WebSocket error:", error);
@@ -268,18 +281,32 @@ class WebSocketManager {
       ...message,
       token: this.token,
     };
-    console.log("message with token", messageWithToken);
+
+    const messageKey = this.getMessageKey(messageWithToken);
+
     if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(messageWithToken));
     } else {
-      this.messageQueue.push(messageWithToken);
+      this.messageQueue.set(messageKey, messageWithToken);
       this.internalConnect();
     }
+  }
+
+  public getIsConnected(): boolean {
+    return this.isConnected;
   }
 
   public getConnectionStatus(): WebSocketStatus {
     const { socket } = this
     return getSocketStatus(socket);
+  }
+
+  public connect({ url, token }: { url: string, token?: string }): void {
+    console.log("WS MANAGER - connecting...")
+    this.url = url;
+    this.token = token;
+    this.shouldReconnect = true;
+    this.internalConnect();
   }
 }
 

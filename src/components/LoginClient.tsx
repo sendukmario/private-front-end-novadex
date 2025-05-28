@@ -356,7 +356,7 @@ const LoginClient = ({
       redirectsaveWalletAndKeyTimeoutRef.current = setTimeout(() => {
         setBaseTVState();
         resetSnappedPopups();
-        window.location.href = "/";
+        // window.location.href = "/";
       }, 500);
     }
   };
@@ -447,10 +447,17 @@ const LoginClient = ({
     walletAuthenticated,
     isAuthenticating,
   } = use2FAAuthentication({
-    onSuccess: (token) => {
-      console.log("Authentication successful with token:", token);
+    onSuccess: (res) => {
+      console.log("Authentication successful with token:", res.token);
       resetLoadingState();
-      handleAuthSuccess({ token }, twoFAParams);
+      handleAuthSuccess(
+        {
+          token: res.token,
+          isNew: res.isNew,
+          isTelegramConnected: res.isTelegramConnected,
+        },
+        twoFAParams,
+      );
     },
     onError: (error) => {
       console.error("Authentication error in LoginClient:", error);

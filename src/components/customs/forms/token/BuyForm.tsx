@@ -60,6 +60,7 @@ import CustomToast from "../../toasts/CustomToast";
 import {
   convertNumberToPresetId,
   convertNumberToPresetKey,
+  convertPresetIdToKey,
   convertPresetIdToNumber,
   convertPresetKeyToNumber,
 } from "@/utils/convertPreset";
@@ -187,7 +188,12 @@ export default function BuyForm() {
     (state) => state.presets.autoFeeEnabled,
   );
   const feetipData = useFeeTip((state) => state.data);
-  const activePreset = useActivePresetStore((state) => state.cosmoActivePreset);
+  const activePreset = useActivePresetStore(
+    (state) => state.buySellActivePreset,
+  );
+  const setActivePreset = useActivePresetStore(
+    (state) => state.setBuySellActivePreset,
+  );
 
   // 🕍Preset Settings
   useEffect(() => {
@@ -426,12 +432,19 @@ export default function BuyForm() {
               <FormItem className="w-fit">
                 <FormControl>
                   <PresetSelectionButtons
-                    activePreset={convertNumberToPresetId(field.value)}
+                    activePreset={convertNumberToPresetKey(field.value)}
                     setActivePreset={(value: string) => {
                       setPicker(0);
+                      console.log(
+                        "setActivePreset⭕⭕⭕",
+                        convertPresetIdToKey(value),
+                        value,
+                      );
                       setLastFocusOn("picker");
+                      setActivePreset(convertPresetIdToKey(value));
                       field.onChange(convertPresetIdToNumber(value));
                     }}
+                    isGlobal={false}
                   />
                 </FormControl>
                 <FormMessage />
@@ -664,7 +677,10 @@ export default function BuyForm() {
                             />
                           </FormControl>
                           {form.watch("fee") < 0.001 ? (
-                            <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                            <FormMessage className="leading-4">
+                              We recommend a minimum tip of 0.001 for faster
+                              transaction
+                            </FormMessage>
                           ) : (
                             <FormMessage />
                           )}
@@ -727,7 +743,10 @@ export default function BuyForm() {
                             />
                           </FormControl>
                           {form.watch("tip") < 0.001 ? (
-                            <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                            <FormMessage className="leading-4">
+                              We recommend a minimum tip of 0.001 for faster
+                              transaction
+                            </FormMessage>
                           ) : (
                             <FormMessage />
                           )}

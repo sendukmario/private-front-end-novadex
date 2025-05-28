@@ -4,8 +4,8 @@ export default async function middleware(req: NextRequest, res: NextResponse) {
   const pathname = req.nextUrl.pathname;
   const session = req.cookies.get("_nova_session");
   const isNew = req.cookies.get("isNew")?.value === "true";
-  const accessCodeFromParams = pathname.split("@")[1]
-  const validAccessCode = "frixeth"
+  const accessCodeFromParams = pathname.split("@")[1];
+  const validAccessCode = "frixeth";
 
   const unprotectedRoutes = ["/login"];
 
@@ -70,5 +70,14 @@ export default async function middleware(req: NextRequest, res: NextResponse) {
 }
 
 export const config = {
-  matcher: ["/((?!.*\\.).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * 1. /api/ routes
+     * 2. /_next/ (Next.js internals)
+     * 3. /static (public files)
+     * 4. all root files inside /public (e.g. /favicon.ico)
+     */
+    "/((?!api|_next|static|.*\\.[^\\s]*$).*)",
+  ],
 };

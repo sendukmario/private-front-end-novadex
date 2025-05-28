@@ -254,7 +254,7 @@ export default React.memo(function WalletTrackerCardPopOut({
                           ? "bonk"
                           : tracker?.dex === "Dynamic Bonding Curve" &&
                               tracker?.launchpad === "Launch a Coin"
-                            ? "believe"
+                            ? "launch_a_coin"
                             : (tracker?.dex
                                 ?.replace(/\./g, "")
                                 ?.replace(/ /g, "_")
@@ -438,7 +438,7 @@ export default React.memo(function WalletTrackerCardPopOut({
                         ? "bonk"
                         : tracker?.dex === "Dynamic Bonding Curve" &&
                             tracker?.launchpad === "Launch a Coin"
-                          ? "believe"
+                          ? "launch_a_coin"
                           : (tracker?.dex
                               ?.replace(/\./g, "")
                               ?.replace(/ /g, "_")

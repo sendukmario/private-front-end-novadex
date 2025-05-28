@@ -54,6 +54,7 @@ import { presetPriority, setHeight } from "./NewlyCreatedList";
 import { AvatarSetting } from "@/apis/rest/settings/settings";
 import { useSnapStateStore } from "@/stores/use-snap-state";
 import { useCopyDropdownState } from "@/stores/cosmo/card-state/use-copy-dropdown-state.store";
+import { CosmoSound } from "@/components/customs/popovers/CosmoSound";
 
 export type AboutToGraduateListProps = {
   sizeVariant: "desktop" | "mobile";
@@ -122,7 +123,7 @@ function AboutToGraduateList({
       checkBoxes.moonshot === false ||
       checkBoxes.pumpfun === false ||
       checkBoxes.dynamic_bonding_curve === false ||
-      checkBoxes.believe === false ||
+      checkBoxes.launch_a_coin === false ||
       checkBoxes.bonk === false ||
       checkBoxes.launchlab === false ||
       checkBoxes.showHide === true ||
@@ -147,7 +148,7 @@ function AboutToGraduateList({
     checkBoxes.moonshot,
     checkBoxes.pumpfun,
     checkBoxes.dynamic_bonding_curve,
-    checkBoxes.believe,
+    checkBoxes.launch_a_coin,
     checkBoxes.bonk,
     checkBoxes.launchlab,
     checkBoxes.showHide,
@@ -737,6 +738,7 @@ function AboutToGraduateList({
               <AboutToGraduateListFilterPopover
                 handleSendFilterMessage={handleSendFilterMessage}
               />
+              <CosmoSound listType="aboutToGraduate" />
             </div>
           </div>
 

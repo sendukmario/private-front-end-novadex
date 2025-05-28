@@ -601,26 +601,26 @@ export default React.memo(function TradesTable({
         ),
       },
       // Total SOL Column
-      {
-        label: remainingScreenWidth < 1400 ? "Total" : "Total SOL",
-        valueIdentifier: "total",
-        sortButton: (
-          <>
-            <TradesTotalFilter />
-            <SortButton
-              type="usdc-or-sol"
-              value={tradesTokenSol}
-              setValue={setTradesTokenSol}
-            />
-          </>
-        ),
-        tooltipContent:
-          "Filter by the total value of the transaction in SOL/USD.",
-        className:
-          remainingScreenWidth < 1400
-            ? "min-w-[115px]"
-            : "min-w-[145px] min-[1520px]:min-w-[175px]",
-      },
+      // {
+      //   label: remainingScreenWidth < 1400 ? "Total" : "Total SOL",
+      //   valueIdentifier: "total",
+      //   sortButton: (
+      //     <>
+      //       <TradesTotalFilter />
+      //       <SortButton
+      //         type="usdc-or-sol"
+      //         value={tradesTokenSol}
+      //         setValue={setTradesTokenSol}
+      //       />
+      //     </>
+      //   ),
+      //   tooltipContent:
+      //     "Filter by the total value of the transaction in SOL/USD.",
+      //   className:
+      //     remainingScreenWidth < 1400
+      //       ? "min-w-[115px]"
+      //       : "min-w-[145px] min-[1520px]:min-w-[175px]",
+      // },
       // Maker Column
       {
         label: "Maker",

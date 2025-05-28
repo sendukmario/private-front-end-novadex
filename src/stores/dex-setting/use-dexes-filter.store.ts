@@ -15,7 +15,7 @@ export type DexesFilterState = {
         raydium: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        // believe: boolean;
+        // launch_a_coin: boolean;
         bonk: boolean;
         meteora_amm_v2: boolean;
         meteora_amm: boolean;
@@ -30,7 +30,7 @@ export type DexesFilterState = {
         raydium: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        // believe: boolean;
+        // launch_a_coin: boolean;
         bonk: boolean;
         meteora_amm_v2: boolean;
         meteora_amm: boolean;
@@ -58,7 +58,7 @@ export const useDexesFilterStore = create<DexesFilterState>()(
             raydium: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            // believe: true,
+            // launch_a_coin: true,
             bonk: true,
             meteora_amm_v2: true,
             meteora_amm: true,
@@ -73,7 +73,7 @@ export const useDexesFilterStore = create<DexesFilterState>()(
             pumpfun: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            // believe: true,
+            // launch_a_coin: true,
             bonk: true,
             meteora_amm_v2: true,
             meteora_amm: true,
@@ -106,7 +106,7 @@ export const useDexesFilterStore = create<DexesFilterState>()(
                 pumpfun: true,
                 // boop: true,
                 dynamic_bonding_curve: true,
-                // believe: true,
+                // launch_a_coin: true,
                 bonk: true,
                 meteora_amm_v2: true,
                 meteora_amm: true,

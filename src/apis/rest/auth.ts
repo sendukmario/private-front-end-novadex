@@ -5,7 +5,7 @@ import { getBaseURLBasedOnRegion } from "../../utils/getBaseURLBasedOnRegion";
 export interface AuthResponse {
   success: boolean;
   message: string;
-  isTelegramConnected?: string;
+  isTelegramConnected?: boolean;
   token?: string;
   isNew?: boolean;
   publicKey?: string;

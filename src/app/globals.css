@@ -769,6 +769,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .summary-value {
+  margin-top: -4px;
   font-size: 20px;
   font-weight: 600;
   color: #ffffff;
@@ -776,6 +777,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .summary-value-profit {
+  margin-top: -4px;
   font-size: 20px;
   font-weight: 600;
   color: #42ffa4;
@@ -783,6 +785,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .summary-value-loss {
+  margin-top: -4px;
   font-size: 20px;
   font-weight: 600;
   color: #ff4242;
@@ -805,7 +808,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .footer-container {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;

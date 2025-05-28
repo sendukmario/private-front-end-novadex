@@ -53,6 +53,7 @@ import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settin
 import { AvatarSetting } from "@/apis/rest/settings/settings";
 import { useSnapStateStore } from "@/stores/use-snap-state";
 import { useCopyDropdownState } from "@/stores/cosmo/card-state/use-copy-dropdown-state.store";
+import { CosmoSound } from "@/components/customs/popovers/CosmoSound";
 
 export type GraduatedListProps = {
   sizeVariant: "desktop" | "mobile";
@@ -119,7 +120,7 @@ export default function GraduatedList({
       checkBoxes.moonshot === false ||
       checkBoxes.pumpfun === false ||
       checkBoxes.dynamic_bonding_curve === false ||
-      checkBoxes.believe === false ||
+      checkBoxes.launch_a_coin === false ||
       checkBoxes.bonk === false ||
       checkBoxes.launchlab === false ||
       checkBoxes.showHide === true ||
@@ -144,7 +145,7 @@ export default function GraduatedList({
     checkBoxes.moonshot,
     checkBoxes.pumpfun,
     checkBoxes.dynamic_bonding_curve,
-    checkBoxes.believe,
+    checkBoxes.launch_a_coin,
     checkBoxes.bonk,
     checkBoxes.launchlab,
     checkBoxes.showHide,
@@ -744,6 +745,7 @@ export default function GraduatedList({
               <GraduatedListFilterPopover
                 handleSendFilterMessage={handleSendFilterMessage}
               />
+              <CosmoSound listType="graduated" />
             </div>
           </div>
 

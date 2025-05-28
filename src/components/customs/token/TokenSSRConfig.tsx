@@ -11,7 +11,6 @@ import { useSolPriceMessageStore } from "@/stores/use-solprice-message.store";
 import { useWalletsMessageStore } from "@/stores/wallets/use-wallets-message.store";
 import { useCurrentTokenFreshWalletsStore } from "@/stores/token/use-current-token-fresh-wallets.store";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useTokenCardsFilter } from "@/stores/token/use-token-cards-filter.store";
 import useVisibilityRefresh from "@/hooks/use-visibility-refresh";
 import axios from "@/libraries/axios";
 import cookies from "js-cookie";

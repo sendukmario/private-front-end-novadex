@@ -25,7 +25,7 @@ export type ChartHoldingMessageType = {
 
 export type DEX =
   | "Pump.Fun"
-  | "Believe"
+  | "Launch a Coin"
   | "Bonk"
   | "Moonshot"
   | "LaunchLab"

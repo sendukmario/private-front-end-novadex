@@ -455,7 +455,7 @@ export const MobileView = React.memo(
         <div className="flex h-full w-40 flex-col items-start justify-center gap-y-1">
           <div className="flex items-center gap-x-1">
             <div className="flex items-center gap-x-1">
-              <span className="flex gap-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
+              <span className="flex items-center gap-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
                 <div className="relative aspect-auto size-4 flex-shrink-0">
                   <CachedImage
                     src={"/icons/solana-sq.svg"}

@@ -329,7 +329,7 @@ function HoldersTable() {
             className={cn(
               "sticky top-0 z-[9] hidden h-[40px] min-w-max flex-shrink-0 items-center border-b border-border bg-[#080811] xl:flex",
               isLoading ? "pr-0" : "pr-10",
-              remainingScreenWidth > 1280 && "xl:hidden",
+              remainingScreenWidth < 1280 && "xl:hidden",
             )}
           >
             {isLoading && selectedHoldersFilter !== "Amount Of Holders" ? (

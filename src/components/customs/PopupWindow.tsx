@@ -683,6 +683,76 @@ export function PopupWindow({
     }));
   }, [minWidth]);
 
+  const EDGE_THRESHOLD = 10;
+  const prevDimensions = useRef({ width: 0, height: 0 });
+
+  useEffect(() => {
+    console.log("SNAP: width change", { width, height });
+
+    const newWidth = width || window.innerWidth;
+    const newHeight = height || window.innerHeight;
+
+    const prevWidth = prevDimensions.current.width || newWidth;
+    const prevHeight = prevDimensions.current.height || newHeight;
+
+    const deltaX = newWidth - prevWidth;
+    const deltaY = newHeight - prevHeight;
+
+    const popupWidth = size.width || 300;
+    const popupHeight = size.height || 200;
+
+    const isShrinking = deltaX < 0 || deltaY < 0;
+
+    setLocalPosition((prev) => {
+      let newX = prev.x;
+      let newY = prev.y;
+
+      const isNearRight = prev.x + popupWidth >= prevWidth - EDGE_THRESHOLD;
+      const isNearBottom = prev.y + popupHeight >= prevHeight - EDGE_THRESHOLD;
+
+      if (isShrinking) {
+        if (isNearRight) newX += deltaX;
+        if (isNearBottom) newY += deltaY;
+      }
+
+      // Clamp to keep inside screen
+      newX = Math.min(newX, newWidth - popupWidth);
+      newY = Math.min(newY, newHeight - popupHeight);
+      newX = Math.max(newX, 0);
+      newY = Math.max(newY, 0);
+
+      return { x: Math.round(newX), y: Math.round(newY) };
+    });
+
+    setPopupState(name, (prevPopup) => {
+      let { x: prevX, y: prevY } = prevPopup.position;
+
+      const isNearRight = prevX + popupWidth >= prevWidth - EDGE_THRESHOLD;
+      const isNearBottom = prevY + popupHeight >= prevHeight - EDGE_THRESHOLD;
+
+      if (isShrinking) {
+        if (isNearRight) prevX += deltaX;
+        if (isNearBottom) prevY += deltaY;
+      }
+
+      // Clamp to keep inside screen
+      prevX = Math.min(prevX, newWidth - popupWidth);
+      prevY = Math.min(prevY, newHeight - popupHeight);
+      prevX = Math.max(prevX, 0);
+      prevY = Math.max(prevY, 0);
+
+      return {
+        ...prevPopup,
+        position: {
+          x: Math.round(prevX),
+          y: Math.round(prevY),
+        },
+      };
+    });
+
+    prevDimensions.current = { width: newWidth, height: newHeight };
+  }, [width, height]);
+
   const resizableProps = useMemo(
     () => ({
       size: localSize,
@@ -782,6 +852,7 @@ export function PopupWindow({
         setPopupState(name, (p) => ({
           ...p,
           mode: "footer",
+          isInitialized: false,
           isOpen: shouldOpen,
         }));
       }

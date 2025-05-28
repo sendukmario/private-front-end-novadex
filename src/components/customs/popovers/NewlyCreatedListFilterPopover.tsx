@@ -7,6 +7,9 @@ import {
   NewlyCreatedFilterState,
 } from "@/stores/cosmo/use-newly-created-filter.store";
 import { useBlacklistedDeveloperFilterStore } from "@/stores/cosmo/use-blacklisted-developer-filter.store";
+import { useWindowSizeStore } from "@/stores/use-window-size.store";
+import { usePopupStore } from "@/stores/use-popup-state";
+import toast from "react-hot-toast";
 // ######## Components 🧩 ########
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
@@ -26,11 +29,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { usePopupStore } from "@/stores/use-popup-state";
-import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
-import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
+import CustomToast from "@/components/customs/toasts/CustomToast";
+// ######## Utils & Helpers 🤝 ########
 import { cn } from "@/libraries/utils";
+import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
+// ######## Types 🗨️ ########.
+import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
 
 const NewlyCreatedListFilterPopover = React.memo(
   ({
@@ -91,6 +95,31 @@ const NewlyCreatedListFilterPopover = React.memo(
       updateNewlyCreatedFiltersCount,
     } = useNewlyCreatedFilterStore();
 
+    const previewSelectedDexesCount = Object.entries(checkBoxes).filter(
+      ([key, value]) => key !== "showHide" && value === true,
+    ).length;
+
+    const toggleNewlyCreatedFilterWithValidation = (
+      filterKey: keyof NewlyCreatedFilterState["filters"]["preview"]["checkBoxes"],
+      filterType: keyof NewlyCreatedFilterState["filters"],
+    ) => {
+      if (filterKey === "showHide") {
+        toggleNewlyCreatedFilter(filterKey, filterType);
+      } else {
+        if (previewSelectedDexesCount === 1 && checkBoxes[filterKey]) {
+          toast.custom((t) => (
+            <CustomToast
+              tVisibleState={t.visible}
+              message="Please select at least one Dex"
+              state="WARNING"
+            />
+          ));
+        } else {
+          toggleNewlyCreatedFilter(filterKey, filterType);
+        }
+      }
+    };
+
     const isFilterApplied = useMemo(() => {
       const hasMinMaxFilter = (filter: {
         min: number | undefined;
@@ -101,7 +130,7 @@ const NewlyCreatedListFilterPopover = React.memo(
         GcheckBoxes.moonshot === false ||
         GcheckBoxes.pumpfun === false ||
         GcheckBoxes.dynamic_bonding_curve === false ||
-        GcheckBoxes.believe === false ||
+        GcheckBoxes.launch_a_coin === false ||
         GcheckBoxes.bonk === false ||
         GcheckBoxes.launchlab === false ||
         GcheckBoxes.showHide === true ||
@@ -126,7 +155,7 @@ const NewlyCreatedListFilterPopover = React.memo(
       GcheckBoxes.moonshot,
       GcheckBoxes.pumpfun,
       GcheckBoxes.dynamic_bonding_curve,
-      GcheckBoxes.believe,
+      GcheckBoxes.launch_a_coin,
       GcheckBoxes.bonk,
       GcheckBoxes.launchlab,
       GcheckBoxes.showHide,
@@ -309,7 +338,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("pumpfun", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "pumpfun",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -343,7 +375,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("moonshot", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "moonshot",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -414,7 +449,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("bonk", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "bonk",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -448,15 +486,18 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("believe", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "launch_a_coin",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/believe.png"
-                            alt="Believe Icon"
+                            src="/icons/asset/launch_a_coin.png"
+                            alt="Launch a Coin Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -469,7 +510,7 @@ const NewlyCreatedListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.believe
+                            checkBoxes?.launch_a_coin
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -482,7 +523,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("launchlab", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "launchlab",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -516,7 +560,7 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("boop", "preview")
+                        toggleNewlyCreatedFilterWithValidation("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -563,7 +607,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleNewlyCreatedFilter("showHide", "preview")
+                          toggleNewlyCreatedFilterWithValidation(
+                            "showHide",
+                            "preview",
+                          )
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >
@@ -1169,7 +1216,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("pumpfun", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "pumpfun",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1203,7 +1253,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("moonshot", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "moonshot",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1274,7 +1327,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("bonk", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "bonk",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1308,15 +1364,18 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("believe", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "launch_a_coin",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/believe.png"
-                            alt="Believe Icon"
+                            src="/icons/asset/launch_a_coin.png"
+                            alt="Launch a Coin Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -1329,7 +1388,7 @@ const NewlyCreatedListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.believe
+                            checkBoxes?.launch_a_coin
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -1342,7 +1401,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("launchlab", "preview")
+                        toggleNewlyCreatedFilterWithValidation(
+                          "launchlab",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1376,7 +1438,7 @@ const NewlyCreatedListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleNewlyCreatedFilter("boop", "preview")
+                        toggleNewlyCreatedFilterWithValidation("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1421,7 +1483,10 @@ const NewlyCreatedListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleNewlyCreatedFilter("showHide", "preview")
+                          toggleNewlyCreatedFilterWithValidation(
+                            "showHide",
+                            "preview",
+                          )
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >

@@ -7,6 +7,9 @@ import {
   GraduatedFilterState,
 } from "@/stores/cosmo/use-graduated-filter.store";
 import { useBlacklistedDeveloperFilterStore } from "@/stores/cosmo/use-blacklisted-developer-filter.store";
+import { useWindowSizeStore } from "@/stores/use-window-size.store";
+import { usePopupStore } from "@/stores/use-popup-state";
+import toast from "react-hot-toast";
 // ######## Components 🧩 ########
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
@@ -26,10 +29,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { usePopupStore } from "@/stores/use-popup-state";
-import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
+import CustomToast from "@/components/customs/toasts/CustomToast";
+// ######## Utils & Helpers 🤝 ########
 import { cn } from "@/libraries/utils";
+import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
+// ######## Types 🗨️ ########.
+import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
 
 const GraduatedListFilterPopover = React.memo(
   ({
@@ -90,6 +95,32 @@ const GraduatedListFilterPopover = React.memo(
       updateGraduatedFiltersCount,
     } = useGraduatedFilterStore();
 
+    const previewSelectedDexesCount =
+      Object.entries(checkBoxes).filter(
+        ([key, value]) => key !== "showHide" && value === true,
+      ).length - 1;
+
+    const toggleGraduatedFilterWithValidation = (
+      filterKey: keyof GraduatedFilterState["filters"]["preview"]["checkBoxes"],
+      filterType: keyof GraduatedFilterState["filters"],
+    ) => {
+      if (filterKey === "showHide") {
+        toggleGraduatedFilter(filterKey, filterType);
+      } else {
+        if (previewSelectedDexesCount === 1 && checkBoxes[filterKey]) {
+          toast.custom((t) => (
+            <CustomToast
+              tVisibleState={t.visible}
+              message="Please select at least one Dex"
+              state="WARNING"
+            />
+          ));
+        } else {
+          toggleGraduatedFilter(filterKey, filterType);
+        }
+      }
+    };
+
     const isFilterApplied = useMemo(() => {
       const hasMinMaxFilter = (filter: {
         min: number | undefined;
@@ -99,8 +130,9 @@ const GraduatedListFilterPopover = React.memo(
       return (
         GcheckBoxes.moonshot === false ||
         GcheckBoxes.pumpfun === false ||
+        GcheckBoxes.pumpswap === false ||
         GcheckBoxes.dynamic_bonding_curve === false ||
-        GcheckBoxes.believe === false ||
+        GcheckBoxes.launch_a_coin === false ||
         GcheckBoxes.bonk === false ||
         GcheckBoxes.launchlab === false ||
         GcheckBoxes.showHide === true ||
@@ -124,8 +156,9 @@ const GraduatedListFilterPopover = React.memo(
     }, [
       GcheckBoxes.moonshot,
       GcheckBoxes.pumpfun,
+      GcheckBoxes.pumpswap,
       GcheckBoxes.dynamic_bonding_curve,
-      GcheckBoxes.believe,
+      GcheckBoxes.launch_a_coin,
       GcheckBoxes.bonk,
       GcheckBoxes.launchlab,
       GcheckBoxes.showHide,
@@ -242,132 +275,15 @@ const GraduatedListFilterPopover = React.memo(
     const handleApplyFilterAndSendMessage = () => {
       const latestGenuineFilters =
         useGraduatedFilterStore.getState().filters.genuine;
-      const blacklist_developers =
+      const blacklistDevelopers =
         useBlacklistedDeveloperFilterStore.getState().blacklistedDevelopers;
 
-      const dexes = Object.entries(latestGenuineFilters?.checkBoxes)
-        .filter(([key, value]) => value === true && key !== "showHide")
-        .map(([key]) => {
-          if (key === "pumpswap") {
-            return "Pump.Swap";
-          }
-          if (key === "pumpfun") {
-            return "Pump.Fun";
-          }
-          if (key === "launchlab") {
-            return "LaunchLab";
-          }
-          if (key === "dynamic_bonding_curve") {
-            return "Dynamic Bonding Curve";
-          }
-          if (key === "meteora_amm_v2") {
-            return "Meteora AMM V2";
-          }
-          if (key === "meteora_amm") {
-            return "Meteora AMM";
-          }
-          return key
-            .split(" ")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join("");
-        })
-        .join(",");
+      const filterObject = convertCosmoIntoWSFilterFormat(
+        latestGenuineFilters,
+        blacklistDevelopers,
+      );
 
-      handleSendFilterMessage?.("graduated", {
-        show_keywords: latestGenuineFilters?.showKeywords,
-        hide_keywords: latestGenuineFilters?.doNotShowKeywords,
-        dexes: dexes,
-        blacklist_developers: blacklist_developers
-          ? String(blacklist_developers)
-          : "",
-        show_hidden: String(latestGenuineFilters?.checkBoxes?.showHide || ""),
-        min_holders: latestGenuineFilters?.byHoldersCount?.min
-          ? String(latestGenuineFilters.byHoldersCount.min)
-          : "",
-        max_holders: latestGenuineFilters?.byHoldersCount?.max
-          ? String(latestGenuineFilters.byHoldersCount.max)
-          : "",
-        max_top10_holders: latestGenuineFilters?.byTop10Holders?.max
-          ? String(latestGenuineFilters.byTop10Holders.max)
-          : "",
-        min_top10_holders: latestGenuineFilters?.byTop10Holders?.min
-          ? String(latestGenuineFilters.byTop10Holders.min)
-          : "",
-        min_dev_holdings: latestGenuineFilters?.byDevHoldingPercentage?.min
-          ? String(latestGenuineFilters.byDevHoldingPercentage.min)
-          : "",
-        max_dev_holdings: latestGenuineFilters?.byDevHoldingPercentage?.max
-          ? String(latestGenuineFilters.byDevHoldingPercentage.max)
-          : "",
-        min_dev_migrated: latestGenuineFilters?.byDevMigrated?.min
-          ? String(latestGenuineFilters.byDevMigrated.min)
-          : "",
-        max_dev_migrated: latestGenuineFilters?.byDevMigrated?.max
-          ? String(latestGenuineFilters.byDevMigrated.max)
-          : "",
-        min_snipers: latestGenuineFilters?.bySnipers?.min
-          ? String(latestGenuineFilters.bySnipers.min)
-          : "",
-        max_snipers: latestGenuineFilters?.bySnipers?.max
-          ? String(latestGenuineFilters.bySnipers.max)
-          : "",
-        min_insider_holding: latestGenuineFilters?.byInsiderHoldingPercentage
-          ?.min
-          ? String(latestGenuineFilters.byInsiderHoldingPercentage.min)
-          : "",
-        max_insider_holding: latestGenuineFilters?.byInsiderHoldingPercentage
-          ?.max
-          ? String(latestGenuineFilters.byInsiderHoldingPercentage.max)
-          : "",
-        min_bot_holders: latestGenuineFilters?.byBotHolders?.min
-          ? String(latestGenuineFilters.byBotHolders.min)
-          : "",
-        max_bot_holders: latestGenuineFilters?.byBotHolders?.max
-          ? String(latestGenuineFilters.byBotHolders.max)
-          : "",
-        min_age: latestGenuineFilters?.byAge?.min
-          ? String(latestGenuineFilters.byAge.min)
-          : "",
-        max_age: latestGenuineFilters?.byAge?.max
-          ? String(latestGenuineFilters.byAge.max)
-          : "",
-        min_liquidity: latestGenuineFilters?.byCurrentLiquidity?.min
-          ? String(latestGenuineFilters.byCurrentLiquidity.min)
-          : "",
-        max_liquidity: latestGenuineFilters?.byCurrentLiquidity?.max
-          ? String(latestGenuineFilters.byCurrentLiquidity.max)
-          : "",
-        min_market_cap: latestGenuineFilters?.byMarketCap?.min
-          ? String(latestGenuineFilters.byMarketCap.min)
-          : "",
-        max_market_cap: latestGenuineFilters?.byMarketCap?.max
-          ? String(latestGenuineFilters.byMarketCap.max)
-          : "",
-        min_volume: latestGenuineFilters?.byVolume?.min
-          ? String(latestGenuineFilters.byVolume.min)
-          : "",
-        max_volume: latestGenuineFilters?.byVolume?.max
-          ? String(latestGenuineFilters.byVolume.max)
-          : "",
-        min_transactions: latestGenuineFilters?.byTXNS?.min
-          ? String(latestGenuineFilters.byTXNS.min)
-          : "",
-        max_transactions: latestGenuineFilters?.byTXNS?.max
-          ? String(latestGenuineFilters.byTXNS.max)
-          : "",
-        min_buys: latestGenuineFilters?.byBuys?.min
-          ? String(latestGenuineFilters.byBuys.min)
-          : "",
-        max_buys: latestGenuineFilters?.byBuys?.max
-          ? String(latestGenuineFilters.byBuys.max)
-          : "",
-        min_sells: latestGenuineFilters?.bySells?.min
-          ? String(latestGenuineFilters.bySells.min)
-          : "",
-        max_sells: latestGenuineFilters?.bySells?.max
-          ? String(latestGenuineFilters.bySells.max)
-          : "",
-      });
+      handleSendFilterMessage?.("graduated", filterObject);
     };
 
     return (
@@ -400,7 +316,7 @@ const GraduatedListFilterPopover = React.memo(
           >
             <div className="flex h-[52px] flex-row items-center justify-between border-b border-border p-4">
               <h4 className="font-geistSemiBold text-base text-fontColorPrimary">
-                Filter
+                Filter {previewSelectedDexesCount}
               </h4>
               <button
                 title="Close"
@@ -424,16 +340,23 @@ const GraduatedListFilterPopover = React.memo(
                   {/* A. Dexes */}
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <button
-                      onClick={() =>
-                        toggleGraduatedFilter("pumpfun", "preview")
-                      }
+                      onClick={() => {
+                        toggleGraduatedFilterWithValidation(
+                          "pumpfun",
+                          "preview",
+                        );
+                        toggleGraduatedFilterWithValidation(
+                          "pumpswap",
+                          "preview",
+                        );
+                      }}
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
                             src="/icons/asset/pumpfun.png"
-                            alt="Pumpfun Icon"
+                            alt="Pump Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -446,7 +369,7 @@ const GraduatedListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.pumpfun
+                            checkBoxes?.pumpfun || checkBoxes?.pumpswap
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -459,7 +382,10 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("moonshot", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "moonshot",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -529,7 +455,9 @@ const GraduatedListFilterPopover = React.memo(
                       </div>
                     </button>
                     <button
-                      onClick={() => toggleGraduatedFilter("bonk", "preview")}
+                      onClick={() =>
+                        toggleGraduatedFilterWithValidation("bonk", "preview")
+                      }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
@@ -562,15 +490,18 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("believe", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "launch_a_coin",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/believe.png"
-                            alt="Believe Icon"
+                            src="/icons/asset/launch_a_coin.png"
+                            alt="launch_a_coin Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -583,7 +514,7 @@ const GraduatedListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.believe
+                            checkBoxes?.launch_a_coin
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -596,7 +527,10 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("launchlab", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "launchlab",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -630,7 +564,7 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleGraduatedFilter("boop", "preview")
+                        toggleGraduatedFilterWithValidation("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -677,7 +611,10 @@ const GraduatedListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleGraduatedFilter("showHide", "preview")
+                          toggleGraduatedFilterWithValidation(
+                            "showHide",
+                            "preview",
+                          )
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >
@@ -1282,29 +1219,36 @@ const GraduatedListFilterPopover = React.memo(
                   {/* A. Dexes */}
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <button
-                      onClick={() =>
-                        toggleGraduatedFilter("pumpfun", "preview")
-                      }
+                      onClick={() => {
+                        toggleGraduatedFilterWithValidation(
+                          "pumpfun",
+                          "preview",
+                        );
+                        toggleGraduatedFilterWithValidation(
+                          "pumpswap",
+                          "preview",
+                        );
+                      }}
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
                             src="/icons/asset/pumpfun.png"
-                            alt="Pumpfun Icon"
+                            alt="Pump Icon"
                             fill
                             quality={100}
                             className="object-contain"
                           />
                         </div>
                         <span className="inline-block text-nowrap text-sm text-fontColorPrimary">
-                          Pump.Fun
+                          Pump
                         </span>
                       </div>
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.pumpfun
+                            checkBoxes?.pumpfun || checkBoxes?.pumpswap
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -1317,7 +1261,10 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("moonshot", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "moonshot",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1387,7 +1334,9 @@ const GraduatedListFilterPopover = React.memo(
                       </div>
                     </button>
                     <button
-                      onClick={() => toggleGraduatedFilter("bonk", "preview")}
+                      onClick={() =>
+                        toggleGraduatedFilterWithValidation("bonk", "preview")
+                      }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
@@ -1420,15 +1369,18 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("believe", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "launch_a_coin",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/believe.png"
-                            alt="Believe Icon"
+                            src="/icons/asset/launch_a_coin.png"
+                            alt="launch_a_coin Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -1441,7 +1393,7 @@ const GraduatedListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.believe
+                            checkBoxes?.launch_a_coin
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -1454,7 +1406,10 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleGraduatedFilter("launchlab", "preview")
+                        toggleGraduatedFilterWithValidation(
+                          "launchlab",
+                          "preview",
+                        )
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1488,7 +1443,7 @@ const GraduatedListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleGraduatedFilter("boop", "preview")
+                        toggleGraduatedFilterWithValidation("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1533,7 +1488,10 @@ const GraduatedListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleGraduatedFilter("showHide", "preview")
+                          toggleGraduatedFilterWithValidation(
+                            "showHide",
+                            "preview",
+                          )
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >

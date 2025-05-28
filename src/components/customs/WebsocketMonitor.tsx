@@ -16,6 +16,7 @@ import { WifiIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import CustomToast from "./toasts/CustomToast";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
+import { useWebSocket } from "@/hooks/useWebsocketNew";
 
 function getPingStatusColor(ping: number | null): string {
   if (ping === null) return "text-gray-400";
@@ -48,7 +49,7 @@ const sortByPathname: SortByPathname[] = [
   },
   {
     pathname: "/holdings",
-    sorted: ["chartHoldings", "chartPrice", ...generalWs],
+    sorted: ["chartHoldings", ...generalWs],
   },
   {
     pathname: "/token",
@@ -90,6 +91,10 @@ function usePing(url = "/favicon.ico", interval = 5000) {
 }
 
 export function WebsocketMonitor() {
+  const { sendMessage } = useWebSocket({
+    channel: "server_shutdown"
+  })
+
   const websocketData = useWebsocketMonitor();
   const latency = usePing("/favicon.ico");
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -297,6 +302,11 @@ export function WebsocketMonitor() {
               <WifiIcon className="h-4 w-4" />
               <span>{latency !== null ? `${latency}ms` : "N/A"}</span>
             </div>
+            <button onClick={() => sendMessage({
+              channel: "server_shutdown"
+            })} className="text-red-500">
+              Shutdown websocket
+            </button>
           </div>
         </div>
 
@@ -318,14 +328,13 @@ export function WebsocketMonitor() {
                         {key}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 font-mono text-xs ${
-                          ws.status === "connected"
-                            ? "bg-green-900/30 text-green-400"
-                            : ws.status === "connecting" ||
-                                ws.status === "reconnecting"
-                              ? "bg-yellow-900/30 text-yellow-400"
-                              : "bg-red-900/30 text-red-400"
-                        }`}
+                        className={`rounded px-2 py-1 font-mono text-xs ${ws.status === "connected"
+                          ? "bg-green-900/30 text-green-400"
+                          : ws.status === "connecting" ||
+                            ws.status === "reconnecting"
+                            ? "bg-yellow-900/30 text-yellow-400"
+                            : "bg-red-900/30 text-red-400"
+                          }`}
                       >
                         {ws.status}
                       </span>
@@ -337,8 +346,8 @@ export function WebsocketMonitor() {
                           <p>
                             {ws.connectedTimestamp
                               ? new Date(
-                                  ws.connectedTimestamp,
-                                ).toLocaleTimeString()
+                                ws.connectedTimestamp,
+                              ).toLocaleTimeString()
                               : "Never"}
                           </p>
                         </div>
@@ -347,8 +356,8 @@ export function WebsocketMonitor() {
                           <p>
                             {ws.lastMessageTimestamp
                               ? new Date(
-                                  ws.lastMessageTimestamp,
-                                ).toLocaleTimeString()
+                                ws.lastMessageTimestamp,
+                              ).toLocaleTimeString()
                               : "Never"}
                           </p>
                         </div>

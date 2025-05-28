@@ -137,7 +137,7 @@ const navItems = [
   { label: "2FA", link: "/verify-2fa" },
   {
     label: "Documentation",
-    link: "/documentation",
+    link: "https://docs.nova.trade/",
   },
   // { label: "Settings", link: "/settings" },
 ];
@@ -178,8 +178,11 @@ const MobileNav = React.memo(() => {
     cookies.remove("isNew");
     localStorage.removeItem("loginStep");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("quick-buy-amount");
     localStorage.removeItem("quick-buy-settings");
-    
+    localStorage.removeItem("wallet-addresses-filter-storage");
+    localStorage.removeItem("cosmo-hidden-tokens");
+
     window.location.replace("/login");
   };
 
@@ -322,6 +325,9 @@ const MobileNav = React.memo(() => {
                       <Link
                         href={item.link}
                         prefetch
+                        target={
+                          item.link.startsWith("http") ? "_blank" : "_self"
+                        }
                         className="group flex h-[40px] w-full items-center gap-x-2 rounded-[8px] bg-white/[4%] px-4 py-3 transition-all duration-300 ease-out hover:bg-white/10"
                       >
                         <span className="inline-block text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">

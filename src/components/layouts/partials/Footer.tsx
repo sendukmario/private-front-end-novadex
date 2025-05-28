@@ -75,7 +75,7 @@ const rightFooterLinks = {
   socials: {
     guide: {
       iconURL: "/icons/support.svg",
-      href: "https://docs.tradeonnova.io/",
+      href: "https://docs.nova.trade/",
     },
     x: {
       iconURL: "/icons/x.svg",

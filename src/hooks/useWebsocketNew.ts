@@ -126,6 +126,10 @@ export function useWebSocket<T = any>({
 
   const sendMessage = (message: any, isLeave?: boolean) => {
     setWebsocketState(websocketName, { status: "connecting" });
+    if (message?.channel === "server_shutdown") {
+      webSocketManager.send(message);
+      return
+    }
 
     if (Array.isArray(message)) {
       message.forEach((msg) => {
@@ -206,25 +210,21 @@ export function useWebSocket<T = any>({
 
       if (
         (data as any).channel === channel &&
-        ((data as any).channel !== "cosmo" ||
-          (data as any).channel === "cosmo2")
+        !["cosmo", "cosmo2"].includes((data as any).channel)
       ) {
         if (data) {
           lastMessageTimestamp.current = Date.now();
-          // addLastMessage(websocketName, JSON.stringify(data), new Date());
+          addLastMessage(websocketName, JSON.stringify(data), new Date());
           updateLastMessageTimestamp(websocketName, new Date());
         }
       }
 
       // for cosmo
-      if (
-        (data as any).channel === "cosmo" ||
-        (data as any).channel === "cosmo2"
-      ) {
+      if (["cosmo", "cosmo2"].includes((data as any).channel)) {
         if (data) {
           lastMessageTimestamp.current = Date.now();
           console.log("cosmo2 message data: ", data);
-          // addLastMessage("cosmo2", JSON.stringify(data), new Date());
+          addLastMessage("cosmo2", JSON.stringify(data), new Date());
           updateLastMessageTimestamp("cosmo2", new Date());
         }
       }
@@ -234,7 +234,7 @@ export function useWebSocket<T = any>({
 
     const onWSClose = webSocketManager.onClose((event) => {
       log("❌ WebSocket closed", event);
-
+      isInitialMessageRef.current = false
       const closeInfo = {
         name: websocketName,
         code: event.code,
@@ -253,6 +253,7 @@ export function useWebSocket<T = any>({
 
     const onWSError = webSocketManager.onError((event) => {
       log("❌ WebSocket error", event);
+      isInitialMessageRef.current = false
       addError(websocketName, {
         message: JSON.stringify(event),
         timestamp: new Date(),

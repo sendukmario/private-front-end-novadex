@@ -11,11 +11,12 @@ export type GraduatedFilterState = {
     preview: {
       checkBoxes: {
         pumpfun: boolean;
+        pumpswap: boolean;
         moonshot: boolean;
         launchlab: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        believe: boolean;
+        launch_a_coin: boolean;
         bonk: boolean;
         showHide: boolean;
       };
@@ -81,11 +82,12 @@ export type GraduatedFilterState = {
     genuine: {
       checkBoxes: {
         pumpfun: boolean;
+        pumpswap: boolean;
         moonshot: boolean;
         launchlab: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        believe: boolean;
+        launch_a_coin: boolean;
         bonk: boolean;
         showHide: boolean;
       };
@@ -191,11 +193,12 @@ export const useGraduatedFilterStore = create<GraduatedFilterState>()(
         preview: {
           checkBoxes: {
             pumpfun: true,
+            pumpswap: true,
             moonshot: true,
             launchlab: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            believe: true,
+            launch_a_coin: true,
             bonk: true,
             showHide: false,
           },
@@ -261,11 +264,12 @@ export const useGraduatedFilterStore = create<GraduatedFilterState>()(
         genuine: {
           checkBoxes: {
             pumpfun: true,
+            pumpswap: true,
             moonshot: true,
             launchlab: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            believe: true,
+            launch_a_coin: true,
             bonk: true,
             showHide: false,
           },
@@ -384,11 +388,12 @@ export const useGraduatedFilterStore = create<GraduatedFilterState>()(
             [filterType]: {
               checkBoxes: {
                 pumpfun: true,
+                pumpswap: true,
                 moonshot: true,
                 launchlab: true,
                 // boop: true,
                 dynamic_bonding_curve: true,
-                believe: true,
+                launch_a_coin: true,
                 bonk: true,
                 showHide: false,
               },
@@ -540,6 +545,13 @@ export const useGraduatedFilterStore = create<GraduatedFilterState>()(
             .checkBoxes!.pumpswap;
           delete (persistedState as GraduatedFilterState)!.filters!.genuine!
             .checkBoxes!.pumpswap;
+        }
+
+        if (version === 3) {
+          delete (persistedState as GraduatedFilterState)!.filters!.preview!
+            .checkBoxes!.believe;
+          delete (persistedState as GraduatedFilterState)!.filters!.genuine!
+            .checkBoxes!.believe;
         }
 
         return persistedState as GraduatedFilterState;

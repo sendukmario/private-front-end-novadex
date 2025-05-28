@@ -579,7 +579,7 @@ const CosmoCard = memo(
                     src={data?.image}
                     alt="Token Image"
                     leftType={
-                      data?.dex === "Believe" ||
+                      data?.dex === "Launch a Coin" ||
                       data?.dex === "Raydium" ||
                       data?.dex === "Meteora AMM V2" ||
                       data?.dex === "Meteora AMM" ||
@@ -589,7 +589,7 @@ const CosmoCard = memo(
                           ? "bonk"
                           : data?.origin_dex === "Dynamic Bonding Curve" &&
                               data?.launchpad === "Launch a Coin"
-                            ? "believe"
+                            ? "launch_a_coin"
                             : (data?.origin_dex
                                 ?.replace(/\./g, "")
                                 ?.replace(/ /g, "_")
@@ -601,7 +601,7 @@ const CosmoCard = memo(
                         ? "bonk"
                         : data?.dex === "Dynamic Bonding Curve" &&
                             data?.launchpad === "Launch a Coin"
-                          ? "believe"
+                          ? "launch_a_coin"
                           : (data?.dex
                               ?.replace(/\./g, "")
                               ?.replace(/ /g, "_")
@@ -746,7 +746,7 @@ const CosmoCard = memo(
             <SnipeButton
               data={data}
               className={cn(
-                `absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center ${
+                `absolute right-[12px] top-1/2 z-[10] flex w-auto min-w-[200px] flex-shrink-0 -translate-y-1/2 items-center justify-center ${
                   (currentButtonPreset === "tripleextralarge" &&
                     currentAvatarPreset !== "normal" &&
                     currentAvatarPreset !== "large") ||
@@ -765,19 +765,21 @@ const CosmoCard = memo(
             <CosmoQuickBuyButton
               mintAddress={data?.mint}
               className={cn(
-                `absolute right-[12px] top-1/2 z-[10] flex w-auto flex-shrink-0 -translate-y-1/2 items-center justify-center xl:top-[75%] ${
+                `absolute right-[12px] top-1/2 z-[10] flex w-auto min-w-[200px] flex-shrink-0 -translate-y-1/2 items-center justify-center xl:top-2/3 ${
                   (currentButtonPreset === "tripleextralarge" &&
                     currentAvatarPreset !== "normal" &&
                     currentAvatarPreset !== "large") ||
                   (currentButtonPreset === "quadripleextralarge" &&
                     currentAvatarPreset !== "normal" &&
                     currentAvatarPreset !== "large")
-                    ? "2xl:top-[75%]"
-                    : "2xl:top-[75%]"
+                    ? "2xl:top-2/3"
+                    : "2xl:top-[55%]"
                 }`,
                 isSnapOpen && "right-0 scale-[0.9]",
                 isSmallScreen &&
                   `${currentButtonPreset === "tripleextralarge" || currentButtonPreset === "quadripleextralarge" ? "!top-[calc(100%_-_42px)]" : "!top-[calc(100%_-_32px)]"} ${remainingScreenWidth < 1350 || width! < 1380 ? "opacity-0" : "opacity-100"} transition-all duration-300 ease-in-out group-hover:opacity-100`,
+                // remainingScreenWidth < 1200 &&
+                //   `${currentButtonPreset === "tripleextralarge" || currentButtonPreset === "quadripleextralarge" ? "!top-[calc(100%_-_42px)]" : "!top-[calc(100%_-_32px)]"} opacity-0 transition-all duration-300 ease-in-out group-hover:opacity-100`,
               )}
             />
           )}

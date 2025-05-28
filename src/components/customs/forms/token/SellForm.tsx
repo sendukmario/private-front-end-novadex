@@ -51,6 +51,7 @@ import { cn } from "@/libraries/utils";
 import {
   convertNumberToPresetId,
   convertNumberToPresetKey,
+  convertPresetIdToKey,
   convertPresetIdToNumber,
   convertPresetKeyToNumber,
 } from "@/utils/convertPreset";
@@ -70,6 +71,7 @@ import { SuperNovaActived } from "./SuperNovaActived";
 import { usePopupStore } from "@/stores/use-popup-state";
 import { formatAmountWithoutLeadingZero } from "@/utils/formatAmount";
 import { useActivePresetStore } from "@/stores/dex-setting/use-active-preset.store";
+import { PresetKey } from "@/types/preset";
 
 // Define interface for settings to autosave
 interface SettingsToAutoSave {
@@ -456,7 +458,12 @@ export default React.memo(function SellForm({
     },
   });
 
-  const activePreset = useActivePresetStore((state) => state.cosmoActivePreset);
+  const activePreset = useActivePresetStore(
+    (state) => state.buySellActivePreset,
+  );
+  const setActivePreset = useActivePresetStore(
+    (state) => state.setBuySellActivePreset,
+  );
 
   // 🕍Preset Settings
   useEffect(() => {
@@ -741,10 +748,14 @@ export default React.memo(function SellForm({
                 <FormItem className="w-full @[240px]:w-fit">
                   <FormControl>
                     <PresetSelectionButtons
-                      activePreset={convertNumberToPresetId(field.value)}
-                      setActivePreset={(value: string) =>
-                        field.onChange(convertPresetIdToNumber(value))
-                      }
+                      activePreset={convertNumberToPresetKey(field.value)}
+                      setActivePreset={(value: string) => {
+                        field.onChange(convertPresetIdToNumber(value));
+                        setActivePreset(
+                          convertPresetIdToKey(value) as PresetKey,
+                        );
+                      }}
+                      isGlobal={false}
                     />
                   </FormControl>
                   <FormMessage />
@@ -1449,7 +1460,10 @@ export default React.memo(function SellForm({
                               />
                             </FormControl>
                             {form.watch("fee") < 0.001 ? (
-                              <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                              <FormMessage className="leading-4">
+                                We recommend a minimum tip of 0.001 for faster
+                                transaction
+                              </FormMessage>
                             ) : (
                               <FormMessage />
                             )}
@@ -1514,7 +1528,10 @@ export default React.memo(function SellForm({
                               />
                             </FormControl>
                             {form.watch("tip") < 0.001 ? (
-                              <FormMessage className="leading-4">We recommend a minimum tip of 0.001 for faster transaction</FormMessage>
+                              <FormMessage className="leading-4">
+                                We recommend a minimum tip of 0.001 for faster
+                                transaction
+                              </FormMessage>
                             ) : (
                               <FormMessage />
                             )}

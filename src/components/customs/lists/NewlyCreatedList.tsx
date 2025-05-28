@@ -38,15 +38,13 @@ import { CachedImage } from "../CachedImage";
 import debounce from "lodash/debounce";
 import { usePopupStore } from "@/stores/use-popup-state";
 import { cn } from "@/libraries/utils";
-import CosmoCard from "../cards/CosmoCard";
-import CosmoCardLoading from "../loadings/CosmoCardLoading";
 import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
 import { FixedSizeList } from "react-window";
 import CosmoCardRow from "../cards/VirtualizedCosmoCard";
 import { AvatarSetting } from "@/apis/rest/settings/settings";
 import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settings.store";
-import { useSnapStateStore } from "@/stores/use-snap-state";
 import { useCopyDropdownState } from "@/stores/cosmo/card-state/use-copy-dropdown-state.store";
+import { CosmoSound } from "@/components/customs/popovers/CosmoSound";
 
 export const setHeight = (type: AvatarSetting) => {
   switch (type) {
@@ -133,7 +131,7 @@ function NewlyCreatedList({
       checkBoxes.moonshot === false ||
       checkBoxes.pumpfun === false ||
       checkBoxes.dynamic_bonding_curve === false ||
-      checkBoxes.believe === false ||
+      checkBoxes.launch_a_coin === false ||
       checkBoxes.bonk === false ||
       checkBoxes.launchlab === false ||
       checkBoxes.showHide === true ||
@@ -158,7 +156,7 @@ function NewlyCreatedList({
     checkBoxes.moonshot,
     checkBoxes.pumpfun,
     checkBoxes.dynamic_bonding_curve,
-    checkBoxes.believe,
+    checkBoxes.launch_a_coin,
     checkBoxes.bonk,
     checkBoxes.launchlab,
     checkBoxes.showHide,
@@ -752,6 +750,7 @@ function NewlyCreatedList({
               <NewlyCreatedListFilterPopover
                 handleSendFilterMessage={handleSendFilterMessage}
               />
+              <CosmoSound listType="newlyCreated" />
             </div>
           </div>
 

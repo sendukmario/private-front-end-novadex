@@ -95,7 +95,7 @@ export const AddTwitterContent: React.FC<AddTwitterContentProps> = ({
     queryFn: async () => {
       const res = await getTwitterMonitorAccounts();
       const accounts = res || [];
-      setUserRegularAndSuggestedTwitterAccounts(res);
+      setUserRegularAndSuggestedTwitterAccounts(accounts);
 
       const filledInputs = Array.from({ length: 5 }, () => ({
         name: "",
@@ -105,7 +105,7 @@ export const AddTwitterContent: React.FC<AddTwitterContentProps> = ({
 
       accounts
         .filter((a) => a.type === "regular")
-        .forEach((account, index) => {
+        ?.forEach((account, index) => {
           if (index < 5) {
             filledInputs[index] = { ...account };
           }

@@ -93,7 +93,7 @@ export const AddTSContent: React.FC<AddTSContentProps> = ({
     queryFn: async () => {
       const res = await getTSMonitorAccounts();
       const accounts = res || [];
-      setUserRegularAndSuggestedTSAccounts(res);
+      setUserRegularAndSuggestedTSAccounts(accounts);
 
       const filledInputs = Array.from({ length: 5 }, () => ({
         name: "",
@@ -103,7 +103,7 @@ export const AddTSContent: React.FC<AddTSContentProps> = ({
 
       accounts
         .filter((a) => a.type === "regular")
-        .forEach((account, index) => {
+        ?.forEach((account, index) => {
           if (index < 5) {
             filledInputs[index] = { ...account };
           }

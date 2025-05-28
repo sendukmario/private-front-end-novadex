@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,6 +35,7 @@ import { formatAmount } from "@/utils/formatAmount";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import LightTooltip from "./light-tooltip";
 import TimeDifference from "./cards/TimeDifference";
+import { Skeleton } from "../ui/skeleton";
 
 function getTimeAgoSuffix(unixTimestamp: number): string {
   const date = fromUnixTime(unixTimestamp);
@@ -199,32 +200,76 @@ const TwitterHoverPopoverContent = React.memo(
       React.SetStateAction<TwitterUserData | undefined>
     >;
   }) => {
+    const [partialData, setPartialData] = useState<TwitterUserData | undefined>(data);
+
     const { data: fetchData, isLoading } = useQuery({
       queryKey: ["twitter", username],
       queryFn: async () => {
         if (data) return data;
-        const res = await fetchTwitterUserData(username);
+        const res = await fetchTwitterUserData(username, (newData) => {
+          // Update partial data immediately when any data is available
+          setPartialData(prev => {
+            if (!prev) {
+              return {
+                success: true,
+                past: [],
+                new: {
+                  image_profile: '',
+                  username: username,
+                  following: 0,
+                  follower: 0,
+                  followed_by: [],
+                  is_blue_verified: false,
+                  timestamp: Date.now()
+                },
+                ...newData
+              };
+            }
+            return {
+              ...prev,
+              ...newData,
+              new: {
+                ...prev.new,
+                ...newData.new
+              }
+            };
+          });
+        });
         return res;
       },
       initialData: data,
       enabled: !data,
     });
 
-    console.log("twitter data", fetchData);
+    // Update final data when fetch completes
+    useEffect(() => {
+      if (fetchData && !isLoading) {
+        setFinalData(fetchData);
+      }
+    }, [fetchData, isLoading, setFinalData]);
+
+    // Use partial data for display if available
+    const displayData = partialData || fetchData;
+
     return (
       <>
-        {isLoading ? (
+        {isLoading && !displayData ? (
           <div className="absolute left-1/2 top-1/2 z-[1000] flex h-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-            <div className="relative size-8 animate-spin">
-              <Image
-                src="/icons/search-loading.png"
-                alt="Loading"
-                fill
-                className="object-contain"
-              />
+            <div className="flex flex-col gap-4 w-full px-3">
+              <div className="flex items-center gap-x-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex flex-1 flex-col gap-y-1">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+              <div className="flex items-center gap-x-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-20" />
+              </div>
             </div>
           </div>
-        ) : fetchData && fetchData.success ? (
+        ) : displayData && displayData.success ? (
           <>
             <div className="z-[1000] h-full w-full">
               <ScrollArea className="h-full w-full">
@@ -241,18 +286,24 @@ const TwitterHoverPopoverContent = React.memo(
                   >
                     <div className="flex items-start gap-x-3">
                       <Avatar className="h-10 w-10 flex-shrink-0">
-                        <AvatarImage
-                          src={fetchData.new.image_profile}
-                          alt={`${fetchData.new.username} Profile Picture`}
-                        />
-                        <AvatarFallback>
-                          {username // get initial
-                            .split(" ")
-                            .map((part) => part[0])
-                            .slice(0, 2)
-                            .join("")
-                            .toUpperCase()}
-                        </AvatarFallback>
+                        {displayData.loading?.pfp ? (
+                          <Skeleton className="h-full w-full rounded-full" />
+                        ) : (
+                          <>
+                            <AvatarImage
+                              src={displayData.new.image_profile}
+                              alt={`${displayData.new.username} Profile Picture`}
+                            />
+                            <AvatarFallback>
+                              {username
+                                .split(" ")
+                                .map((part) => part[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </>
+                        )}
                       </Avatar>
                       <div className="flex flex-1 flex-col gap-y-1">
                         <div className="flex items-center justify-between">
@@ -261,50 +312,41 @@ const TwitterHoverPopoverContent = React.memo(
                               {username}
                             </h4>
                             <h4 className="text-fontColorSecondary">
-                              {
+                              {displayData.new.timestamp && (
                                 <TimeDifference
                                   className="font-geistRegular text-xs text-fontColorSecondary"
-                                  created={fetchData.new.timestamp}
+                                  created={displayData.new.timestamp}
                                 />
-                              }
+                              )}
                             </h4>
-                            {/* Blue Verified Tick is not needed */}
-                            {/* {fetchData.new.is_blue_verified && (
-                            <span className="text-fontColorSecondary">
-                              <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M17.5418 8.99999C17.5255 8.41272 17.3464 7.8409 17.0236 7.34908C16.7018 6.85818 16.2491 6.46545 15.7164 6.21636C15.9191 5.66454 15.9618 5.06727 15.8436 4.49181C15.7246 3.91545 15.4464 3.38454 15.0418 2.95818C14.6146 2.55363 14.0846 2.27636 13.5082 2.15636C12.9327 2.03818 12.3355 2.0809 11.7836 2.28363C11.5355 1.74999 11.1436 1.29636 10.6518 0.974539C10.16 0.652721 9.58819 0.472721 9.00001 0.458176C8.41274 0.47363 7.84274 0.651812 7.35183 0.974539C6.86092 1.29727 6.47092 1.7509 6.22455 2.28363C5.67183 2.0809 5.07274 2.03636 4.49546 2.15636C3.91819 2.27454 3.38637 2.55272 2.9591 2.95818C2.55455 3.38545 2.27819 3.91727 2.16092 4.49272C2.04274 5.06818 2.08819 5.66545 2.29183 6.21636C1.75819 6.46545 1.30365 6.85727 0.980009 7.34818C0.656373 7.83908 0.475464 8.41181 0.458191 8.99999C0.476373 9.58817 0.656373 10.16 0.980009 10.6518C1.30365 11.1427 1.75819 11.5354 2.29183 11.7836C2.08819 12.3345 2.04274 12.9318 2.16092 13.5073C2.2791 14.0836 2.55455 14.6145 2.95819 15.0418C3.38546 15.4445 3.91637 15.7209 4.49183 15.84C5.06728 15.96 5.66455 15.9164 6.21637 15.7164C6.46546 16.2491 6.85728 16.7018 7.3491 17.0245C7.84001 17.3464 8.41274 17.5254 9.00001 17.5418C9.58819 17.5273 10.16 17.3482 10.6518 17.0264C11.1436 16.7045 11.5355 16.25 11.7836 15.7173C12.3327 15.9345 12.9346 15.9864 13.5136 15.8664C14.0918 15.7464 14.6227 15.46 15.0409 15.0418C15.4591 14.6236 15.7464 14.0927 15.8664 13.5136C15.9864 12.9345 15.9346 12.3327 15.7164 11.7836C16.2491 11.5345 16.7018 11.1427 17.0246 10.6509C17.3464 10.16 17.5255 9.58727 17.5418 8.99999ZM7.78364 12.5L4.66637 9.38363L5.84183 8.19999L7.72546 10.0836L11.7255 5.72545L12.95 6.85818L7.78364 12.5Z"
-                                  fill="#1D9BF0"
-                                />
-                              </svg>
-                            </span>
-                          )} */}
                           </div>
                         </div>
                         <div className="flex items-center gap-x-1 whitespace-nowrap">
-                          <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
-                            <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
-                              {formatAmount(fetchData.new.following || 0, 2)}
-                            </span>{" "}
-                            Following
-                          </p>
+                          {displayData.loading?.following ? (
+                            <Skeleton className="h-4 w-20" />
+                          ) : (
+                            <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
+                              <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
+                                {formatAmount(displayData.new.following || 0, 2)}
+                              </span>{" "}
+                              Following
+                            </p>
+                          )}
 
                           <span className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
                             ·
                           </span>
 
-                          <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
-                            <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
-                              {formatAmount(fetchData.new.follower || 0, 2)}
-                            </span>{" "}
-                            Followers
-                          </p>
+                          {displayData.loading?.followers ? (
+                            <Skeleton className="h-4 w-20" />
+                          ) : (
+                            <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
+                              <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
+                                {formatAmount(displayData.new.follower || 0, 2)}
+                              </span>{" "}
+                              Followers
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-x-1">
                           <p className="font-geistRegular text-[10px] font-normal leading-[14px] text-fontColorSecondary">
@@ -314,8 +356,15 @@ const TwitterHoverPopoverContent = React.memo(
                             className="flex items-center"
                             onClick={(e) => e.preventDefault()}
                           >
-                            {fetchData.new.followed_by.length > 0 &&
-                              fetchData.new.followed_by.map((item, index) => (
+                            {displayData.loading?.scoredFollowers ? (
+                              <div className="flex gap-1">
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                              </div>
+                            ) : (
+                              displayData.new.followed_by.length > 0 &&
+                              displayData.new.followed_by.slice(0, 3).map((item, index) => (
                                 <AvatarItem
                                   key={item.username}
                                   username={item.username}
@@ -323,27 +372,36 @@ const TwitterHoverPopoverContent = React.memo(
                                   isFirstItem={index === 0}
                                   className="h-4 w-4"
                                 />
-                              ))}
+                              ))
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {(fetchData?.past.filter(
+                {displayData.loading?.pastUsernames ? (
+                  <div className="mt-4 px-3">
+                    <Skeleton className="h-4 w-20 mb-2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+                  </div>
+                ) : (displayData?.past.filter(
                   (item) =>
                     item.username.toLowerCase() !==
-                    fetchData.new.username.toLowerCase(),
+                    displayData.new.username.toLowerCase(),
                 )).length > 0 ? (
                   <div className="flex flex-col gap-y-0.5 px-3">
                     <h3 className="pt-2 font-geistRegular text-xs font-normal uppercase text-fontColorSecondary">
                       Past
                     </h3>
-                    {fetchData?.past
+                    {displayData?.past
                       .filter(
                         (item) =>
                           item.username.toLowerCase() !==
-                          fetchData.new.username.toLowerCase(),
+                          displayData.new.username.toLowerCase(),
                       )
                       .map((item) => (
                         <div

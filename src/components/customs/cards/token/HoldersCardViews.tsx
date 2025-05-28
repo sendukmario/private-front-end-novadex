@@ -322,7 +322,7 @@ export const MobileView = React.memo(
           <div className="flex items-center gap-x-1">
             <div className={cn("relative aspect-auto size-4 flex-shrink-0")}>
               <CachedImage
-                src={tokenData?.image ?? "/icons/solana-sq.svg"}
+                src={tokenData?.image ? tokenData.image : "/icons/usdc.svg"}
                 alt="Solana SQ Icon"
                 fill
                 quality={50}
@@ -427,7 +427,7 @@ export const MobileView = React.memo(
         )}
       >
         <div className="flex items-center gap-x-1">
-          <span className="flex gap-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
+          <span className="flex items-center gap-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
             <div className="relative aspect-auto size-4 flex-shrink-0">
               <CachedImage
                 src={"/icons/solana-sq.svg"}

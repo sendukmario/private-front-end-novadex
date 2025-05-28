@@ -85,7 +85,7 @@ const useSocialFeedMonitor = () => {
     isLoadingTS,
     isLoadingDiscord,
   });
-  const isLoading = isLoadingTwitter || isLoadingTS || isLoadingDiscord;
+  const isLoading = isLoadingTwitter && isLoadingTS && isLoadingDiscord;
 
   // Helper functions
   const normalizeTimestamp = (timestamp: any): number => {

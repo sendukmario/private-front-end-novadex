@@ -13,6 +13,7 @@ import { useNewlyCreatedFilterStore } from "@/stores/cosmo/use-newly-created-fil
 import { useAboutToGraduateFilterStore } from "@/stores/cosmo/use-about-to-graduate-filter.store";
 import { useGraduatedFilterStore } from "@/stores/cosmo/use-graduated-filter.store";
 import { useTrackedWalletsOfToken } from "@/hooks/use-tracked-wallets-of-token";
+import { useCosmoSoundStore } from "@/stores/cosmo/use-cosmo-sound.store";
 import cookies from "js-cookie";
 // ######## APIs 🛜 ########
 import { getHiddenTokens } from "@/apis/rest/cosmo";
@@ -55,7 +56,29 @@ export default function CosmoListTabSection() {
   );
   const { walletsOfToken } = useTrackedWalletsOfToken();
 
-  const [isFirstLoading, setIsFirstLoading] = useState(true);
+  const isFirstLoadingRef = useRef<boolean>(true);
+
+  // Sound state refs
+  const newlyCreatedSoundRef = useRef(
+    useCosmoSoundStore.getState().newlyCreatedSound,
+  );
+  const aboutToGraduateSoundRef = useRef(
+    useCosmoSoundStore.getState().aboutToGraduateSound,
+  );
+  const graduatedSoundRef = useRef(
+    useCosmoSoundStore.getState().graduatedSound,
+  );
+
+  // Subscribe to sound state changes
+  useEffect(() => {
+    const unsubscribe = useCosmoSoundStore.subscribe((state) => {
+      newlyCreatedSoundRef.current = state.newlyCreatedSound;
+      aboutToGraduateSoundRef.current = state.aboutToGraduateSound;
+      graduatedSoundRef.current = state.graduatedSound;
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const { data: hiddenTokensData, isLoading: isLoadingHiddenTokens } = useQuery(
     {
@@ -91,7 +114,7 @@ export default function CosmoListTabSection() {
         ?.toLowerCase();
       if (
         !latestGenuineNewlyCreatedFilters.checkBoxes[
-        transformedDex as keyof typeof latestGenuineNewlyCreatedFilters.checkBoxes
+          transformedDex as keyof typeof latestGenuineNewlyCreatedFilters.checkBoxes
         ]
       )
         return false;
@@ -136,13 +159,13 @@ export default function CosmoListTabSection() {
       if (
         latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.min &&
         devHoldingsPercent <
-        latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.min
+          latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.min
       )
         return false;
       if (
         latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.max &&
         devHoldingsPercent >
-        latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.max
+          latestGenuineNewlyCreatedFilters?.byDevHoldingPercentage.max
       )
         return false;
 
@@ -177,13 +200,13 @@ export default function CosmoListTabSection() {
       if (
         latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.min &&
         insiderHoldingsPercent <
-        latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.min
+          latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.min
       )
         return false;
       if (
         latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.max &&
         insiderHoldingsPercent >
-        latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.max
+          latestGenuineNewlyCreatedFilters?.byInsiderHoldingPercentage.max
       )
         return false;
 
@@ -225,13 +248,13 @@ export default function CosmoListTabSection() {
       if (
         latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.min &&
         currentLiquidity <
-        latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.min
+          latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.min
       )
         return false;
       if (
         latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.max &&
         currentLiquidity >
-        latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.max
+          latestGenuineNewlyCreatedFilters?.byCurrentLiquidity.max
       )
         return false;
 
@@ -329,7 +352,7 @@ export default function CosmoListTabSection() {
 
   // Add this useEffect to handle the pause cycle
   useEffect(() => {
-    if (isFirstLoading) return;
+    if (isFirstLoadingRef.current) return;
 
     const startPauseCycle = () => {
       // Set to true for 3 seconds
@@ -367,37 +390,98 @@ export default function CosmoListTabSection() {
       }
       isPausedRef.current = false;
     };
-  }, [isFirstLoading]);
+  }, [isFirstLoadingRef.current]);
 
   const processNewTokenMessage = useCallback(
     (newDataMessage: CosmoDataMessageType) => {
       if ([newDataMessage].filter(filterTokens).length === 0) {
         console.log("COSMO WS ✨ | New Token 👌 | 🔴", newDataMessage);
       } else {
-        console.log("COSMO WS ✨ | New Token 👌 | 🟢", newDataMessage);
+        if (newlyCreatedSoundRef.current !== "none") {
+          const audio = new Audio(
+            `/sfx/cosmo/${newlyCreatedSoundRef.current}.mp3`,
+          );
+          audio.play();
+        }
         updateNewlyCreated(newDataMessage);
       }
     },
-    [filterTokens, updateNewlyCreated],
+    [filterTokens, updateNewlyCreated, newlyCreatedSoundRef.current],
   );
+
+  // Add refs for previous lists
+  const prevAboutToGraduateListRef = useRef<CosmoDataMessageType[]>([]);
+  const prevGraduatedListRef = useRef<CosmoDataMessageType[]>([]);
 
   const processBatchMessage = useCallback(
     (data: CosmoDataBatchUpdateMessageType) => {
-      if (isFirstLoading) {
-        setIsFirstLoading(false);
+      if (isFirstLoadingRef.current) {
+        isFirstLoadingRef.current = false;
+        // Initialize previous lists on first load
+        prevAboutToGraduateListRef.current = data?.aboutToGraduate || [];
+        prevGraduatedListRef.current = data?.graduated || [];
+        setNewlyCreatedList(data?.created);
+        setAboutToGraduateList(data?.aboutToGraduate);
+        setGraduatedList(data?.graduated);
+        return;
       }
 
-      console.log("COSMO WS ✨ | Batch Updates 🔥", data);
+      if (data?.aboutToGraduate) {
+        const newAboutToGraduateItems = data.aboutToGraduate.filter(
+          (newItem) =>
+            !prevAboutToGraduateListRef.current.some(
+              (prevItem) => prevItem.mint === newItem.mint,
+            ),
+        );
+
+        if (
+          newAboutToGraduateItems.length > 0 &&
+          aboutToGraduateSoundRef.current !== "none"
+        ) {
+          const audio = new Audio(
+            `/sfx/cosmo/${aboutToGraduateSoundRef.current}.mp3`,
+          );
+          audio.play();
+        }
+
+        prevAboutToGraduateListRef.current = data.aboutToGraduate;
+        setAboutToGraduateList(data.aboutToGraduate);
+      }
+
+      // Handle graduated list
+      if (data?.graduated) {
+        const newGraduatedItems = data.graduated.filter(
+          (newItem) =>
+            !prevGraduatedListRef.current.some(
+              (prevItem) => prevItem.mint === newItem.mint,
+            ),
+        );
+
+        if (
+          newGraduatedItems.length > 0 &&
+          graduatedSoundRef.current !== "none"
+        ) {
+          const audio = new Audio(
+            `/sfx/cosmo/${graduatedSoundRef.current}.mp3`,
+          );
+          audio.play();
+        }
+
+        prevGraduatedListRef.current = data.graduated;
+        setGraduatedList(data.graduated);
+      }
+
+      // Handle newly created list (existing functionality)
       setNewlyCreatedList(data?.created);
-      setAboutToGraduateList(data?.aboutToGraduate);
-      setGraduatedList(data?.graduated);
     },
     [
-      isFirstLoading,
-      setIsFirstLoading,
+      isFirstLoadingRef.current,
       setNewlyCreatedList,
       setAboutToGraduateList,
       setGraduatedList,
+      aboutToGraduateSoundRef.current,
+      graduatedSoundRef.current,
+      newlyCreatedSoundRef.current,
     ],
   );
 
@@ -423,7 +507,7 @@ export default function CosmoListTabSection() {
       const wsStatus = webSocketManager.getConnectionStatus();
       console.debug(`WS HOOK 📺 - cosmo | CONNECTION STATUS ✅`, wsStatus);
     },
-    onLeave: () => { },
+    onLeave: () => {},
     onMessage: (event) => {
       try {
         const newDataMessage:
@@ -477,12 +561,12 @@ export default function CosmoListTabSection() {
 
       try {
         const filterSubscriptionMessage: DynamicCosmoFilterSubscriptionMessageType =
-        {
-          action: "update",
-          channel: "cosmo2",
-          token,
-          [category]: filterObject,
-        };
+          {
+            action: "update",
+            channel: "cosmo2",
+            token,
+            [category]: filterObject,
+          };
 
         console.log("COSMO | FILTER LOG ✨", filterSubscriptionMessage);
         sendMessage(filterSubscriptionMessage);
@@ -493,27 +577,6 @@ export default function CosmoListTabSection() {
     [sendMessage],
   );
 
-  // useEffect(() => {
-  //   if (!isLoadingBlacklistedDeveloper) {
-  //     sendMessage({
-  //       channel: "cosmo2",
-  //       action: "update",
-  //       created: convertCosmoIntoWSFilterFormat(
-  //         latestGenuineNewlyCreatedFilters,
-  //         blacklistedDeveloperData as string[],
-  //       ),
-  //       aboutToGraduate: convertCosmoIntoWSFilterFormat(
-  //         latestGenuineAboutToGraduateFilters,
-  //         blacklistedDeveloperData as string[],
-  //       ),
-  //       graduated: convertCosmoIntoWSFilterFormat(
-  //         latestGenuineGraduatedFilters,
-  //         blacklistedDeveloperData as string[],
-  //       ),
-  //     });
-  //   }
-  // }, [isLoadingBlacklistedDeveloper]);
-
   useEffect(() => {
     if (blacklistedDeveloperData && !isLoadingBlacklistedDeveloper) {
       setGlobalBlacklistedDevelopers(blacklistedDeveloperData);
@@ -523,23 +586,23 @@ export default function CosmoListTabSection() {
         const token = cookies.get("_nova_session");
         if (!token || token === "") return;
         const filterSubscriptionMessage: DynamicCosmoFilterSubscriptionMessageType =
-        {
-          action: "update",
-          channel: "cosmo2",
-          token,
-          created: convertCosmoIntoWSFilterFormat(
-            latestGenuineNewlyCreatedFilters,
-            blacklistedDeveloperData,
-          ),
-          aboutToGraduate: convertCosmoIntoWSFilterFormat(
-            latestGenuineAboutToGraduateFilters,
-            blacklistedDeveloperData,
-          ),
-          graduated: convertCosmoIntoWSFilterFormat(
-            latestGenuineGraduatedFilters,
-            blacklistedDeveloperData,
-          ),
-        };
+          {
+            action: "update",
+            channel: "cosmo2",
+            token,
+            created: convertCosmoIntoWSFilterFormat(
+              latestGenuineNewlyCreatedFilters,
+              blacklistedDeveloperData,
+            ),
+            aboutToGraduate: convertCosmoIntoWSFilterFormat(
+              latestGenuineAboutToGraduateFilters,
+              blacklistedDeveloperData,
+            ),
+            graduated: convertCosmoIntoWSFilterFormat(
+              latestGenuineGraduatedFilters,
+              blacklistedDeveloperData,
+            ),
+          };
 
         sendMessage(filterSubscriptionMessage);
       }
@@ -570,7 +633,7 @@ export default function CosmoListTabSection() {
     return (
       <>
         <CosmoMobile
-          isLoading={isFirstLoading}
+          isLoading={isFirstLoadingRef.current}
           trackedWalletsOfToken={walletsOfToken}
           handleSendFilterMessage={handleSendFilterMessage}
         />
@@ -609,13 +672,13 @@ export default function CosmoListTabSection() {
         </>
       ) : width! >= 1280 ? (
         <CosmoDesktop
-          isLoading={isFirstLoading}
+          isLoading={isFirstLoadingRef.current}
           trackedWalletsOfToken={walletsOfToken}
           handleSendFilterMessage={handleSendFilterMessage}
         />
       ) : (
         <CosmoMobile
-          isLoading={isFirstLoading}
+          isLoading={isFirstLoadingRef.current}
           trackedWalletsOfToken={walletsOfToken}
           handleSendFilterMessage={handleSendFilterMessage}
         />
