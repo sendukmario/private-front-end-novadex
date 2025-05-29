@@ -11,6 +11,7 @@ import { useSolPriceMessageStore } from "@/stores/use-solprice-message.store";
 import { useWalletsMessageStore } from "@/stores/wallets/use-wallets-message.store";
 import { useCurrentTokenFreshWalletsStore } from "@/stores/token/use-current-token-fresh-wallets.store";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTokenCardsFilter } from "@/stores/token/use-token-cards-filter.store";
 import useVisibilityRefresh from "@/hooks/use-visibility-refresh";
 import axios from "@/libraries/axios";
 import cookies from "js-cookie";
@@ -289,11 +290,7 @@ const TokenSSRConfig = ({
 
       setIsLoadingHolding(false);
 
-      if (
-        message.holding.investedSol <= 0 ||
-        message.holding.token.mint !== mint
-      )
-        return;
+      if (message.holding.investedSol <= 0) return;
 
       const holdingData = {
         wallet: message.wallet,
@@ -452,16 +449,16 @@ const TokenSSRConfig = ({
       });
 
       setTokenInfoMessage(initChartData.token);
-      setInitTransactionMessages(initChartData?.transactions?.reverse() ?? []);
+      setInitTransactionMessages(initChartData.transactions.reverse());
       setPriceMessage(initChartData.price);
       setCurrentTokenChartPrice(initChartData.price.price_sol.toString());
       setCurrentTokenChartPriceUsd(initChartData.price.price_usd.toString());
       setCurrentTokenChartSupply(initChartData.price.supply.toString());
       setVolumeMessage(initChartData.volume);
       setDataSecurityMessage(initChartData.data_security);
-      setChartHolderMessages(initChartData?.chart_holders?.chart_holders ?? []);
-      setTotalHolderMessages(initChartData?.chart_holders?.total_holders);
-      setChartTraderMessages(initChartData?.chart_traders ?? []);
+      setChartHolderMessages(initChartData.chart_holders.chart_holders);
+      setTotalHolderMessages(initChartData.chart_holders.total_holders);
+      setChartTraderMessages(initChartData.chart_traders);
       setTimestamp(Date.now() / 1000);
 
       return () => {

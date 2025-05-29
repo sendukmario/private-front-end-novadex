@@ -202,8 +202,8 @@ export default function HoldingsCardMobile({
                 data?.token?.launchpad === "Bonk"
                   ? "bonk"
                   : data?.token?.dex === "Dynamic Bonding Curve" &&
-                      data?.token?.launchpad === "Launch a Coin"
-                    ? "launch_a_coin"
+                      data?.token?.launchpad === "Believe"
+                    ? "believe"
                     : (data?.token?.dex
                         ?.replace(/\./g, "")
                         ?.replace(/ /g, "_")

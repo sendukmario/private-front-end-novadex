@@ -40,9 +40,9 @@ class MaxDepthErrorBoundary extends Component<
       );
       Sentry.captureException(new Error(`MaxDepthError 🔴: ${error.message}`));
 
-      // this.reloadTimeout = setTimeout(() => {
-      //   window.location.reload();
-      // }, 100);
+      this.reloadTimeout = setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       console.warn("Uncaught error:", error, errorInfo);
       Sentry.captureException(error);

@@ -28,8 +28,6 @@ type HoldingsMessageState = {
   setTimestamp: (timestamp: number) => void;
   chartPriceMessage: BatchPriceMessage[];
   setChartPriceMessage: (newMessage: BatchPriceMessage[]) => void;
-  marqueeMint: string[];
-  setMarqueeMint: (mint: string | string[]) => void;
 };
 
 export const useHoldingsMessageStore = create<HoldingsMessageState>()(
@@ -37,14 +35,6 @@ export const useHoldingsMessageStore = create<HoldingsMessageState>()(
     messages: [],
     WSHoldingRef: null,
     WSChartHoldingRef: null,
-    marqueeMint: [],
-    setMarqueeMint: (mint) =>
-      set(() => {
-        if (Array.isArray(mint)) {
-          return { marqueeMint: mint };
-        }
-        return { marqueeMint: [mint as string] };
-      }),
     listSubscribedMints: [],
     setListSubscribedMints: (mints) =>
       set(() => ({ listSubscribedMints: mints })),

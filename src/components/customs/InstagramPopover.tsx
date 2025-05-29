@@ -110,7 +110,7 @@ const InstagramPopoverContent = React.memo(
     return (
       <>
         {isLoading && !error && (
-          <div className="flex h-24 items-center justify-center z-[1000]">
+          <div className="flex h-24 items-center justify-center">
             <div className="relative size-6 animate-spin">
               <Image
                 src="/icons/search-loading.png"
@@ -123,7 +123,7 @@ const InstagramPopoverContent = React.memo(
         )}
 
         {(error || !fetchData?.posting_account?.username) && !isLoading && (
-          <div className="z-50 flex w-full flex-col items-center justify-center p-3 max-xl:h-[350px] max-xl:gap-8 z-[1000]">
+          <div className="z-50 flex w-full flex-col items-center justify-center p-3 max-xl:h-[350px] max-xl:gap-8">
             <div className="relative aspect-square size-[160px] xl:size-[64px]">
               <Image
                 src="/icons/social/instagram-empty.png"
@@ -153,7 +153,7 @@ const InstagramPopoverContent = React.memo(
         {!isLoading && fetchData?.posting_account?.username && (
           <>
             {fetchData?.posting_account?.username ? (
-              <div className="flex flex-col gap-y-4 p-4 z-[1000]">
+              <div className="flex flex-col gap-y-4 p-4">
                 <div className="flex items-center gap-x-2">
                   <div className="relative aspect-square size-[42px] rounded-full">
                     <Image
@@ -324,7 +324,6 @@ const InstagramPopover = React.memo(
               side="bottom"
               className="nova-scroller darker gb__white__popover z-[1000] max-h-[450px] w-[284px] overflow-y-scroll rounded-[6px] border border-border bg-[#17171F] p-0 !transition-none"
             >
-              <iframe className="absolute left-0 top-0 size-full" />
               <InstagramPopoverContent
                 setIsFetched={setIsFetched}
                 isFetched={isFetched}

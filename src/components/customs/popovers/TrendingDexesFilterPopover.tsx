@@ -264,7 +264,7 @@ export default function TrendingDexesFilterPopover() {
               </div>
             </button>
             {/* <button
-              onClick={() => toggleDexesFilter("launch_a_coin", "preview")}
+              onClick={() => toggleDexesFilter("believe", "preview")}
               className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
             >
               <div className="flex items-center gap-x-2">
@@ -679,7 +679,7 @@ export default function TrendingDexesFilterPopover() {
               </div>
             </button>
             {/* <button
-              onClick={() => toggleDexesFilter("launch_a_coin", "preview")}
+              onClick={() => toggleDexesFilter("believe", "preview")}
               className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
             >
               <div className="flex items-center gap-x-2">

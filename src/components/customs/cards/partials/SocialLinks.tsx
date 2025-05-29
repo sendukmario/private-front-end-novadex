@@ -12,7 +12,6 @@ import SocialLinkButton from "@/components/customs/buttons/SocialLinkButton";
 import TiktokHoverPopover from "@/components/customs/TiktokHoverPopover";
 import WebsiteHoverPopover from "../../WebsiteHoverPopover";
 import YoutubeHoverPopover from "../../YoutubeHoverPopover";
-import { DEX } from "@/types/ws-general";
 
 const iconSizeContainerMap = {
   normal: "!size-[20px]",
@@ -42,7 +41,18 @@ const SocialLinks = React.memo(
     twitterStatusPopoverAlignment,
     isTokenPage = false,
   }: {
-    dex: DEX;
+    dex:
+      | "Pump.Fun"
+      | "Believe"
+      | "Bonk"
+      | "Moonshot"
+      | "LaunchLab"
+      | "Boop"
+      | "Dynamic Bonding Curve"
+      | "Meteora AMM V2"
+      | "Meteora AMM"
+      | "Raydium"
+      | "Pump.Swap";
     isFirst: boolean;
     twitter?: string;
     mint?: string;

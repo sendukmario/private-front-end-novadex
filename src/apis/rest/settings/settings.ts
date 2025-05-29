@@ -12,8 +12,8 @@ export const quickBuyPresetSchema = z.object({
     })
     .min(1),
   autoTipEnabled: z.boolean(),
-  fee: z.number().min(0),
-  tip: z.number().min(0),
+  fee: z.number().min(0).min(0.0001, "Fee must be at least 0.0001 SOL"),
+  tip: z.number().min(0.001, "Tip must be at least 0.001 SOL"),
   processor: z.string(),
   amounts: z.array(z.number().min(0)),
   autoFeeEnabled: z.boolean().optional(),
@@ -28,8 +28,8 @@ export const quickSellPresetSchema = z.object({
     .min(1)
     .max(100),
   autoTipEnabled: z.boolean(),
-  fee: z.number().min(0),
-  tip: z.number().min(0),
+  fee: z.number().min(0).min(0.0001, "Fee must be at least 0.0001 SOL"),
+  tip: z.number().min(0.001, "Tip must be at least 0.001 SOL"),
   processor: z.string(),
   amounts: z.array(z.number().min(0)),
   autoFeeEnabled: z.boolean().optional(),

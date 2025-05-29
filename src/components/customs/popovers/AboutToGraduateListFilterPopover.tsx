@@ -7,9 +7,6 @@ import {
   AboutToGraduateFilterState,
 } from "@/stores/cosmo/use-about-to-graduate-filter.store";
 import { useBlacklistedDeveloperFilterStore } from "@/stores/cosmo/use-blacklisted-developer-filter.store";
-import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { usePopupStore } from "@/stores/use-popup-state";
-import toast from "react-hot-toast";
 // ######## Components 🧩 ########
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
@@ -29,12 +26,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import CustomToast from "@/components/customs/toasts/CustomToast";
-// ######## Utils & Helpers 🤝 ########
-import { cn } from "@/libraries/utils";
-import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
-// ######## Types 🗨️ ########.
+import { useWindowSizeStore } from "@/stores/use-window-size.store";
+import { usePopupStore } from "@/stores/use-popup-state";
 import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
+import convertCosmoIntoWSFilterFormat from "@/utils/convertCosmoIntoWSFilterFormat";
+import { cn } from "@/libraries/utils";
 
 const AboutToGraduateListFilterPopover = React.memo(
   ({
@@ -95,31 +91,6 @@ const AboutToGraduateListFilterPopover = React.memo(
       updateAboutToGraduateFiltersCount,
     } = useAboutToGraduateFilterStore();
 
-    const previewSelectedDexesCount = Object.entries(checkBoxes).filter(
-      ([key, value]) => key !== "showHide" && value === true,
-    ).length;
-
-    const toggleAboutToGraduateFilterWithValidation = (
-      filterKey: keyof AboutToGraduateFilterState["filters"]["preview"]["checkBoxes"],
-      filterType: keyof AboutToGraduateFilterState["filters"],
-    ) => {
-      if (filterKey === "showHide") {
-        toggleAboutToGraduateFilter(filterKey, filterType);
-      } else {
-        if (previewSelectedDexesCount === 1 && checkBoxes[filterKey]) {
-          toast.custom((t) => (
-            <CustomToast
-              tVisibleState={t.visible}
-              message="Please select at least one Dex"
-              state="WARNING"
-            />
-          ));
-        } else {
-          toggleAboutToGraduateFilter(filterKey, filterType);
-        }
-      }
-    };
-
     const isFilterApplied = useMemo(() => {
       const hasMinMaxFilter = (filter: {
         min: number | undefined;
@@ -130,7 +101,7 @@ const AboutToGraduateListFilterPopover = React.memo(
         GcheckBoxes.moonshot === false ||
         GcheckBoxes.pumpfun === false ||
         GcheckBoxes.dynamic_bonding_curve === false ||
-        GcheckBoxes.launch_a_coin === false ||
+        GcheckBoxes.believe === false ||
         GcheckBoxes.bonk === false ||
         GcheckBoxes.launchlab === false ||
         GcheckBoxes.showHide === true ||
@@ -155,7 +126,7 @@ const AboutToGraduateListFilterPopover = React.memo(
       GcheckBoxes.moonshot,
       GcheckBoxes.pumpfun,
       GcheckBoxes.dynamic_bonding_curve,
-      GcheckBoxes.launch_a_coin,
+      GcheckBoxes.believe,
       GcheckBoxes.bonk,
       GcheckBoxes.launchlab,
       GcheckBoxes.showHide,
@@ -338,10 +309,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "pumpfun",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("pumpfun", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -375,10 +343,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "moonshot",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("moonshot", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -449,10 +414,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "bonk",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("bonk", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -486,18 +448,15 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "launch_a_coin",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("believe", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/launch_a_coin.png"
-                            alt="launch_a_coin Icon"
+                            src="/icons/asset/believe.png"
+                            alt="Believe Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -510,7 +469,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.launch_a_coin
+                            checkBoxes?.believe
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -523,10 +482,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "launchlab",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("launchlab", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -560,7 +516,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation("boop", "preview")
+                        toggleAboutToGraduateFilter("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -607,10 +563,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleAboutToGraduateFilterWithValidation(
-                            "showHide",
-                            "preview",
-                          )
+                          toggleAboutToGraduateFilter("showHide", "preview")
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >
@@ -1216,10 +1169,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                   <div className="flex w-full flex-col gap-y-2 p-4">
                     <div
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "pumpfun",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("pumpfun", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1253,10 +1203,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </div>
                     <div
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "moonshot",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("moonshot", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1327,10 +1274,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "bonk",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("bonk", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1364,18 +1308,15 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "launch_a_coin",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("believe", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
                       <div className="flex items-center gap-x-2">
                         <div className="relative aspect-square h-5 w-5 flex-shrink-0">
                           <Image
-                            src="/icons/asset/launch_a_coin.png"
-                            alt="launch_a_coin Icon"
+                            src="/icons/asset/believe.png"
+                            alt="Believe Icon"
                             fill
                             quality={100}
                             className="object-contain"
@@ -1388,7 +1329,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                       <div className="relative aspect-square h-6 w-6 flex-shrink-0">
                         <Image
                           src={
-                            checkBoxes?.launch_a_coin
+                            checkBoxes?.believe
                               ? "/icons/footer/checked.png"
                               : "/icons/footer/unchecked.png"
                           }
@@ -1401,10 +1342,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation(
-                          "launchlab",
-                          "preview",
-                        )
+                        toggleAboutToGraduateFilter("launchlab", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1438,7 +1376,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                     </button>
                     {/* <button
                       onClick={() =>
-                        toggleAboutToGraduateFilterWithValidation("boop", "preview")
+                        toggleAboutToGraduateFilter("boop", "preview")
                       }
                       className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                     >
@@ -1483,10 +1421,7 @@ const AboutToGraduateListFilterPopover = React.memo(
                       </Label>
                       <button
                         onClick={() =>
-                          toggleAboutToGraduateFilterWithValidation(
-                            "showHide",
-                            "preview",
-                          )
+                          toggleAboutToGraduateFilter("showHide", "preview")
                         }
                         className="flex h-8 w-full cursor-pointer items-center justify-between gap-x-2 rounded-[8px] border border-border bg-white/[3%] py-1 pl-2 pr-1 duration-300 hover:bg-white/[6%]"
                       >

@@ -36,7 +36,6 @@ export default function HoldingsTable({
     (state) => state.chartPriceMessage,
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const marqueeMints = useHoldingsMessageStore((state) => state.marqueeMint);
 
   const sortedList = useMemo(() => {
     if (!list) return [];
@@ -390,10 +389,8 @@ export default function HoldingsTable({
   );
 
   const sendMessage = debounce(() => {
-    const mintsToSubscribe = [
-      ...paginatedList?.map((item) => item.token.mint),
-      ...marqueeMints,
-    ];
+    const mintsToSubscribe =
+      paginatedList?.map((item) => item.token.mint) || [];
     if (mintsToSubscribe.length === 0) return;
     handleSendMessage(mintsToSubscribe);
     setListSubscribedMints(mintsToSubscribe);
@@ -401,7 +398,7 @@ export default function HoldingsTable({
 
   useEffect(() => {
     sendMessage();
-  }, [list?.length, currentPage, marqueeMints.join(",")]);
+  }, [list?.length, currentPage]);
 
   const handlePrevPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));

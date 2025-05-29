@@ -30,7 +30,9 @@ const UserAccount = () => {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const handleLogout = () => {
-    timeoutRef.current = setTimeout(resetAllTutorialStates, 1000);
+    timeoutRef.current = setTimeout(() => {
+      resetAllTutorialStates();
+    }, 1000);
     cookies.remove("_nova_session");
     cookies.remove("_twitter_api_key");
     cookies.remove("_truthsocial_api_key");
@@ -38,11 +40,7 @@ const UserAccount = () => {
     localStorage.removeItem("loginStep");
     localStorage.removeItem("authToken");
     localStorage.removeItem("quick-buy-amount");
-    localStorage.removeItem("quick-buy-settings");
-    localStorage.removeItem("wallet-addresses-filter-storage");
-    localStorage.removeItem("cosmo-hidden-tokens");
-
-    window.location.replace("/login");
+    window.location.href = "/login";
 
     // set is initialized to false for reset the pnl tracker when logged out
     setIsInitialized(false);
@@ -166,7 +164,7 @@ const UserAccount = () => {
           </Link>
 
           <Link
-            href="https://docs.nova.trade/"
+            href="/documentation"
             onClick={() => setOpenMenuPopover(false)}
             target="_blank"
             className="group flex h-[40px] w-full items-center gap-x-2 rounded-[8px] bg-white/[4%] px-4 py-3 transition-all duration-300 ease-out hover:bg-white/10"

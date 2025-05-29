@@ -55,9 +55,9 @@ export function PopupWindow({
   // Constants
   const MIN_DRAG_DISTANCE = 2;
   const SNAP_THRESHOLD = 30;
-  const HEADER_HEIGHT = 88;
+  const HEADER_HEIGHT = 42.8;
   const FOOTER_HEIGHT = 48.8;
-  const PAGE_MARGIN = 5;
+  const PAGE_MARGIN = 10;
   const TOTAL_PAGE_HEIGHT = HEADER_HEIGHT + FOOTER_HEIGHT + PAGE_MARGIN;
 
   // Get window size
@@ -192,52 +192,24 @@ export function PopupWindow({
     };
   }, []);
 
-  // useEffect(() => {
-  //   const isLeftSnapped = popups.some(
-  //     (popup) => popup.isOpen && popup.snappedSide === "left",
-  //   );
-
-  //   const isRightSnapped = popups.some(
-  //     (popup) => popup.isOpen && popup.snappedSide === "right",
-  //   );
-
-  //   if (!isDragging) {
-  //     hideSnapHint("left");
-  //     hideSnapHint("right");
-  //     return;
-  //   }
-
-  //   if (!isLeftSnapped) showSnapHint("left");
-  //   if (!isRightSnapped) showSnapHint("right");
-  // }, [isDragging]);
-
   useEffect(() => {
     const isLeftSnapped = popups.some(
-      (popup) =>
-        popup.name === name && popup.isOpen && popup.snappedSide === "left",
+      (popup) => popup.isOpen && popup.snappedSide === "left",
     );
 
     const isRightSnapped = popups.some(
-      (popup) =>
-        popup.name === name && popup.isOpen && popup.snappedSide === "right",
+      (popup) => popup.isOpen && popup.snappedSide === "right",
     );
 
-    if (nearSnappedSide === "left" && !isLeftSnapped) {
-      showSnapHint("left");
-      return;
-    }
-    if (nearSnappedSide === "right" && !isRightSnapped) {
-      showSnapHint("right");
-      return;
-    }
-
-    hideSnapHint("left");
-    hideSnapHint("right");
-
     if (!isDragging) {
+      hideSnapHint("left");
+      hideSnapHint("right");
       return;
     }
-  }, [isDragging, nearSnappedSide]);
+
+    if (!isLeftSnapped) showSnapHint("left");
+    if (!isRightSnapped) showSnapHint("right");
+  }, [isDragging]);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -593,12 +565,12 @@ export function PopupWindow({
       if (!isSnappedRef.current) {
         previousSizeRef.current = { width: newWidth, height: newHeight };
       }
-      setLocalSize((prev) => {
+      setLocalSize(prev => {
         if (prev.width === newWidth && prev.height === newHeight) return prev;
         return { width: newWidth, height: newHeight };
       });
 
-      setLocalPosition((prev) => {
+      setLocalPosition(prev => {
         if (prev.x === newPosX && prev.y === newPosY) return prev;
         return { x: newPosX, y: newPosY };
       });
@@ -682,76 +654,6 @@ export function PopupWindow({
       size: { width: Math.max(size.width, minWidth), height: size.height },
     }));
   }, [minWidth]);
-
-  const EDGE_THRESHOLD = 10;
-  const prevDimensions = useRef({ width: 0, height: 0 });
-
-  useEffect(() => {
-    console.log("SNAP: width change", { width, height });
-
-    const newWidth = width || window.innerWidth;
-    const newHeight = height || window.innerHeight;
-
-    const prevWidth = prevDimensions.current.width || newWidth;
-    const prevHeight = prevDimensions.current.height || newHeight;
-
-    const deltaX = newWidth - prevWidth;
-    const deltaY = newHeight - prevHeight;
-
-    const popupWidth = size.width || 300;
-    const popupHeight = size.height || 200;
-
-    const isShrinking = deltaX < 0 || deltaY < 0;
-
-    setLocalPosition((prev) => {
-      let newX = prev.x;
-      let newY = prev.y;
-
-      const isNearRight = prev.x + popupWidth >= prevWidth - EDGE_THRESHOLD;
-      const isNearBottom = prev.y + popupHeight >= prevHeight - EDGE_THRESHOLD;
-
-      if (isShrinking) {
-        if (isNearRight) newX += deltaX;
-        if (isNearBottom) newY += deltaY;
-      }
-
-      // Clamp to keep inside screen
-      newX = Math.min(newX, newWidth - popupWidth);
-      newY = Math.min(newY, newHeight - popupHeight);
-      newX = Math.max(newX, 0);
-      newY = Math.max(newY, 0);
-
-      return { x: Math.round(newX), y: Math.round(newY) };
-    });
-
-    setPopupState(name, (prevPopup) => {
-      let { x: prevX, y: prevY } = prevPopup.position;
-
-      const isNearRight = prevX + popupWidth >= prevWidth - EDGE_THRESHOLD;
-      const isNearBottom = prevY + popupHeight >= prevHeight - EDGE_THRESHOLD;
-
-      if (isShrinking) {
-        if (isNearRight) prevX += deltaX;
-        if (isNearBottom) prevY += deltaY;
-      }
-
-      // Clamp to keep inside screen
-      prevX = Math.min(prevX, newWidth - popupWidth);
-      prevY = Math.min(prevY, newHeight - popupHeight);
-      prevX = Math.max(prevX, 0);
-      prevY = Math.max(prevY, 0);
-
-      return {
-        ...prevPopup,
-        position: {
-          x: Math.round(prevX),
-          y: Math.round(prevY),
-        },
-      };
-    });
-
-    prevDimensions.current = { width: newWidth, height: newHeight };
-  }, [width, height]);
 
   const resizableProps = useMemo(
     () => ({
@@ -852,7 +754,6 @@ export function PopupWindow({
         setPopupState(name, (p) => ({
           ...p,
           mode: "footer",
-          isInitialized: false,
           isOpen: shouldOpen,
         }));
       }

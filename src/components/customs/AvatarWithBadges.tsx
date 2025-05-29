@@ -18,7 +18,7 @@ import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settin
 
 export type BadgeType =
   | "moonshot"
-  | "launch_a_coin"
+  | "believe"
   | "bonk"
   | "pumpfun"
   | "launchlab"
@@ -62,10 +62,7 @@ interface BadgeProps {
 const BADGE_IMAGE_PATHS: Record<BadgeType, { src: string; alt: string }> = {
   moonshot: { src: "/icons/asset/moonshot.png", alt: "Moonshot Icon" },
   pumpfun: { src: "/icons/asset/pumpfun.png", alt: "Pumpfun Icon" },
-  launch_a_coin: {
-    src: "/icons/asset/launch_a_coin.png",
-    alt: "Launch A Coin Icon",
-  },
+  believe: { src: "/icons/asset/believe.png", alt: "Believe Icon" },
   bonk: { src: "/icons/asset/bonk.png", alt: "Bonk Icon" },
   launchlab: { src: "/icons/asset/raydium.png", alt: "LaunchLab Icon" },
   raydium: {
@@ -115,9 +112,6 @@ const convertDexToTooltipLabel = (type: BadgeType) => {
   }
   if (type === "pumpswap") {
     return "Pump.Swap";
-  }
-  if (type === "launch_a_coin") {
-    return "Launch a Coin";
   }
   if (type === "launchlab") {
     return "LaunchLab";
@@ -173,9 +167,9 @@ const Badge = ({
               type === "pumpswap" && "hue-rotate-[120deg] saturate-150",
               type === "launchlab" && "hue-rotate-[150deg] saturate-200",
               type === "dynamic_bonding_curve" &&
-                "brightness-150 hue-rotate-[80deg] saturate-150",
+              "brightness-150 hue-rotate-[80deg] saturate-150",
               type === "meteora_amm_v2" &&
-                "brightness-125 hue-rotate-[15deg] saturate-150",
+              "brightness-125 hue-rotate-[15deg] saturate-150",
             )}
             aria-label={badge?.alt || "Badge"}
           >
@@ -185,9 +179,9 @@ const Badge = ({
                 alt={badge?.alt || "Badge"}
                 {...(badgeSizeConstant
                   ? {
-                      height: badgeSizeConstant,
-                      width: badgeSizeConstant,
-                    }
+                    height: badgeSizeConstant,
+                    width: badgeSizeConstant,
+                  }
                   : { fill: true })}
                 className="object-contain"
               />
@@ -269,8 +263,8 @@ const AvatarWithBadges = ({
             className,
             isSquared && isCosmo ? "rounded-[4px]" : "rounded-full",
             !showFallback &&
-              handleGoogleLensSearch &&
-              "cursor-pointer transition-opacity duration-300 ease-out hover:opacity-0",
+            handleGoogleLensSearch &&
+            "cursor-pointer transition-opacity duration-300 ease-out hover:opacity-0",
           )}
         >
           {Boolean(imageSrc) ? (
@@ -280,9 +274,9 @@ const AvatarWithBadges = ({
               alt={alt}
               {...(sizeConstant
                 ? {
-                    height: sizeConstant,
-                    width: sizeConstant,
-                  }
+                  height: sizeConstant,
+                  width: sizeConstant,
+                }
                 : { fill: true })}
               loading="eager"
               className={cn(

@@ -9,25 +9,17 @@ type HiddenTokensState = {
   unhideToken: (tokenMint: string) => void;
 };
 
-export const useHiddenTokensStore = create<HiddenTokensState>()(
-  persist(
-    (set, get) => ({
-      hiddenTokens: [],
-      setHiddenTokens: (tokens) => set({ hiddenTokens: tokens }),
-      isTokenHidden: (tokenMint) => get().hiddenTokens.includes(tokenMint),
-      hideToken: (tokenMint) =>
-        set((state) => {
-          if (state.hiddenTokens.includes(tokenMint)) return state;
-          return { hiddenTokens: [...state.hiddenTokens, tokenMint] };
-        }),
-      unhideToken: (tokenMint) =>
-        set((state) => ({
-          hiddenTokens: state.hiddenTokens.filter((t: any) => t !== tokenMint),
-        })),
+export const useHiddenTokensStore = create<HiddenTokensState>()((set, get) => ({
+  hiddenTokens: [],
+  setHiddenTokens: (tokens) => set({ hiddenTokens: tokens }),
+  isTokenHidden: (tokenMint) => get().hiddenTokens.includes(tokenMint),
+  hideToken: (tokenMint) =>
+    set((state) => {
+      if (state.hiddenTokens.includes(tokenMint)) return state;
+      return { hiddenTokens: [...state.hiddenTokens, tokenMint] };
     }),
-    {
-      name: "cosmo-hidden-tokens",
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+  unhideToken: (tokenMint) =>
+    set((state) => ({
+      hiddenTokens: state.hiddenTokens.filter((t: any) => t !== tokenMint),
+    })),
+}));

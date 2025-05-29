@@ -625,31 +625,25 @@ const NovaTradingView = ({
               // Update existing bar
               const updatedBar: Bar = {
                 ...lastBar,
-                high: Math.max(lastBar.open, nextPrice, lastBar.high),
-                low: Math.min(lastBar.open, nextPrice, lastBar.low),
+                high: Math.max(lastBar.high, nextPrice),
+                low: Math.min(lastBar.low, nextPrice),
                 close: nextPrice,
                 volume: (lastBar.volume || 0) + (nextVolume || 0),
               };
+              // console.log(updatedBar, "yeremia 3");
 
               sub.callback(updatedBar);
-              lastBarRef.current[selectedResolution!] = updatedBar;
+              lastBarRef.current[selectedResolution] = updatedBar;
             } else {
-              if (
-                lastBar &&
-                barStartTime >
-                  lastBar.time +
-                    parseResolutionToMilliseconds(selectedResolution)
-              ) {
+              if (lastBar && barStartTime > lastBar.time + parseResolutionToMilliseconds(selectedResolution)) {
                 // Fill the gap with synthetic bar(s)
                 const gapFillBar: Bar = {
-                  time:
-                    lastBar.time +
-                    parseResolutionToMilliseconds(selectedResolution),
+                  time: lastBar.time + parseResolutionToMilliseconds(selectedResolution),
                   open: lastBar.close,
                   high: lastBar.close,
                   low: lastBar.close,
                   close: lastBar.close,
-                  volume: 0,
+                  volume: 0
                 };
                 sub.callback(gapFillBar);
                 lastBarRef.current[selectedResolution] = gapFillBar;
@@ -659,11 +653,13 @@ const NovaTradingView = ({
               const newBar: Bar = {
                 time: barStartTime,
                 open: lastBar?.close ?? nextPrice,
-                high: Math.max(lastBar.close ?? nextPrice, nextPrice),
-                low: Math.min(lastBar.close ?? nextPrice, nextPrice),
+                high: nextPrice,
+                low: nextPrice,
                 close: nextPrice,
                 volume: nextVolume || 0,
               };
+              // console.log(newBar, "yeremia");
+
               sub.callback(newBar);
               lastBarRef.current[selectedResolution] = newBar;
             }
@@ -1205,9 +1201,8 @@ const NovaTradingView = ({
               const symbolInfo: LibrarySymbolInfo = {
                 name: name,
                 ticker: mint,
-                description: `${
-                  symbol
-                }/${localStorage.getItem("chart_currency")} on ${dex} Nova`,
+                description: `${symbol
+                  }/${localStorage.getItem("chart_currency")} on ${dex} Nova`,
                 type: "crypto",
                 session: "24x7",
                 timezone: getTimeZone(),
@@ -1751,10 +1746,10 @@ const NovaTradingView = ({
                   ...trade,
                   name:
                     isMyTrade ||
-                    isSniperTrade ||
-                    isDevTrade ||
-                    isInsiderTrade ||
-                    isTrackedTrade
+                      isSniperTrade ||
+                      isDevTrade ||
+                      isInsiderTrade ||
+                      isTrackedTrade
                       ? "NOT"
                       : trade.name,
                   supply: String(tokenSupplyRef.current) || "1000000000",
@@ -2926,7 +2921,7 @@ const NovaTradingView = ({
 
   return (
     <div className="h-full">
-      <div ref={chartContainerRef} id="trading-view" className="h-full" />
+      <div ref={chartContainerRef} id="trading-view" className="h-full" />;
     </div>
   );
 };

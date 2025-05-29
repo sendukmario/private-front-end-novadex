@@ -225,8 +225,7 @@ export default React.memo(function WalletTrackerCardPopOut({
               className={cn(
                 "flex h-full w-full items-center",
                 snappedSide === "none" && "min-w-[340px]",
-                popUpResponsive ? "min-w-[130px]" : "min-w-[250px]",
-                size.width > 800 && "min-w-[340px]",
+                popUpResponsive ? "min-w-[130px]" : "min-w-[340px]",
                 size.width < 500 && snappedSide !== "none" && "min-w-[120px]",
               )}
               style={{
@@ -253,8 +252,8 @@ export default React.memo(function WalletTrackerCardPopOut({
                         tracker?.launchpad === "Bonk"
                           ? "bonk"
                           : tracker?.dex === "Dynamic Bonding Curve" &&
-                              tracker?.launchpad === "Launch a Coin"
-                            ? "launch_a_coin"
+                              tracker?.launchpad === "Believe"
+                            ? "believe"
                             : (tracker?.dex
                                 ?.replace(/\./g, "")
                                 ?.replace(/ /g, "_")
@@ -312,7 +311,7 @@ export default React.memo(function WalletTrackerCardPopOut({
             </div>
 
             {/* address */}
-            <div className="flex h-full w-full min-w-[80px] items-center">
+            <div className="flex h-full w-full min-w-[120px] max-w-[200px] items-center">
               <AddressWithEmojis
                 address={(() => {
                   const walletName = trackedWalletAdditionalInfo?.name || "";
@@ -321,10 +320,7 @@ export default React.memo(function WalletTrackerCardPopOut({
                     (size.width < 1050 && walletName.length > 10);
                   return shouldTruncate
                     ? truncateString(walletName, popUpResponsive ? 5 : 10)
-                    : truncateString(
-                        walletName,
-                        Math.floor((size.width - 330) / 40),
-                      );
+                    : walletName;
                 })()}
                 fullAddress={trackedWalletAdditionalInfo?.address}
                 className="!font-geistRegular text-sm"
@@ -337,7 +333,7 @@ export default React.memo(function WalletTrackerCardPopOut({
             </div>
 
             {/* amount */}
-            <div className="flex h-full w-full min-w-[135px] items-center">
+            <div className="flex h-full w-full min-w-[105px] items-center">
               <div className="flex items-center">
                 <div className="relative aspect-square h-4 w-4 flex-shrink-0">
                   <CachedImage
@@ -437,8 +433,8 @@ export default React.memo(function WalletTrackerCardPopOut({
                       tracker?.launchpad === "Bonk"
                         ? "bonk"
                         : tracker?.dex === "Dynamic Bonding Curve" &&
-                            tracker?.launchpad === "Launch a Coin"
-                          ? "launch_a_coin"
+                            tracker?.launchpad === "Believe"
+                          ? "believe"
                           : (tracker?.dex
                               ?.replace(/\./g, "")
                               ?.replace(/ /g, "_")

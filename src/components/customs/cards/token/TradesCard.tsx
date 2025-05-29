@@ -34,7 +34,6 @@ import { usePopupStore } from "@/stores/use-popup-state";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import { useTokenMarketCapToggleState } from "@/stores/token/use-token-market-cap-toggle.store";
 import { useTradesTableSettingStore } from "@/stores/table/token/use-trades-table-setting.store";
-import { useTokenPersist } from "@/stores/token/use-token-persist.store";
 
 interface TradesCardProps {
   index?: number;
@@ -327,7 +326,7 @@ const DesktopView = memo(
         )}
 
         {/* SOL Amount column */}
-        {/* {selectedTableColumns.find((col) => col === "total") && (
+        {selectedTableColumns.find((col) => col === "total") && (
           <div className={cn("flex h-full w-full min-w-[115px] items-center")}>
             <div className="flex items-center gap-x-1">
               {tradesTokenSol == "SOL" ? (
@@ -359,7 +358,7 @@ const DesktopView = memo(
               </span>
             </div>
           </div>
-        )} */}
+        )}
 
         {/* Maker column */}
         {isTradeMatchWithExistingTrackedWallet ? (
@@ -622,7 +621,7 @@ const MobileView = React.memo(
                 )}
               </span>
             </div>
-            {/* <div className="flex flex-col gap-y-1">
+            <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">
                 Value
               </span>
@@ -631,8 +630,21 @@ const MobileView = React.memo(
               >
                 {formatAmountWithoutLeadingZero(transactionData.value, 3, 2)}
               </span>
-            </div> */}
-
+            </div>
+            <div className="flex flex-col gap-y-1">
+              <span className="text-nowrap text-xs text-fontColorSecondary">
+                Tokens
+              </span>
+              <span
+                className={cn("font-geistSemiBold text-sm", transactionClass)}
+              >
+                {formatAmountWithoutLeadingZero(
+                  transactionData.tokenAmount,
+                  3,
+                  2,
+                )}
+              </span>
+            </div>
             <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">
                 SOL
@@ -657,20 +669,6 @@ const MobileView = React.memo(
                   )}
                 </span>
               </div>
-            </div>
-            <div className="flex flex-col gap-y-1">
-              <span className="text-nowrap text-xs text-fontColorSecondary">
-                Tokens
-              </span>
-              <span
-                className={cn("font-geistSemiBold text-sm", transactionClass)}
-              >
-                {formatAmountWithoutLeadingZero(
-                  transactionData.tokenAmount,
-                  3,
-                  2,
-                )}
-              </span>
             </div>
             <div className="flex flex-col gap-y-1">
               <span className="text-nowrap text-xs text-fontColorSecondary">
@@ -835,8 +833,8 @@ const TradesCard = memo(
     const tradesDateType = useTokenCardsFilterStorePersist(
       (state) => state.tradesDateType,
     );
-
-    const { tradesValue, tradesTokenSol } = useTokenPersist();
+    const tradesValue = useTokenCardsFilter((state) => state.tradesValue);
+    const tradesTokenSol = useTokenCardsFilter((state) => state.tradesTokenSol);
 
     // Memoize expensive computations
     const trackedWallets = useWalletTrackerMessageStore(

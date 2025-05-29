@@ -113,8 +113,8 @@ export default function HoldersCard({
         "max-xl:rounded-[8px] max-xl:border max-xl:border-border max-xl:bg-card",
         "transition-colors duration-200 ease-out xl:flex xl:h-[72px] xl:min-w-max",
         rank % 2 === 0 ? "" : "xl:bg-shadeTable xl:hover:bg-shadeTableHover",
-        // remainingScreenWidth < 1280 && "max-xl:rounded-none max-xl:border-none max-xl:bg-transparent xl:flex xl:h-auto xl:min-w-fit",
-        remainingScreenWidth < 1280 &&
+        // remainingScreenWidth <= 1280 && "max-xl:rounded-none max-xl:border-none max-xl:bg-transparent xl:flex xl:h-auto xl:min-w-fit",
+        remainingScreenWidth <= 1280 &&
           "!m-4 !rounded-[8px] !border !border-border !bg-card xl:flex xl:h-auto xl:min-w-fit",
       )}
     >

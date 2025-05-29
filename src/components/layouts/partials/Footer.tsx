@@ -3,7 +3,6 @@
 // ######## Libraries 📦 & Hooks 🪝 ########
 import { useTwitterMonitorModalFullscreenStore } from "@/stores/footer/use-twitter-monitor-modal-fullscreen.store";
 import { useAPIEndpointBasedOnRegionStore } from "@/stores/setting/use-api-endpoint-based-on-region.store";
-import { usePnlTrackerFooterData } from "@/hooks/use-pnl-tracker-footer-data";
 import React, { useEffect, useMemo, useState } from "react";
 import cookies from "js-cookie";
 // ######## Components 🧩 ########
@@ -75,7 +74,7 @@ const rightFooterLinks = {
   socials: {
     guide: {
       iconURL: "/icons/support.svg",
-      href: "https://docs.nova.trade/",
+      href: "https://docs.tradeonnova.io/",
     },
     x: {
       iconURL: "/icons/x.svg",
@@ -473,108 +472,223 @@ export default function Footer({ variant = "fixed" }: FooterProps) {
     window.location.reload();
   };
 
-  const {
-    solPrice,
-    totalStoredBalance,
-    totalBalance,
-    totalProfitAndLoss,
-    totalProfitAndLossPercentage,
-  } = usePnlTrackerFooterData();
-
   return (
-    <>
-      {/* <div className="fixed right-3 top-3 z-[200000] flex flex-col border border-white/30 bg-black/80 p-2 text-white backdrop-blur-md">
-        <h3 className="font-geistSemiBold text-xl">PNL Tracker Debug 🖖</h3>
-
-        <div className="flex flex-col text-lg text-white">
-          <span>SOL PRICE: {solPrice}</span>
-          <span>TOTAL STORED BALANCE: {totalStoredBalance}</span>
-          <span>TOTAL CURRENT BALANCE: {totalBalance}</span>
-          <span>RAW PNL: {totalBalance - totalStoredBalance}</span>
-
-          <span className="my-2 block h-px w-full bg-white"></span>
-          <span>TOTAL P&L: {totalProfitAndLoss}</span>
-          <span>TOTAL P&L PERCENTAGE: {totalProfitAndLossPercentage}</span>
-        </div>
-      </div> */}
-      <footer
-        className={cn(
-          "z-[150] hidden h-auto w-full border-t border-border bg-[#080811] xl:flex",
-          variant === "fixed" ? "fixed bottom-[-1px] left-0" : "relative",
-          isOpenSettings || (openPnLModal && "z-[1000]"),
-        )}
-      >
-        <div className="flex h-[42px] w-full items-center justify-between px-2 lg:px-4">
-          {/* Desktop (trigger) + modal */}
-          <nav className="hidden items-center justify-start gap-x-1 lg:flex">
-            {MENU.map((item, index) => (
-              <React.Fragment key={index}>
-                <FooterModal
-                  modalState={item.modal}
-                  toggleModal={item.isComingSoon ? () => {} : item.toggleModal}
-                  layer={1}
-                  responsiveWidthAt={920}
-                  isComingSoon={item.isComingSoon || false}
-                  triggerChildren={
+    <footer
+      className={cn(
+        "z-[150] hidden h-auto w-full border-t border-border bg-[#080811] xl:flex",
+        variant === "fixed" ? "fixed bottom-[-1px] left-0" : "relative",
+        isOpenSettings || (openPnLModal && "z-[1000]"),
+      )}
+    >
+      <div className="flex h-[42px] w-full items-center justify-between px-2 lg:px-4">
+        {/* Desktop (trigger) + modal */}
+        <nav className="hidden items-center justify-start gap-x-1 lg:flex">
+          {MENU.map((item, index) => (
+            <React.Fragment key={index}>
+              <FooterModal
+                modalState={item.modal}
+                toggleModal={item.isComingSoon ? () => {} : item.toggleModal}
+                layer={1}
+                responsiveWidthAt={920}
+                isComingSoon={item.isComingSoon || false}
+                triggerChildren={
+                  <div
+                    id={
+                      item.name?.toLowerCase()?.replace(" ", "-") +
+                      (item.name == "Sniper" ? "-task" : "")
+                    }
+                    onClick={item.isComingSoon ? () => {} : item.toggleModal}
+                    className={cn(
+                      "group flex flex-shrink-0 cursor-pointer items-center gap-x-2 rounded-[8px] px-3 py-1 tracking-normal duration-300 ease-out hover:bg-white/[8%] max-lg:hidden",
+                      item.modal && "bg-white/[8%]",
+                      item.name === "P&L Tracker" &&
+                        openPnLModal &&
+                        "bg-white/[8%]",
+                    )}
+                  >
                     <div
-                      id={
-                        item.name?.toLowerCase()?.replace(" ", "-") +
-                        (item.name == "Sniper" ? "-task" : "")
-                      }
-                      onClick={item.isComingSoon ? () => {} : item.toggleModal}
                       className={cn(
-                        "group flex flex-shrink-0 cursor-pointer items-center gap-x-2 rounded-[8px] px-3 py-1 tracking-normal duration-300 ease-out hover:bg-white/[8%] max-lg:hidden",
-                        item.modal && "bg-white/[8%]",
+                        "relative aspect-square h-4 w-4 flex-shrink-0 duration-300",
+                        item.modal &&
+                          "brightness-[5] group-hover:brightness-[5]",
+                        !item.isComingSoon && "group-hover:brightness-200",
+                        item.name === "Monitor" &&
+                          twitterPopup.isOpen &&
+                          "brightness-[5] group-hover:brightness-[5]",
+                        item.name === "Wallet Tracker" &&
+                          walletTrackerPopup.isOpen &&
+                          "brightness-[5] group-hover:brightness-[5]",
                         item.name === "P&L Tracker" &&
                           openPnLModal &&
-                          "bg-white/[8%]",
+                          "brightness-[5] group-hover:brightness-[5]",
                       )}
                     >
-                      <div
-                        className={cn(
-                          "relative aspect-square h-4 w-4 flex-shrink-0 duration-300",
-                          item.modal &&
-                            "brightness-[5] group-hover:brightness-[5]",
-                          !item.isComingSoon && "group-hover:brightness-200",
-                          item.name === "Monitor" &&
-                            twitterPopup.isOpen &&
-                            "brightness-[5] group-hover:brightness-[5]",
-                          item.name === "Wallet Tracker" &&
-                            walletTrackerPopup.isOpen &&
-                            "brightness-[5] group-hover:brightness-[5]",
-                          item.name === "P&L Tracker" &&
-                            openPnLModal &&
-                            "brightness-[5] group-hover:brightness-[5]",
-                        )}
-                      >
+                      <Image
+                        src={item.icon}
+                        alt={item.name + " Icon"}
+                        fill
+                        quality={100}
+                        className="object-contain"
+                      />
+                    </div>
+                    <span
+                      className={cn(
+                        "text-nowrap font-geistMonoRegular text-xs text-fontColorSecondary duration-300",
+                        item.modal &&
+                          "text-fontColorPrimary group-hover:text-fontColorPrimary",
+                        !item.isComingSoon && "group-hover:text-[#cccce1]",
+                        item.name === "Monitor" &&
+                          twitterPopup.isOpen &&
+                          "text-fontColorPrimary group-hover:text-fontColorPrimary",
+                        item.name === "Wallet Tracker" &&
+                          walletTrackerPopup.isOpen &&
+                          "text-fontColorPrimary group-hover:text-fontColorPrimary",
+                        item.name === "P&L Tracker" &&
+                          openPnLModal &&
+                          "text-fontColorPrimary group-hover:text-fontColorPrimary",
+                      )}
+                    >
+                      {item.name}
+                    </span>
+                    {item.loading ? (
+                      <div className="relative inline-block size-4 animate-spin">
+                        <Image
+                          src="/icons/pink-loading.svg"
+                          alt="Loading Icon"
+                          fill
+                          objectFit="content"
+                        />
+                      </div>
+                    ) : item.count !== undefined && item.count > 0 ? (
+                      <span className="flex h-4 w-fit items-center justify-center rounded-[8px] bg-[#F65B93] px-1 font-geistRegular text-[10px] leading-3 text-fontColorPrimary">
+                        {item.count && (item.count >= 100 ? "99+" : item.count)}
+                      </span>
+                    ) : null}
+                  </div>
+                }
+                contentClassName={item.contentClassName}
+              >
+                {item.content}
+              </FooterModal>
+
+              {index < MENU.length - 1 && (
+                <Separator
+                  color="#202037"
+                  orientation="vertical"
+                  unit="fixed"
+                  className="max-md:hidden"
+                  fixedHeight={14}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </nav>
+
+        <PnLTrackerModal
+          isOpen={openPnLModal}
+          onOpenChange={(val) => setOpenPnLModal(val)}
+        />
+
+        {/* Mobile */}
+        <nav className="max-w-[45%] lg:hidden">
+          <Popover open={openMenuPopover} onOpenChange={setOpenMenuPopover}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="gb__white__btn__long relative flex h-[24px] w-full flex-shrink-0 cursor-pointer items-center justify-between gap-x-2 rounded-[4px] bg-white/[8%] px-2 duration-300 hover:bg-white/[16%]"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <div className="relative aspect-square size-4 flex-shrink-0">
+                    <Image
+                      src={
+                        MENU.find((item) => item.name === prevActiveModal)
+                          ?.icon as string
+                      }
+                      alt={prevActiveModal + " Icon"}
+                      fill
+                      quality={100}
+                      className="object-contain brightness-[5]"
+                    />
+                  </div>
+                  <span className="inline-block text-nowrap font-geistMonoRegular text-xs text-fontColorPrimary">
+                    {prevActiveModal}
+                  </span>
+                </div>
+                <div
+                  className={cn(
+                    "relative aspect-square size-4 flex-shrink-0 duration-300 hover:opacity-70 md:hidden",
+                    openMenuPopover ? "rotate-180" : "rotate-0",
+                  )}
+                >
+                  <Image
+                    src="/icons/chevron.svg"
+                    alt="Accordion Icon"
+                    fill
+                    quality={100}
+                    className="object-contain"
+                  />
+                </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              sideOffset={12}
+              className="gb__white__popover z-[200] w-[247px] rounded-[8px] border border-border bg-card p-0 shadow-[0_0_20px_0_#000000]"
+            >
+              <div className="flex w-full flex-col gap-y-2 p-2">
+                <button
+                  onClick={() => setIsOpenSettings(!isOpenSettings)}
+                  type="button"
+                  className="group flex h-10 w-full items-center gap-x-2 rounded-[6px] bg-white/[4%] px-4"
+                >
+                  <div className="relative aspect-square h-4 w-4 flex-shrink-0">
+                    <Image
+                      src="/icons/footer/settings.svg"
+                      alt="Settings Icon"
+                      fill
+                      quality={100}
+                      className="object-contain brightness-[5] duration-300 group-hover:scale-125"
+                    />
+                  </div>
+                  <span className="inline-block text-nowrap text-sm text-fontColorPrimary">
+                    Settings
+                  </span>
+                </button>
+                {MENU.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <button
+                      onClick={item.toggleModal}
+                      type="button"
+                      className="group flex h-10 w-full items-center gap-x-2 rounded-[6px] bg-white/[4%] px-4"
+                      disabled={item.name === "P&L Tracker"}
+                    >
+                      <div className="relative aspect-square h-4 w-4 flex-shrink-0">
                         <Image
                           src={item.icon}
                           alt={item.name + " Icon"}
                           fill
                           quality={100}
-                          className="object-contain"
+                          className={cn(
+                            "object-contain duration-300",
+                            item.name === "P&L Tracker"
+                              ? "brightness-[0.5] group-hover:scale-100"
+                              : "brightness-[5] group-hover:scale-125",
+                          )}
                         />
                       </div>
                       <span
                         className={cn(
-                          "text-nowrap font-geistMonoRegular text-xs text-fontColorSecondary duration-300",
-                          item.modal &&
-                            "text-fontColorPrimary group-hover:text-fontColorPrimary",
-                          !item.isComingSoon && "group-hover:text-[#cccce1]",
-                          item.name === "Monitor" &&
-                            twitterPopup.isOpen &&
-                            "text-fontColorPrimary group-hover:text-fontColorPrimary",
-                          item.name === "Wallet Tracker" &&
-                            walletTrackerPopup.isOpen &&
-                            "text-fontColorPrimary group-hover:text-fontColorPrimary",
-                          item.name === "P&L Tracker" &&
-                            openPnLModal &&
-                            "text-fontColorPrimary group-hover:text-fontColorPrimary",
+                          "inline-block text-nowrap text-sm",
+                          item.name === "P&L Tracker"
+                            ? "text-[#FFFFFF]/20"
+                            : "text-fontColorPrimary",
                         )}
                       >
-                        {item.name}
+                        {item.name === "P&L Tracker"
+                          ? "P&L Tracker (Desktop only)"
+                          : item.name}
                       </span>
-                      {item.loading ? (
+                      {item.loading && (
                         <div className="relative inline-block size-4 animate-spin">
                           <Image
                             src="/icons/pink-loading.svg"
@@ -583,209 +697,70 @@ export default function Footer({ variant = "fixed" }: FooterProps) {
                             objectFit="content"
                           />
                         </div>
-                      ) : item.count !== undefined && item.count > 0 ? (
+                      )}
+                      {item.count !== undefined && (
                         <span className="flex h-4 w-fit items-center justify-center rounded-[8px] bg-[#F65B93] px-1 font-geistRegular text-[10px] leading-3 text-fontColorPrimary">
                           {item.count &&
                             (item.count >= 100 ? "99+" : item.count)}
                         </span>
-                      ) : null}
-                    </div>
-                  }
-                  contentClassName={item.contentClassName}
-                >
-                  {item.content}
-                </FooterModal>
+                      )}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </nav>
 
-                {index < MENU.length - 1 && (
-                  <Separator
-                    color="#202037"
-                    orientation="vertical"
-                    unit="fixed"
-                    className="max-md:hidden"
-                    fixedHeight={14}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </nav>
+        <SettingsPopUp
+          isOpen={isOpenSettings}
+          onOpenChange={(val) => setIsOpenSettings(val)}
+        />
 
-          <PnLTrackerModal
-            isOpen={openPnLModal}
-            onOpenChange={(val) => setOpenPnLModal(val)}
-          />
-
-          {/* Mobile */}
-          <nav className="max-w-[45%] lg:hidden">
-            <Popover open={openMenuPopover} onOpenChange={setOpenMenuPopover}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="gb__white__btn__long relative flex h-[24px] w-full flex-shrink-0 cursor-pointer items-center justify-between gap-x-2 rounded-[4px] bg-white/[8%] px-2 duration-300 hover:bg-white/[16%]"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="relative aspect-square size-4 flex-shrink-0">
-                      <Image
-                        src={
-                          MENU.find((item) => item.name === prevActiveModal)
-                            ?.icon as string
-                        }
-                        alt={prevActiveModal + " Icon"}
-                        fill
-                        quality={100}
-                        className="object-contain brightness-[5]"
-                      />
-                    </div>
-                    <span className="inline-block text-nowrap font-geistMonoRegular text-xs text-fontColorPrimary">
-                      {prevActiveModal}
-                    </span>
-                  </div>
-                  <div
-                    className={cn(
-                      "relative aspect-square size-4 flex-shrink-0 duration-300 hover:opacity-70 md:hidden",
-                      openMenuPopover ? "rotate-180" : "rotate-0",
-                    )}
-                  >
-                    <Image
-                      src="/icons/chevron.svg"
-                      alt="Accordion Icon"
-                      fill
-                      quality={100}
-                      className="object-contain"
-                    />
-                  </div>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                sideOffset={12}
-                className="gb__white__popover z-[200] w-[247px] rounded-[8px] border border-border bg-card p-0 shadow-[0_0_20px_0_#000000]"
-              >
-                <div className="flex w-full flex-col gap-y-2 p-2">
-                  <button
-                    onClick={() => setIsOpenSettings(!isOpenSettings)}
-                    type="button"
-                    className="group flex h-10 w-full items-center gap-x-2 rounded-[6px] bg-white/[4%] px-4"
-                  >
-                    <div className="relative aspect-square h-4 w-4 flex-shrink-0">
-                      <Image
-                        src="/icons/footer/settings.svg"
-                        alt="Settings Icon"
-                        fill
-                        quality={100}
-                        className="object-contain brightness-[5] duration-300 group-hover:scale-125"
-                      />
-                    </div>
-                    <span className="inline-block text-nowrap text-sm text-fontColorPrimary">
-                      Settings
-                    </span>
-                  </button>
-                  {MENU.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <button
-                        onClick={item.toggleModal}
-                        type="button"
-                        className="group flex h-10 w-full items-center gap-x-2 rounded-[6px] bg-white/[4%] px-4"
-                        disabled={item.name === "P&L Tracker"}
-                      >
-                        <div className="relative aspect-square h-4 w-4 flex-shrink-0">
-                          <Image
-                            src={item.icon}
-                            alt={item.name + " Icon"}
-                            fill
-                            quality={100}
-                            className={cn(
-                              "object-contain duration-300",
-                              item.name === "P&L Tracker"
-                                ? "brightness-[0.5] group-hover:scale-100"
-                                : "brightness-[5] group-hover:scale-125",
-                            )}
-                          />
-                        </div>
-                        <span
-                          className={cn(
-                            "inline-block text-nowrap text-sm",
-                            item.name === "P&L Tracker"
-                              ? "text-[#FFFFFF]/20"
-                              : "text-fontColorPrimary",
-                          )}
-                        >
-                          {item.name === "P&L Tracker"
-                            ? "P&L Tracker (Desktop only)"
-                            : item.name}
-                        </span>
-                        {item.loading && (
-                          <div className="relative inline-block size-4 animate-spin">
-                            <Image
-                              src="/icons/pink-loading.svg"
-                              alt="Loading Icon"
-                              fill
-                              objectFit="content"
-                            />
-                          </div>
-                        )}
-                        {item.count !== undefined && (
-                          <span className="flex h-4 w-fit items-center justify-center rounded-[8px] bg-[#F65B93] px-1 font-geistRegular text-[10px] leading-3 text-fontColorPrimary">
-                            {item.count &&
-                              (item.count >= 100 ? "99+" : item.count)}
-                          </span>
-                        )}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </nav>
-
-          <SettingsPopUp
-            isOpen={isOpenSettings}
-            onOpenChange={(val) => setIsOpenSettings(val)}
-          />
-
-          <Separator
-            color="#202037"
-            orientation="vertical"
-            unit="fixed"
-            fixedHeight={14}
-            className="mx-4 block flex-shrink-0 md:hidden"
-          />
-          <nav className="flex items-center justify-end gap-x-3 lg:w-full lg:gap-x-[23px]">
-            {/* <FeeSummary variant="footer" /> */}
-            <button
-              onClick={() => setIsOpenSettings(!isOpenSettings)}
-              className={cn(
-                "group flex flex-shrink-0 items-center gap-x-2 rounded-[8px] py-1 tracking-normal duration-300 ease-out max-lg:hidden",
-              )}
-            >
-              {/* <div
+        <Separator
+          color="#202037"
+          orientation="vertical"
+          unit="fixed"
+          fixedHeight={14}
+          className="mx-4 block flex-shrink-0 md:hidden"
+        />
+        <nav className="flex items-center justify-end gap-x-3 lg:w-full lg:gap-x-[23px]">
+          {/* <FeeSummary variant="footer" /> */}
+          <button
+            onClick={() => setIsOpenSettings(!isOpenSettings)}
+            className={cn(
+              "group flex flex-shrink-0 items-center gap-x-2 rounded-[8px] py-1 tracking-normal duration-300 ease-out max-lg:hidden",
+            )}
+          >
+            {/* <div
               className={cn(
                 "relative aspect-square h-4 w-4 flex-shrink-0 duration-300 group-hover:brightness-[5]",
               )}
             ></div> */}
-              <div
-                className={cn(
-                  "relative aspect-square h-4 w-4 flex-shrink-0 duration-300 group-hover:brightness-200",
-                )}
-              >
-                <Image
-                  src="/icons/footer/settings.svg"
-                  alt="Settings Icon"
-                  fill
-                  quality={100}
-                  className="object-contain"
-                />
-              </div>
-              <span
-                className={cn(
-                  "text-nowrap font-geistMonoRegular text-xs text-fontColorSecondary duration-300 group-hover:text-[#cccce1] group-hover:text-fontColorPrimary",
-                )}
-              >
-                Settings
-              </span>
-            </button>
+            <div
+              className={cn(
+                "relative aspect-square h-4 w-4 flex-shrink-0 duration-300 group-hover:brightness-200",
+              )}
+            >
+              <Image
+                src="/icons/footer/settings.svg"
+                alt="Settings Icon"
+                fill
+                quality={100}
+                className="object-contain"
+              />
+            </div>
+            <span
+              className={cn(
+                "text-nowrap font-geistMonoRegular text-xs text-fontColorSecondary duration-300 group-hover:text-[#cccce1] group-hover:text-fontColorPrimary",
+              )}
+            >
+              Settings
+            </span>
+          </button>
 
-            <div className="flex items-center">
-              {/* <div className="relative">
+          <div className="flex items-center">
+            {/* <div className="relative">
               <Select
                 value={region}
                 onValueChange={(value) =>
@@ -889,24 +864,24 @@ export default function Footer({ variant = "fixed" }: FooterProps) {
               </Select>
             </div> */}
 
-              <Separator
-                color="#202037"
-                orientation="vertical"
-                unit="fixed"
-                fixedHeight={14}
-                className="flex-shrink-0"
-              />
+            <Separator
+              color="#202037"
+              orientation="vertical"
+              unit="fixed"
+              fixedHeight={14}
+              className="flex-shrink-0"
+            />
 
-              <div className="ml-2 flex items-center gap-x-1 lg:ml-5">
-                <SocialLinkButton
-                  size="md"
-                  href={rightFooterLinks["socials"]["guide"]["href"]}
-                  icon="support"
-                  label="Guide"
-                  typeImage="svg"
-                  withTooltip={false}
-                />
-                {/*    <SocialLinkButton
+            <div className="ml-2 flex items-center gap-x-1 lg:ml-5">
+              <SocialLinkButton
+                size="md"
+                href={rightFooterLinks["socials"]["guide"]["href"]}
+                icon="support"
+                label="Guide"
+                typeImage="svg"
+                withTooltip={false}
+              />
+              {/*    <SocialLinkButton
                 size="md"
                 href={rightFooterLinks["socials"]["x"]["href"]}
                 icon="x"
@@ -914,11 +889,10 @@ export default function Footer({ variant = "fixed" }: FooterProps) {
                 typeImage="svg"
                 withTooltip={false}
               /> */}
-              </div>
             </div>
-          </nav>
-        </div>
-      </footer>
-    </>
+          </div>
+        </nav>
+      </div>
+    </footer>
   );
 }

@@ -34,21 +34,6 @@ import {
   formatAmountDollar,
 } from "@/utils/formatAmount";
 import { getProxyUrl } from "@/utils/getProxyUrl";
-import {
-  HOLDINGS_BATCH_PROCESSING_INTERVAL_MS,
-  HOLDINGS_CHART_PRICE_BATCH_PROCESSING_INTERVAL_MS,
-} from "@/constants/duration";
-import {
-  HoldingsChartPriceDataQueuedMessage,
-  HoldingsDataQueuedMessage,
-} from "@/components/customs/sections/HoldingsListSection";
-import cookies from "js-cookie";
-import { useWebSocket } from "@/hooks/useWebsocketNew";
-import {
-  HoldingsConvertedMessageType,
-  HoldingsTokenData,
-} from "@/types/ws-general";
-import { usePathname } from "next/navigation";
 
 type HoldingItemProps = {
   isLast: boolean;
@@ -57,7 +42,6 @@ type HoldingItemProps = {
   remainingSol: number;
   percentage: number;
   mint: string;
-  walletName: string;
 };
 const HoldingItem = React.memo(
   ({
@@ -67,7 +51,6 @@ const HoldingItem = React.memo(
     remainingSol,
     percentage,
     mint,
-    walletName,
   }: HoldingItemProps) => {
     return (
       <Link
@@ -78,9 +61,6 @@ const HoldingItem = React.memo(
           isLast && "border-r-0",
         )}
       >
-        <span className="font-geistMonoBold text-xs text-fontColorPrimary">
-          {`(${truncateString(walletName, 5)})`}
-        </span>
         <div className="relative aspect-square h-4 w-4 flex-shrink-0 overflow-hidden rounded-full">
           <Image
             src={image}
@@ -94,7 +74,7 @@ const HoldingItem = React.memo(
           {truncateString(tokenSymbol, 5)}
         </span>
         <span className="font-geistMonoLight text-xs text-fontColorSecondary">
-          {formatAmountWithoutLeadingZero(Number(remainingSol ?? 0))}
+          {formatAmountWithoutLeadingZero(Number(remainingSol))}
         </span>
         <span
           className={cn(
@@ -103,7 +83,7 @@ const HoldingItem = React.memo(
           )}
         >
           {percentage > 0 ? "+" : ""}
-          {!percentage ? 0 : percentage?.toFixed(2)}%
+          {percentage.toFixed(2)}%
         </span>
       </Link>
     );
@@ -184,7 +164,7 @@ const WatchlistItem = React.memo(
           )}
         >
           {pnl > 0 ? "+" : "-"}
-          {!pnl ? 0 : pnl?.toFixed(2)}%
+          {pnl.toFixed(2)}%
         </span>
 
         <svg
@@ -210,54 +190,36 @@ WatchlistItem.displayName = "WatchlistItem";
 const HOLDINGS_SORT_BUTTON_WIDTH = 130;
 const WATCLIST_ICON = 130;
 const GAPS = 50;
-const HOLDING_ITEM_WIDTH = 235;
+const HOLDING_ITEM_WIDTH = 200;
 const WATCHLIST_ITEM_WIDTH = 180;
 
 export default function HoldingsAndWatchlist() {
-  const pathname = usePathname();
-  const holdingsDataMessageQueueRef = useRef<HoldingsDataQueuedMessage[]>([]);
-  const holdingsDataProcessingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const chartPriceHoldingsDataMessageQueueRef = useRef<
-    HoldingsChartPriceDataQueuedMessage[]
-  >([]);
-  const chartPriceHoldingsDataProcessingTimerRef =
-    useRef<NodeJS.Timeout | null>(null);
   const { width } = useWindowSize();
 
   // ######## Holdings 🪙 ########
   const holdingsMessages = useHoldingsMessageStore((state) => state.messages);
+  const selectedWallet = useUserWalletStore(
+    (state) => state.userWalletFullList,
+  ).find((w) => w.selected);
   const sortType = useHoldingsMarqueeSortStore((state) => state.sortType);
   const setSortType = useHoldingsMarqueeSortStore((state) => state.setSortType);
-  const updateHoldingsMessages = useHoldingsMessageStore(
-    (state) => state.updateMessage,
-  );
-  const chartPriceMessage = useHoldingsMessageStore(
-    (state) => state.chartPriceMessage,
-  );
-  const setChartPriceMessage = useHoldingsMessageStore(
-    (state) => state.setChartPriceMessage,
-  );
-  const setMarqueeMint = useHoldingsMessageStore(
-    (state) => state.setMarqueeMint,
-  );
-  const marqueeMints = useHoldingsMessageStore((state) => state.marqueeMint);
 
   const hiddenTokenList = useHoldingsHideStore(
     (state) => state.hiddenTokenList,
   );
 
-  // const holdingsItemLimit = useMemo(() => {
-  //   const remainingWidth =
-  //     (width! - HOLDINGS_SORT_BUTTON_WIDTH - GAPS - WATCLIST_ICON) / 2;
+  const holdingsItemLimit = useMemo(() => {
+    const remainingWidth =
+      (width! - HOLDINGS_SORT_BUTTON_WIDTH - GAPS - WATCLIST_ICON) / 2;
 
-  //   return Math.round(remainingWidth / HOLDING_ITEM_WIDTH);
-  // }, [width]);
-  // const watchlistItemLimit = useMemo(() => {
-  //   const remainingWidth =
-  //     (width! - HOLDINGS_SORT_BUTTON_WIDTH - GAPS - WATCLIST_ICON) / 2;
+    return Math.round(remainingWidth / HOLDING_ITEM_WIDTH);
+  }, [width]);
+  const watchlistItemLimit = useMemo(() => {
+    const remainingWidth =
+      (width! - HOLDINGS_SORT_BUTTON_WIDTH - GAPS - WATCLIST_ICON) / 2;
 
-  //   return Math.round(remainingWidth / WATCHLIST_ITEM_WIDTH + 0.5);
-  // }, [width]);
+    return Math.round(remainingWidth / WATCHLIST_ITEM_WIDTH + 0.5);
+  }, [width]);
 
   const finalHoldings = useMemo(() => {
     if (!holdingsMessages.length) return [];
@@ -265,242 +227,53 @@ export default function HoldingsAndWatchlist() {
     return holdingsMessages
       .map((cm) => ({
         ...cm,
-        tokens: cm.tokens
-          ?.map((t) => {
-            return {
-              ...t,
-              walletName: cm.wallet,
-            } as HoldingsTokenData;
-          })
-          // .filter((token) => token.balance !== 0),
-          .filter((token) => token.investedSol > 0)
+        tokens: cm.tokens?.filter((token) => token.balance !== 0),
       }))
       ?.filter((cm) => cm.tokens.length > 0);
   }, [holdingsMessages]);
 
-  const filteredAndSortedTokens = useMemo(() => {
-    const allTokens =
-      finalHoldings
-        ?.flatMap((wallet) => wallet.tokens || []) // collect tokens from all wallets
-        .filter((t: any) => !hiddenTokenList.includes(t.token.mint)) // filter hidden tokens
+  const holdingsBasedOnSelectedWallet = useMemo(
+    () =>
+      finalHoldings?.find(
+        (holdings) => holdings.wallet === selectedWallet?.address,
+      ),
+    [finalHoldings, selectedWallet?.address],
+  );
+
+  const filteredAndSortedTokens = useMemo(
+    () =>
+      holdingsBasedOnSelectedWallet?.tokens
+        ?.filter((t: any) => !hiddenTokenList.includes(t.token.mint))
         .sort((a, b) =>
-          sortType === "amount"
+          sortType == "amount"
             ? b.balance - a.balance
             : b.lastBought - a.lastBought,
-        ) || [];
-
-    return allTokens;
-  }, [finalHoldings, hiddenTokenList, sortType]);
-
-  const userWalletsWithName = useUserWalletStore(
-    (state) => state.userWalletFullList,
+        ),
+    [holdingsBasedOnSelectedWallet?.tokens, hiddenTokenList, sortType],
   );
 
   const renderHoldingItems = useCallback(() => {
-    const source = filteredAndSortedTokens?.slice(0, 10);
-    // const source = filteredAndSortedTokens?.slice(0, holdingsItemLimit);
+    const source = filteredAndSortedTokens?.slice(0, holdingsItemLimit);
 
     return source?.map((item, index) => {
-      const priceSol = chartPriceMessage?.find(
-        (price) => price.mint === item?.token?.mint,
-      )?.priceSol || item?.price?.price_sol;
-      const remainingSol = item?.balance * priceSol;
-      const prevCalc = item?.soldSol + item?.balance * priceSol;
-      const pnlSol = prevCalc - item?.investedSol;
-      const pnlPercentage = (pnlSol / item?.investedSol) * 100;
-      console.log("pnlPercentage", {
-        pnlSol,
-        investedSol: item?.investedSol,
-        pnlPercentage,
-        item
-      })
-      const walletName = userWalletsWithName.find(
-        (wallet) => wallet.address === item?.walletName,
-      )?.name;
-      const proxyImage = getProxyUrl(item?.token?.image, item?.token?.symbol);
+      const remainingSol = item.balance * item.price.price_sol;
+      const prevCalc = item.soldSol + item.balance * item.price.price_sol;
+      const pnlSol = prevCalc - item.investedSol;
+      const pnlPercentage = (pnlSol / item.investedSol) * 100;
 
       return (
         <HoldingItem
           isLast={source.length - 1 === index}
-          key={item?.token?.mint + index}
-          remainingSol={remainingSol || 0}
-          image={proxyImage}
-          mint={item?.token?.mint}
-          percentage={pnlPercentage || 0}
-          tokenSymbol={item?.token?.symbol}
-          walletName={walletName || "UW"}
+          key={item.token.mint + index}
+          remainingSol={remainingSol}
+          image={item.token.image}
+          mint={item.token.mint}
+          percentage={pnlPercentage}
+          tokenSymbol={item.token.symbol}
         />
       );
     });
-  }, [
-    filteredAndSortedTokens,
-    // holdingsItemLimit,
-    chartPriceMessage,
-    userWalletsWithName,
-  ]);
-
-  const handleSendMessage = (mints: string[]) => {
-    try {
-      const chartHoldingsSubscriptionLeaveMessage = {
-        channel: "chartHoldings",
-        token: cookies.get("_nova_session"),
-        action: "leave",
-      };
-      const chartHoldingsSubscriptionJoinMessage = {
-        channel: "chartHoldings",
-        mints,
-        token: cookies.get("_nova_session"),
-        action: "join",
-        method: "holdings",
-      };
-      const batchPriceSubscriptionLeaveMessage = {
-        channel: "batchPrice",
-        token: cookies.get("_nova_session"),
-        action: "leave",
-      };
-      const batchPriceSubscriptionJoinMessage = {
-        channel: "batchPrice",
-        mints,
-        token: cookies.get("_nova_session"),
-        action: "join",
-      };
-
-      holdingSendMessage(chartHoldingsSubscriptionLeaveMessage);
-      holdingSendMessage(chartHoldingsSubscriptionJoinMessage);
-      holdingSendMessage(batchPriceSubscriptionLeaveMessage);
-      holdingSendMessage(batchPriceSubscriptionJoinMessage);
-    } catch (error) {
-      console.warn("Error sending message:", error);
-    }
-  };
-  const processHoldingsDataMessageQueue = () => {
-    const currentQueue: HoldingsDataQueuedMessage[] = [
-      ...holdingsDataMessageQueueRef.current,
-    ];
-    holdingsDataMessageQueueRef.current = [];
-
-    currentQueue.forEach(({ data }) => {
-      updateHoldingsMessages(data);
-    });
-  };
-  const processChartPriceHoldingsDataMessageQueue = () => {
-    const currentQueue = [...chartPriceHoldingsDataMessageQueueRef.current];
-    chartPriceHoldingsDataMessageQueueRef.current = [];
-
-    setChartPriceMessage(currentQueue.map((item) => item.data));
-  };
-  const { sendMessage: holdingSendMessage } = useWebSocket({
-    channel: "chartHoldings",
-    onInit: () => {
-      if (pathname === "/holdings") return;
-      holdingsDataProcessingTimerRef.current = setInterval(
-        processHoldingsDataMessageQueue,
-        HOLDINGS_BATCH_PROCESSING_INTERVAL_MS,
-      );
-      chartPriceHoldingsDataProcessingTimerRef.current = setInterval(
-        processChartPriceHoldingsDataMessageQueue,
-        HOLDINGS_CHART_PRICE_BATCH_PROCESSING_INTERVAL_MS,
-      );
-    },
-    onLeave: () => {
-      if (pathname === "/holdings") return;
-      if (holdingsDataProcessingTimerRef.current) {
-        clearInterval(holdingsDataProcessingTimerRef.current);
-        holdingsDataProcessingTimerRef.current = null;
-      }
-    },
-    onMessage: (event) => {
-      if (pathname === "/holdings") return;
-      try {
-        if (event?.channel === "ping" && event.success === true) {
-          return;
-        }
-
-        const newMessage = event;
-        if (newMessage.channel == "chartHoldings") {
-          const prevHoldingWallet = holdingsDataMessageQueueRef.current.find(
-            (item) =>
-              (item.data as HoldingsConvertedMessageType).wallet ===
-              newMessage?.data?.wallet,
-          );
-          const prevToken = (
-            prevHoldingWallet?.data as HoldingsConvertedMessageType
-          )?.tokens?.find(
-            (item) => item.token.mint === newMessage?.data?.holding.token.mint,
-          );
-          if (
-            newMessage?.data.holding.investedSol == 0 ||
-            (prevToken?.balance === newMessage?.data?.holding.balance &&
-              prevToken?.soldSol !== newMessage?.data?.holding.soldSol &&
-              !(
-                prevToken?.balance !== newMessage?.data?.holding.balance &&
-                prevToken?.soldSol !== newMessage?.data?.holding.soldSol
-              ))
-          )
-            return;
-          holdingsDataMessageQueueRef.current.push({
-            data: {
-              wallet: newMessage?.data?.wallet,
-              tokens: [newMessage?.data?.holding],
-            },
-            timestamp: Date.now(),
-          });
-          return;
-        } else if (newMessage.channel == "batchPrice") {
-          console.log("chartPriceMessage👀👀🌟🌟", newMessage);
-          chartPriceHoldingsDataMessageQueueRef.current.push({
-            data: newMessage,
-            timestamp: Date.now(),
-          });
-        }
-      } catch (e) {
-        console.warn("Error parsing message:", e);
-        // addError("holding", {
-        //   message: (e as any).message || "Error parsing message",
-        //   timestamp: new Date(),
-        // });
-      }
-    },
-  });
-  const stringKeyMarqueeMints = useMemo(() => {
-    if (
-      (filteredAndSortedTokens?.slice(0, 10)?.length || 0) > 0
-      // (filteredAndSortedTokens?.slice(0, holdingsItemLimit)?.length || 0) > 0
-    ) {
-      return (
-        filteredAndSortedTokens
-          ?.slice(0, 10)
-          // ?.slice(0, holdingsItemLimit)
-          .map((h) => h.token.mint)
-          .join(",") || ""
-      );
-    }
-    return "";
-  }, [
-    filteredAndSortedTokens
-      ?.slice(0, 10)
-      // ?.slice(0, holdingsItemLimit)
-      .map((h) => h.token.mint),
-  ]);
-
-  useEffect(() => {
-    setMarqueeMint(
-      filteredAndSortedTokens
-        ?.slice(0, 10)
-        // ?.slice(0, holdingsItemLimit)
-        .map((h) => h.token.mint) || [],
-    );
-    if (pathname === "/holdings" || stringKeyMarqueeMints.length === 0) return;
-    handleSendMessage(
-      filteredAndSortedTokens
-        ?.slice(0, 10)
-        // ?.slice(0, holdingsItemLimit)
-        .map((h) => h.token.mint) || [],
-    );
-  }, [
-    stringKeyMarqueeMints,
-    // holdingsItemLimit
-  ]);
+  }, [filteredAndSortedTokens, holdingsItemLimit]);
 
   // ######## Watchlist ⭐ ########
   const watchlistToken = useWatchlistTokenStore(
@@ -545,30 +318,27 @@ export default function HoldingsAndWatchlist() {
     //   setWatchlistToken(sorted);
     //   return sorted;
     // },
+    retry: 0,
+    refetchOnWindowFocus: false,
+    refetchInterval: 10000,
   });
 
-  // useEffect(() => {
-  //   console.log("WATCHLIST SETLIST DETECTION ✒️", {
-  //     data,
-  //     isLoading,
-  //   });
+  useEffect(() => {
+    console.log("WATCHLIST SETLIST DETECTION ✒️", {
+      data,
+      isLoading,
+    });
 
-  //   if (data && !isLoading) {
-  //     setWatchlistToken(data);
-  //   }
-  // }, [isLoading, data]);
+    if (data && !isLoading) {
+      setWatchlistToken(data);
+    }
+  }, [isLoading, data]);
 
-  const renderWatchlistItems = useCallback(() => {
-    return (
-      watchlistToken
-        ?.slice(0, 10)
-        // ?.slice(0, watchlistItemLimit)
-        ?.map((item) => <WatchlistItem key={item?.mint} {...item} />)
-    );
-  }, [
-    watchlistToken,
-    //watchlistItemLimit
-  ]);
+  const renderWathclistItems = useCallback(() => {
+    return watchlistToken
+      ?.slice(0, watchlistItemLimit)
+      ?.map((item) => <WatchlistItem key={item?.mint} {...item} />);
+  }, [watchlistToken, watchlistItemLimit]);
 
   return (
     <div className="relative hidden h-10 w-full items-center justify-start gap-x-4 overflow-hidden border-b border-border pl-4 sm:flex">
@@ -605,8 +375,8 @@ export default function HoldingsAndWatchlist() {
         <span>Final Wathclist Limit: {watchlistItemLimit}</span>
       </div> */}
 
-      <div className="flex w-1/2 items-center">
-        <div className="relative mr-2 h-[24px] w-[9rem] flex-shrink-0 rounded-[8px] border border-border p-[1.5px]">
+      <div className="flex items-center">
+        <div className="relative mr-2 h-[24px] w-[9rem] rounded-[8px] border border-border p-[1.5px]">
           <div className={cn("flex h-full w-full rounded-[6px] bg-white/[8%]")}>
             <button
               type="button"
@@ -634,14 +404,13 @@ export default function HoldingsAndWatchlist() {
             </button>
           </div>
         </div>
-        <div className="nova-scroller hide relative flex h-[24px] flex-grow items-center justify-start">
+        <div className="relative flex h-full w-fit items-center justify-start overflow-hidden">
           {isLoading ? (
-            <div className="absolute left-0 top-0 flex h-full w-full items-center gap-x-1">
+            <div className="flex items-center gap-x-1">
               {Array.from({
                 length: 5,
               })
-                .slice(0, 10)
-                // .slice(0, holdingsItemLimit)
+                .slice(0, holdingsItemLimit)
                 .map((_, index) => (
                   <div
                     key={index}
@@ -653,11 +422,9 @@ export default function HoldingsAndWatchlist() {
             <>
               {filteredAndSortedTokens &&
               filteredAndSortedTokens?.length > 0 ? (
-                <div className="absolute left-0 top-0 flex h-full w-full items-center gap-x-1">
-                  {renderHoldingItems()}
-                </div>
+                renderHoldingItems()
               ) : (
-                <div className="absolute left-0 top-0 flex h-full w-full items-center justify-start gap-x-1">
+                <div className="flex items-center gap-x-1">
                   <span className="font-geistMonoSemiBold text-[10px] leading-3 text-[#9191A4]">
                     Start making some trades to see your holdings...
                   </span>
@@ -674,7 +441,7 @@ export default function HoldingsAndWatchlist() {
         <div className="h-5 w-[1px] bg-border"></div>
       </div>
 
-      <div className="flex w-1/2 items-center gap-x-3">
+      <div className="flex items-center gap-x-3">
         <div className="flex items-center">
           {/* <span className="font-geistMonoSemiBold text-[10px] text-fontColorPrimary lg:text-xs">
             Watchlist
@@ -691,12 +458,11 @@ export default function HoldingsAndWatchlist() {
             />
           </svg>
         </div>
-        <div className="nova-scroller hide relative flex h-[24px] flex-grow items-center justify-start">
+        <div className="relative flex h-full w-fit items-center justify-start space-x-1 overflow-hidden pr-4">
           {isLoading ? (
-            <div className="absolute left-0 top-0 flex h-full w-full items-center gap-x-1">
+            <div className="flex items-center gap-x-1">
               {Array.from({ length: 5 })
-                .slice(0, 10)
-                //.slice(0, watchlistItemLimit)
+                .slice(0, watchlistItemLimit)
                 .map((_, index) => (
                   <div
                     key={index}
@@ -707,11 +473,9 @@ export default function HoldingsAndWatchlist() {
           ) : (
             <>
               {watchlistToken && watchlistToken?.length > 0 ? (
-                <div className="absolute left-0 top-0 flex h-full w-full items-center gap-x-1">
-                  {renderWatchlistItems()}
-                </div>
+                renderWathclistItems()
               ) : (
-                <div className="absolute left-0 top-0 flex h-full w-full items-center justify-start gap-x-1">
+                <div className="flex items-center gap-x-1">
                   <span className="font-geistMonoSemiBold text-[10px] leading-3 text-[#9191A4]">
                     No watch list at the moment...
                   </span>

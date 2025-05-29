@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/libraries/utils";
 import BaseButton from "./buttons/BaseButton";
-import { WindowSize } from "@/stores/use-popup-state";
 
 type EmptyStateProps = {
   state:
@@ -25,7 +24,6 @@ type EmptyStateProps = {
   passedTryAgainFunction?: () => void;
   size?: "sm" | "md";
   paragraphClassname?: string;
-  windowSize?: WindowSize;
 };
 
 export default function EmptyState({
@@ -34,7 +32,6 @@ export default function EmptyState({
   passedTryAgainFunction,
   size,
   paragraphClassname,
-  windowSize,
 }: Readonly<EmptyStateProps>) {
   const handleTryAgain = () => {
     if (passedTryAgainFunction !== undefined) {
@@ -95,9 +92,7 @@ export default function EmptyState({
               Oops! No Coins Yet!
             </h2>
             <p className={cn("text-xs text-[#737384]", paragraphClassname)}>
-              {
-                "Show hidden tokens is enabled. There’s no coin data to display right now."
-              }
+              {"Show hidden tokens is enabled. There’s no coin data to display right now."}
             </p>
           </div>
         </div>
@@ -135,12 +130,7 @@ export default function EmptyState({
             className,
           )}
         >
-          <div
-            className={cn(
-              "relative aspect-[160/160] h-auto w-full max-w-[160px] flex-shrink-0",
-              windowSize && windowSize.height <= 450 && "hidden",
-            )}
-          >
+          <div className="relative aspect-[160/160] h-auto w-full max-w-[160px] flex-shrink-0">
             <Image
               src="/images/page-states/no_result.svg"
               alt="No Result Image"
@@ -199,7 +189,6 @@ export default function EmptyState({
             className={cn(
               "relative aspect-[160/160] h-auto w-full max-w-[160px] flex-shrink-0",
               size == "sm" && "max-w-[120px]",
-              windowSize && windowSize.height <= 450 && "hidden",
             )}
           >
             <Image

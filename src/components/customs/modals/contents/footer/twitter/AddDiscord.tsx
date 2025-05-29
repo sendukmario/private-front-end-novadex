@@ -84,22 +84,11 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
   const filteredSuggestedAccounts = useMemo(() => {
     if (!suggestedGroups) return [];
     return suggestedGroups.filter((group) => {
-      const accountNames = groups.map((account) =>
-        typeof account === "string" ? account : account.name,
+      const accountNames = groups.map(account =>
+        typeof account === 'string' ? account : account.name
       );
       return !accountNames.includes(group.name);
     });
-  }, [suggestedGroups, groups]);
-
-  const currentAddedAccounts = useMemo(() => {
-    if (!suggestedGroups) return [];
-    return suggestedGroups.filter((group) =>
-      groups.some((item) =>
-        typeof item === "string"
-          ? item === group.name
-          : item.name === group.name,
-      ),
-    );
   }, [suggestedGroups, groups]);
 
   const [suggestedDiscordChannelDraft, setSuggestedDiscordChannelDraft] =
@@ -178,7 +167,7 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
       }
 
       if (wsRef?.OPEN) {
-        setAccounts(finalGroups);
+        setAccounts(suggestedDiscordChannelDraft);
         const currentGroups = groups.map((acc) => acc);
         const newGroups = suggestedDiscordChannelDraft.map((acc) => acc.name);
 
@@ -205,7 +194,7 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
       toast.custom((t: any) => (
         <CustomToast
           tVisibleState={t.visible}
-          message={`${suggestedDiscordChannelDraft.length - currentAddedAccounts.length} Discord Servers Updated`}
+          message={`${suggestedDiscordChannelDraft.length} Discord Servers Updated`}
         />
       ));
 
@@ -304,13 +293,7 @@ export const AddDiscordContent: React.FC<AddDiscordContentProps> = ({
                   (discord: SuggestedDiscordChannel, index: number) => (
                     <div
                       key={discord.name + index}
-                      className="flex h-[50px] w-full cursor-pointer items-center gap-x-3 rounded-[4px] bg-white/[4%] px-3 py-[10px] transition-all duration-200 ease-out hover:bg-white/[8%]"
-                      onClick={() =>
-                        handleAddSuggestedChannel({
-                          name: discord.name,
-                          image: discord.image,
-                        })
-                      }
+                      className="flex h-[50px] w-full items-center gap-x-3 rounded-[4px] bg-white/[4%] px-3 py-[10px] transition-all duration-200 ease-out hover:bg-white/[8%]"
                     >
                       <div className="relative aspect-square h-8 w-8 flex-shrink-0 cursor-pointer overflow-hidden rounded-full">
                         <Image

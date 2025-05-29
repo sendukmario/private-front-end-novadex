@@ -17,7 +17,6 @@ import { CosmoFilterSubscribeMessageType } from "@/types/ws-general";
 import { NewlyCreatedListProps } from "@/components/customs/lists/NewlyCreatedList";
 import { AboutToGraduateListProps } from "@/components/customs/lists/AboutToGraduateList";
 import { GraduatedListProps } from "@/components/customs/lists/GraduatedList";
-import { CosmoSound } from "@/components/customs/popovers/CosmoSound";
 
 const NewlyCreatedList = dynamic(
   () => import("@/components/customs/lists/NewlyCreatedList"),
@@ -183,7 +182,7 @@ const CosmoMobile = ({
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-
+      
       // Only update the search state for the active tab
       if (activeTab === "Newly Created") {
         setPreviewSearchNewly(value);
@@ -192,7 +191,7 @@ const CosmoMobile = ({
       } else if (activeTab === "Graduated") {
         setPreviewSearchGraduated(value);
       }
-
+      
       debouncedSetGenuineSearch();
     },
     [
@@ -264,23 +263,12 @@ const CosmoMobile = ({
                 className="object-contain"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Search tokens..."
-                className="h-8 pl-8"
-                value={currentSearchValue}
-                onChange={handleSearchChange}
-              />
-              <CosmoSound
-                listType={
-                  activeTab === "Newly Created"
-                    ? "newlyCreated"
-                    : activeTab === "About to Graduate"
-                      ? "aboutToGraduate"
-                      : "graduated"
-                }
-              />
-            </div>
+            <Input
+              placeholder="Search tokens..."
+              className="h-8 pl-8"
+              value={currentSearchValue}
+              onChange={handleSearchChange}
+            />
           </div>
         </div>
 

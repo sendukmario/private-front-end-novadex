@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/libraries/utils";
-import { fetchTwitterUserData, TwitterUserData } from "@/apis/rest/twitter";
+import { fetchTwitterUser, TwitterUserData } from "@/apis/rest/twitter";
 import { ScrollArea } from "../ui/scroll-area";
 import {
   Drawer,
@@ -19,7 +20,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "../ui/drawer";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 import {
   differenceInMinutes,
@@ -31,11 +31,6 @@ import {
   fromUnixTime,
 } from "date-fns";
 import SocialLinkButton from "./buttons/SocialLinkButton";
-import { formatAmount } from "@/utils/formatAmount";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import LightTooltip from "./light-tooltip";
-import TimeDifference from "./cards/TimeDifference";
-import { Skeleton } from "../ui/skeleton";
 
 function getTimeAgoSuffix(unixTimestamp: number): string {
   const date = fromUnixTime(unixTimestamp);
@@ -70,124 +65,6 @@ function getTimeAgoSuffix(unixTimestamp: number): string {
   return `${years}y`;
 }
 
-const PersistentTooltipProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  return (
-    <TooltipPrimitive.Provider
-      delayDuration={100}
-      skipDelayDuration={1000} // Time to allow movement between tooltips
-    >
-      {children}
-    </TooltipPrimitive.Provider>
-  );
-};
-
-const AvatarItem = React.memo(
-  ({
-    username,
-    profileUrl,
-    isFirstItem = false,
-    className,
-  }: {
-    username: string;
-    profileUrl: string;
-    isFirstItem: boolean;
-    className?: string;
-  }) => {
-    const tooltipContent = (
-      <span className="font-geistRegular text-xs font-normal">{username}</span>
-    );
-
-    const avatar = (
-      <div
-        className={cn(
-          "relative flex-shrink-0 cursor-pointer",
-          !isFirstItem && "-ml-[6px]",
-          className,
-        )}
-      >
-        {profileUrl ? (
-          <Image
-            src={profileUrl}
-            alt={username}
-            fill
-            className={cn("rounded-full object-cover")}
-          />
-        ) : (
-          <div
-            className={cn(
-              "flex h-full w-full items-center justify-center rounded-full bg-black font-medium text-white blur-lg",
-            )}
-          >
-            {username
-              .split(" ")
-              .map((part) => part[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase()}
-          </div>
-        )}
-      </div>
-    );
-
-    return (
-      // <TooltipPrimitive.Root delayDuration={100}>
-      //   <TooltipPrimitive.Trigger asChild>
-      //     <Link
-      //       href={`https://x.com/${username}`}
-      //       target="_blank"
-      //       onClick={(e) => {
-      //         e.stopPropagation();
-      //       }}
-      //       onMouseEnter={(e) => {
-      //         e.stopPropagation();
-      //       }}
-      //       onMouseLeave={(e) => {
-      //         e.stopPropagation();
-      //       }}
-      //       aria-label={`View ${username}'s profile on X`}
-      //     >
-      //       {avatar}
-      //     </Link>
-      //   </TooltipPrimitive.Trigger>
-      //   <TooltipPrimitive.Portal>
-      //     <TooltipPrimitive.Content
-      //       side="bottom"
-      //       className="bg-popover text-popover-foreground z-[1001] rounded-md px-3 py-1.5 text-sm shadow-md animate-in fade-in-0 zoom-in-95"
-      //       sideOffset={5}
-      //     >
-      //       {tooltipContent}
-      //       <TooltipPrimitive.Arrow className="fill-popover" />
-      //     </TooltipPrimitive.Content>
-      //   </TooltipPrimitive.Portal>
-      // </TooltipPrimitive.Root>
-      <LightTooltip tip={username}>
-        <Link
-          href={`https://x.com/${username}`}
-          target="_blank"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          onMouseEnter={(e) => {
-            e.stopPropagation();
-          }}
-          onMouseLeave={(e) => {
-            e.stopPropagation();
-          }}
-          aria-label={`View ${username}'s profile on X`}
-        >
-          {avatar}
-        </Link>
-      </LightTooltip>
-    );
-  },
-);
-
-AvatarItem.displayName = "AvatarItem";
-
 const TwitterHoverPopoverContent = React.memo(
   ({
     username,
@@ -200,228 +77,63 @@ const TwitterHoverPopoverContent = React.memo(
       React.SetStateAction<TwitterUserData | undefined>
     >;
   }) => {
-    const [partialData, setPartialData] = useState<TwitterUserData | undefined>(data);
-
-    const { data: fetchData, isLoading } = useQuery({
+    const {
+      data: fetchData,
+      refetch,
+      isLoading,
+    } = useQuery({
       queryKey: ["twitter", username],
       queryFn: async () => {
         if (data) return data;
-        const res = await fetchTwitterUserData(username, (newData) => {
-          // Update partial data immediately when any data is available
-          setPartialData(prev => {
-            if (!prev) {
-              return {
-                success: true,
-                past: [],
-                new: {
-                  image_profile: '',
-                  username: username,
-                  following: 0,
-                  follower: 0,
-                  followed_by: [],
-                  is_blue_verified: false,
-                  timestamp: Date.now()
-                },
-                ...newData
-              };
-            }
-            return {
-              ...prev,
-              ...newData,
-              new: {
-                ...prev.new,
-                ...newData.new
-              }
-            };
-          });
-        });
+        const res = await fetchTwitterUser(username);
+        setFinalData(res);
         return res;
       },
       initialData: data,
       enabled: !data,
     });
 
-    // Update final data when fetch completes
     useEffect(() => {
-      if (fetchData && !isLoading) {
-        setFinalData(fetchData);
+      if (!data) {
+        refetch();
+      } else if (data) {
+        setFinalData(data);
       }
-    }, [fetchData, isLoading, setFinalData]);
-
-    // Use partial data for display if available
-    const displayData = partialData || fetchData;
-
+    }, [username, data]);
     return (
       <>
-        {isLoading && !displayData ? (
-          <div className="absolute left-1/2 top-1/2 z-[1000] flex h-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-            <div className="flex flex-col gap-4 w-full px-3">
-              <div className="flex items-center gap-x-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex flex-1 flex-col gap-y-1">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-              <div className="flex items-center gap-x-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-20" />
-              </div>
+        {isLoading ? (
+          <div className="mt-4 flex h-24 items-center justify-center">
+            <div className="relative size-6 animate-spin">
+              <Image
+                src="/icons/search-loading.png"
+                alt="Loading"
+                fill
+                className="object-contain"
+              />
             </div>
           </div>
-        ) : displayData && displayData.success ? (
+        ) : data || (fetchData && fetchData.success) ? (
           <>
-            <div className="z-[1000] h-full w-full">
-              <ScrollArea className="h-full w-full">
-                <div className="flex flex-col gap-y-0.5 pt-2">
-                  <h3 className="px-3 font-geistRegular text-xs font-normal uppercase text-fontColorSecondary">
-                    New
-                  </h3>
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(`https://x.com/${username}`, "_blank");
-                    }}
-                    className="mx-1 block cursor-pointer rounded-lg bg-[#17171F] p-3 hover:bg-[#272734]"
-                  >
-                    <div className="flex items-start gap-x-3">
-                      <Avatar className="h-10 w-10 flex-shrink-0">
-                        {displayData.loading?.pfp ? (
-                          <Skeleton className="h-full w-full rounded-full" />
-                        ) : (
-                          <>
-                            <AvatarImage
-                              src={displayData.new.image_profile}
-                              alt={`${displayData.new.username} Profile Picture`}
-                            />
-                            <AvatarFallback>
-                              {username
-                                .split(" ")
-                                .map((part) => part[0])
-                                .slice(0, 2)
-                                .join("")
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </>
-                        )}
-                      </Avatar>
-                      <div className="flex flex-1 flex-col gap-y-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex w-full items-center justify-between gap-x-1">
-                            <h4 className="font-geistSemiBold text-base font-semibold leading-5 text-white">
-                              {username}
-                            </h4>
-                            <h4 className="text-fontColorSecondary">
-                              {displayData.new.timestamp && (
-                                <TimeDifference
-                                  className="font-geistRegular text-xs text-fontColorSecondary"
-                                  created={displayData.new.timestamp}
-                                />
-                              )}
-                            </h4>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-x-1 whitespace-nowrap">
-                          {displayData.loading?.following ? (
-                            <Skeleton className="h-4 w-20" />
-                          ) : (
-                            <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
-                              <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
-                                {formatAmount(displayData.new.following || 0, 2)}
-                              </span>{" "}
-                              Following
-                            </p>
-                          )}
-
-                          <span className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
-                            ·
-                          </span>
-
-                          {displayData.loading?.followers ? (
-                            <Skeleton className="h-4 w-20" />
-                          ) : (
-                            <p className="font-geistRegular text-sm font-normal leading-[18px] text-[#9191A4]">
-                              <span className="font-geistSemiBold text-sm font-semibold text-fontColorPrimary">
-                                {formatAmount(displayData.new.follower || 0, 2)}
-                              </span>{" "}
-                              Followers
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-x-1">
-                          <p className="font-geistRegular text-[10px] font-normal leading-[14px] text-fontColorSecondary">
-                            Followed by
-                          </p>
-                          <div
-                            className="flex items-center"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            {displayData.loading?.scoredFollowers ? (
-                              <div className="flex gap-1">
-                                <Skeleton className="h-4 w-4 rounded-full" />
-                                <Skeleton className="h-4 w-4 rounded-full" />
-                                <Skeleton className="h-4 w-4 rounded-full" />
-                              </div>
-                            ) : (
-                              displayData.new.followed_by.length > 0 &&
-                              displayData.new.followed_by.slice(0, 3).map((item, index) => (
-                                <AvatarItem
-                                  key={item.username}
-                                  username={item.username}
-                                  profileUrl={item.image_profile}
-                                  isFirstItem={index === 0}
-                                  className="h-4 w-4"
-                                />
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      </div>
+            <ScrollArea className="h-full w-full">
+              {(data?.usernames || fetchData?.usernames)!.length! > 0 ? (
+                <div className="flex flex-col">
+                  {(data?.usernames || fetchData?.usernames)?.map((item) => (
+                    <div
+                      key={item.username + String(item.time)}
+                      className="flex items-center p-1"
+                    >
+                      <p className="text-xs text-primary">@{item.username}</p>
+                      <p className="ml-1 text-xs text-fontColorSecondary/60">
+                        {getTimeAgoSuffix(item.time)}
+                      </p>
                     </div>
-                  </div>
+                  ))}
                 </div>
-                {displayData.loading?.pastUsernames ? (
-                  <div className="mt-4 px-3">
-                    <Skeleton className="h-4 w-20 mb-2" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-4 w-28" />
-                    </div>
-                  </div>
-                ) : (displayData?.past.filter(
-                  (item) =>
-                    item.username.toLowerCase() !==
-                    displayData.new.username.toLowerCase(),
-                )).length > 0 ? (
-                  <div className="flex flex-col gap-y-0.5 px-3">
-                    <h3 className="pt-2 font-geistRegular text-xs font-normal uppercase text-fontColorSecondary">
-                      Past
-                    </h3>
-                    {displayData?.past
-                      .filter(
-                        (item) =>
-                          item.username.toLowerCase() !==
-                          displayData.new.username.toLowerCase(),
-                      )
-                      .map((item) => (
-                        <div
-                          key={item.username + String(item.timestamp)}
-                          className="flex items-center py-1"
-                        >
-                          <p className="text-xs text-primary">
-                            @{item.username}
-                          </p>
-                          <p className="ml-1 text-xs text-fontColorSecondary/60">
-                            {getTimeAgoSuffix(item.timestamp)}
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <EmptyState />
-                )}
-              </ScrollArea>
-            </div>
+              ) : (
+                <EmptyState />
+              )}
+            </ScrollArea>
           </>
         ) : (
           <div className="flex h-24 items-center justify-center">
@@ -549,7 +261,7 @@ const TwitterHoverPopover = React.memo(
       href.includes("youtube.com")
     ) {
       return (
-        <PersistentTooltipProvider>
+        <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger>
               <SocialLinkButton
@@ -574,7 +286,7 @@ const TwitterHoverPopover = React.memo(
               ></iframe>
             </TooltipContent>
           </Tooltip>
-        </PersistentTooltipProvider>
+        </TooltipProvider>
       );
     }
 
@@ -610,13 +322,13 @@ const TwitterHoverPopover = React.memo(
             </div>
             {!!finalData && (
               <div className="text-xs text-fontColorPrimary">
-                {(data || finalData)?.past?.length}
+                {(data || finalData)?.usernames?.length}
               </div>
             )}
           </Link>
         ) : (
           <>
-            <PersistentTooltipProvider>
+            <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Link
@@ -647,7 +359,7 @@ const TwitterHoverPopover = React.memo(
                     </div>
                     {!!finalData && (
                       <div className="text-xs text-fontColorPrimary">
-                        {(data || finalData).past?.length}
+                        {(data || finalData)?.usernames?.length}
                       </div>
                     )}
                   </Link>
@@ -657,12 +369,8 @@ const TwitterHoverPopover = React.memo(
                   isWithAnimation={false}
                   align="start"
                   side="bottom"
-                  className={cn(
-                    "gb__white__popover z-[1000] rounded-[4px] border border-border bg-card p-1 !transition-none",
-                    "min-h-72 w-auto min-w-72 max-w-96",
-                  )}
+                  className="gb__white__popover z-[1000] h-[160px] w-[178px] rounded-[4px] border border-border bg-card p-3 !transition-none"
                 >
-                  <iframe className="absolute left-0 top-0 z-[500] size-full" />
                   <TwitterHoverPopoverContent
                     username={username}
                     data={data}
@@ -670,7 +378,7 @@ const TwitterHoverPopover = React.memo(
                   />
                 </TooltipContent>
               </Tooltip>
-            </PersistentTooltipProvider>
+            </TooltipProvider>
 
             {isTokenPage ? (
               <Link
@@ -701,7 +409,7 @@ const TwitterHoverPopover = React.memo(
                 </div>
                 {!!finalData && (
                   <div className="text-xs text-fontColorPrimary">
-                    {(data || finalData)?.past?.length}
+                    {(data || finalData)?.usernames?.length}
                   </div>
                 )}
               </Link>
@@ -740,7 +448,7 @@ const TwitterHoverPopover = React.memo(
                     </div>
                     {!!finalData && (
                       <div className="text-xs text-fontColorPrimary">
-                        {(data || finalData)?.past?.length}
+                        {(data || finalData)?.usernames?.length}
                       </div>
                     )}
                   </div>

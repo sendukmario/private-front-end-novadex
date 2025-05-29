@@ -23,20 +23,6 @@ export type ChartHoldingMessageType = {
   holding: HoldingsTokenData;
 };
 
-export type DEX =
-  | "Pump.Fun"
-  | "Launch a Coin"
-  | "Bonk"
-  | "Moonshot"
-  | "LaunchLab"
-  | "Boop"
-  | "Dynamic Bonding Curve"
-  | "Meteora AMM V2"
-  | "Meteora AMM"
-  | "Raydium"
-  | "Pump.Swap";
-export type LAUNCHPAD = "" | "Bonk" | "Launch a Coin";
-
 // ### Cosmo Page Types
 export type CosmoDataMessageType = {
   mint: string;
@@ -63,8 +49,19 @@ export type CosmoDataMessageType = {
   volume_usd: number;
   liquidity_usd: number;
   holders: number;
-  dex: DEX;
-  launchpad: LAUNCHPAD;
+  dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  launchpad: "" | "Bonk" | "Believe";
   progress: number;
   dev_migrated: number;
   bot_holders: number;
@@ -73,10 +70,21 @@ export type CosmoDataMessageType = {
   migrating: boolean;
   migrated_time: number;
   last_update: number;
-  origin_dex: DEX;
+  origin_dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
   type: "update" | "new";
   is_discord_monitored?: boolean;
-  discord_details?: FinalDiscordMessage;
+  discord_details?: FinalDiscordMessage
 };
 
 export type CosmoDataNewlyMessageType = {
@@ -142,8 +150,19 @@ export type TrendingDataMessageType = {
   mint: string;
   image: string;
   supply: number;
-  dex: DEX;
-  launchpad: LAUNCHPAD;
+  dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  launchpad: "" | "Bonk" | "Believe";
   twitter: string;
   telegram: string;
   website: string;
@@ -183,8 +202,19 @@ export type TrendingDataMessageType = {
 export type HoldingsToken = {
   name: string;
   symbol: string;
-  dex: DEX;
-  launchpad: LAUNCHPAD;
+  dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  launchpad: "" | "Bonk" | "Believe";
   mint: string;
   pair?: string;
   supply: number;
@@ -279,7 +309,6 @@ export type HoldingsTokenData = {
   balance: number;
   balanceStr: string;
   lastBought: number;
-  walletName?: string;
 } & {
   boughtTokens?: number;
   boughtTokensStr?: string;
@@ -336,9 +365,31 @@ export type TokenInfo = {
   tiktok: string;
   instagram: string;
   youtube: string;
-  dex: DEX;
-  origin_dex: DEX;
-  launchpad: LAUNCHPAD;
+  dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  origin_dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  launchpad: "" | "Bonk" | "Believe";
   buys: number;
   sells: number;
   supply: number;
@@ -599,6 +650,7 @@ export type TSMonitorMessageType = {
   mint?: string;
 };
 
+
 type TokenDiscordData = {
   buys: number;
   marketCap: number;
@@ -616,6 +668,7 @@ type TokenDiscordData = {
   token_youtube: string;
   volume: string;
 };
+
 
 export type DiscordMonitorMessageType = {
   address: string;

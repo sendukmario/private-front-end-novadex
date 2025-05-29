@@ -20,9 +20,6 @@ const convertCosmoIntoWSFilterFormat = (
       if (key === "pumpswap") {
         return "Pump.Swap";
       }
-      if (key === "launch_a_coin") {
-        return "Launch a Coin";
-      }
       if (key === "launchlab") {
         return "LaunchLab";
       }

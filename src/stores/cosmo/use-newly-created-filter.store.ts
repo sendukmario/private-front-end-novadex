@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { mergeDeepLeft } from "ramda";
@@ -15,7 +13,7 @@ export type NewlyCreatedFilterState = {
         launchlab: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        launch_a_coin: boolean;
+        believe: boolean;
         bonk: boolean;
         showHide: boolean;
       };
@@ -85,7 +83,7 @@ export type NewlyCreatedFilterState = {
         launchlab: boolean;
         // boop: boolean;
         dynamic_bonding_curve: boolean;
-        launch_a_coin: boolean;
+        believe: boolean;
         bonk: boolean;
         showHide: boolean;
       };
@@ -195,7 +193,7 @@ export const useNewlyCreatedFilterStore = create<NewlyCreatedFilterState>()(
             launchlab: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            launch_a_coin: true,
+            believe: true,
             bonk: true,
             showHide: false,
           },
@@ -265,7 +263,7 @@ export const useNewlyCreatedFilterStore = create<NewlyCreatedFilterState>()(
             launchlab: true,
             // boop: true,
             dynamic_bonding_curve: true,
-            launch_a_coin: true,
+            believe: true,
             bonk: true,
             showHide: false,
           },
@@ -398,7 +396,7 @@ export const useNewlyCreatedFilterStore = create<NewlyCreatedFilterState>()(
                 launchlab: true,
                 // boop: true,
                 dynamic_bonding_curve: true,
-                launch_a_coin: true,
+                believe: true,
                 bonk: true,
                 showHide: false,
               },
@@ -490,15 +488,6 @@ export const useNewlyCreatedFilterStore = create<NewlyCreatedFilterState>()(
     {
       name: "newly-created-filter",
       storage: createJSONStorage(() => localStorage),
-      version: 1,
-      migrate: (persistedState, version) => {
-        if (version === 0) {
-          delete (persistedState as NewlyCreatedFilterState)!.filters!.preview!
-            .checkBoxes!.believe;
-          delete (persistedState as NewlyCreatedFilterState)!.filters!.genuine!
-            .checkBoxes!.believe;
-        }
-      },
       merge: (persistedState, currentState) =>
         mergeDeepLeft(persistedState as NewlyCreatedFilterState, currentState),
     },

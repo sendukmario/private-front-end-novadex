@@ -42,7 +42,6 @@ import { truncateAddress } from "@/utils/truncateAddress";
 // ######## Types 🗨️ ########
 import { TokenDataMessageType, TransactionInfo } from "@/types/ws-general";
 import { Trade } from "@/types/nova_tv.types";
-import { useTokenPersist } from "@/stores/token/use-token-persist.store";
 
 // Constants
 const TRADES_LIMIT = 50; // Default limit for non-realtime fetches
@@ -87,10 +86,17 @@ export default React.memo(function TradesTable({
   const [openWalletMakerFilter, setOpenWalletMakerFilter] = useState(false);
 
   // Zustand Stores
-  const { tradesDate, setTradesDate, tradesType, tradesTotal, resetFilters } =
-    useTokenCardsFilter();
-  const { tradesValue, tradesTokenSol, setTradesValue, setTradesTokenSol } =
-    useTokenPersist();
+  const {
+    tradesDate,
+    setTradesDate,
+    tradesType,
+    tradesValue,
+    tradesTokenSol,
+    tradesTotal,
+    setTradesValue,
+    setTradesTokenSol,
+    resetFilters,
+  } = useTokenCardsFilter();
   const { setTradesDateType, tradesDateType } =
     useTokenCardsFilterStorePersist();
   const tokenMarketCap = useTokenMarketCapToggleState((state) => state.column);
@@ -601,26 +607,26 @@ export default React.memo(function TradesTable({
         ),
       },
       // Total SOL Column
-      // {
-      //   label: remainingScreenWidth < 1400 ? "Total" : "Total SOL",
-      //   valueIdentifier: "total",
-      //   sortButton: (
-      //     <>
-      //       <TradesTotalFilter />
-      //       <SortButton
-      //         type="usdc-or-sol"
-      //         value={tradesTokenSol}
-      //         setValue={setTradesTokenSol}
-      //       />
-      //     </>
-      //   ),
-      //   tooltipContent:
-      //     "Filter by the total value of the transaction in SOL/USD.",
-      //   className:
-      //     remainingScreenWidth < 1400
-      //       ? "min-w-[115px]"
-      //       : "min-w-[145px] min-[1520px]:min-w-[175px]",
-      // },
+      {
+        label: remainingScreenWidth < 1400 ? "Total" : "Total SOL",
+        valueIdentifier: "total",
+        sortButton: (
+          <>
+            <TradesTotalFilter />
+            <SortButton
+              type="usdc-or-sol"
+              value={tradesTokenSol}
+              setValue={setTradesTokenSol}
+            />
+          </>
+        ),
+        tooltipContent:
+          "Filter by the total value of the transaction in SOL/USD.",
+        className:
+          remainingScreenWidth < 1400
+            ? "min-w-[115px]"
+            : "min-w-[145px] min-[1520px]:min-w-[175px]",
+      },
       // Maker Column
       {
         label: "Maker",

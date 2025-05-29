@@ -77,6 +77,18 @@ export default function WalletTrackerCard({
   );
 
   const solPrice = useSolPriceMessageStore((state) => state.messages.price);
+  const initialTokenPriceSol = useTokenMessageStore(
+    (state) => state.priceMessage.price_sol,
+  );
+  const currentGlobalChartPrice = useCurrentTokenChartPriceStore(
+    (state) => state.price,
+  );
+  const finalSolPrice =
+    currentGlobalChartPrice === "" ||
+    isNaN(Number(initialTokenPriceSol)) ||
+    !currentGlobalChartPrice
+      ? initialTokenPriceSol
+      : currentGlobalChartPrice;
 
   const handleGoogleLensSearch = useCallback(
     (event: React.MouseEvent, imageUrl: string) => {
@@ -233,8 +245,8 @@ export default function WalletTrackerCard({
                             tracker?.launchpad === "Bonk"
                               ? "bonk"
                               : tracker?.dex === "Dynamic Bonding Curve" &&
-                                  tracker?.launchpad === "Launch a Coin"
-                                ? "launch_a_coin"
+                                  tracker?.launchpad === "Believe"
+                                ? "believe"
                                 : (tracker?.dex
                                     ?.replace(/\./g, "")
                                     ?.replace(/ /g, "_")
@@ -435,13 +447,10 @@ export default function WalletTrackerCard({
                         {remainingType === "COIN"
                           ? formatAmountWithoutLeadingZero(
                               Number(tracker.balanceNow),
-                              2,
-                              2,
                             )
                           : formatAmountWithoutLeadingZero(
-                              Number(tracker.balanceNow) / Number(solPrice),
-                              2,
-                              2,
+                              Number(tracker.balanceNow) *
+                                Number(finalSolPrice),
                             )}
                       </div>
                       {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
@@ -530,8 +539,8 @@ export default function WalletTrackerCard({
                           tracker?.launchpad === "Bonk"
                             ? "bonk"
                             : tracker?.dex === "Dynamic Bonding Curve" &&
-                                tracker?.launchpad === "Launch a Coin"
-                              ? "launch_a_coin"
+                                tracker?.launchpad === "Believe"
+                              ? "believe"
                               : (tracker?.dex
                                   ?.replace(/\./g, "")
                                   ?.replace(/ /g, "_")
@@ -704,47 +713,19 @@ export default function WalletTrackerCard({
             >
               <div className="flex items-center gap-x-0.5">
                 <div className="flex items-center gap-x-1">
-                  <div className="flex items-center justify-center gap-x-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
-                    <div className="relative aspect-auto size-4 flex-shrink-0">
-                      <CachedImage
-                        src={
-                          tracker?.image && remainingType === "COIN"
-                            ? tracker.image
-                            : !tracker?.image && remainingType === "COIN"
-                              ? "/icons/usdc.svg"
-                              : "/icons/solana-sq.svg"
-                        }
-                        alt={"Solana Icon"}
-                        fill
-                        quality={100}
-                        className="rounded-full object-contain"
-                      />
-                    </div>
-                    {remainingType === "COIN"
-                      ? formatAmountWithoutLeadingZero(
-                          Number(tracker.balanceNow),
-                          2,
-                          2,
-                        )
-                      : formatAmountWithoutLeadingZero(
-                          Number(tracker.balanceNow) / Number(solPrice),
-                          2,
-                          2,
-                        )}
-                  </div>
-                  {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
-                  {/*   {formatAmountWithoutLeadingZero( */}
-                  {/*     Number(tracker?.balanceNow), */}
-                  {/*   )} */}
-                  {/* </span> */}
-                  {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
-                  {/*   of */}
-                  {/* </span> */}
-                  {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
-                  {/*   {formatAmountWithoutLeadingZero( */}
-                  {/*     Number(tracker?.balanceTotal), */}
-                  {/*   )} */}
-                  {/* </span> */}
+                  <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
+                    {formatAmountWithoutLeadingZero(
+                      Number(tracker?.balanceNow),
+                    )}
+                  </span>
+                  <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
+                    of
+                  </span>
+                  <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
+                    {formatAmountWithoutLeadingZero(
+                      Number(tracker?.balanceTotal),
+                    )}
+                  </span>
                 </div>
                 <span className="flex h-[16px] items-center justify-center text-nowrap rounded-full px-1 py-0.5 font-geistRegular text-xs text-fontColorSecondary">
                   {tracker?.balancePercentage}
@@ -809,8 +790,8 @@ export default function WalletTrackerCard({
                         tracker?.launchpad === "Bonk"
                           ? "bonk"
                           : tracker?.dex === "Dynamic Bonding Curve" &&
-                              tracker?.launchpad === "Launch a Coin"
-                            ? "launch_a_coin"
+                              tracker?.launchpad === "Believe"
+                            ? "believe"
                             : (tracker?.dex
                                 ?.replace(/\./g, "")
                                 ?.replace(/ /g, "_")
@@ -960,8 +941,8 @@ export default function WalletTrackerCard({
                       tracker?.launchpad === "Bonk"
                         ? "bonk"
                         : tracker?.dex === "Dynamic Bonding Curve" &&
-                            tracker?.launchpad === "Launch a Coin"
-                          ? "launch_a_coin"
+                            tracker?.launchpad === "Believe"
+                          ? "believe"
                           : (tracker?.dex
                               ?.replace(/\./g, "")
                               ?.replace(/ /g, "_")
@@ -1180,30 +1161,19 @@ export default function WalletTrackerCard({
                 <div className="flex h-full w-full max-w-[200px] flex-col items-start justify-center gap-y-1">
                   <div className="flex items-center gap-x-1">
                     <div className="flex items-center gap-x-1">
-                      <span className="flex items-center gap-1 text-nowrap font-geistSemiBold text-sm text-fontColorPrimary">
-                        <div className="relative aspect-auto size-4 flex-shrink-0">
-                          <CachedImage
-                            src={"/icons/solana-sq.svg"}
-                            alt="Amount Icon"
-                            fill
-                            quality={100}
-                            className="object-contain"
-                          />
-                        </div>
+                      <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
                         {formatAmountWithoutLeadingZero(
-                          Number(tracker?.balanceNow) / Number(solPrice),
-                          2,
-                          2,
+                          Number(tracker?.balanceNow),
                         )}
                       </span>
-                      {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
-                      {/*   of */}
-                      {/* </span> */}
-                      {/* <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary"> */}
-                      {/*   {formatAmountWithoutLeadingZero( */}
-                      {/*     Number(tracker?.balanceTotal), */}
-                      {/*   )} */}
-                      {/* </span> */}
+                      <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
+                        of
+                      </span>
+                      <span className="inline-block text-nowrap font-geistSemiBold text-xs text-fontColorPrimary">
+                        {formatAmountWithoutLeadingZero(
+                          Number(tracker?.balanceTotal),
+                        )}
+                      </span>
                     </div>
                     <span className="flex h-[16px] items-center justify-center text-nowrap rounded-full bg-white/[8%] px-1 py-0.5 font-geistRegular text-xs text-fontColorSecondary">
                       {tracker?.balancePercentage}

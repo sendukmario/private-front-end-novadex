@@ -1,5 +1,0 @@
-0000000000000000000000000000000000000000 0289b896bbec3c9b0780e13f69233367c3862cb4 Albert Mangiri <albertnanda1902@gmail.com> 1748171943 +0800	commit (initial): first commit
-0289b896bbec3c9b0780e13f69233367c3862cb4 0289b896bbec3c9b0780e13f69233367c3862cb4 Albert Mangiri <albertnanda1902@gmail.com> 1748171943 +0800	Branch: renamed refs/heads/master to refs/heads/main
-0289b896bbec3c9b0780e13f69233367c3862cb4 75b3c42ca89427a93762576e667e161d148e3263 Albert Mangiri <albertnanda1902@gmail.com> 1748173586 +0800	commit: checkout branch feat/wallet-trade-detail
-75b3c42ca89427a93762576e667e161d148e3263 f204d7faea6fd3d21cb26abfffb6b20465645bd2 Albert Mangiri <albertnanda1902@gmail.com> 1748271989 +0800	commit: checkout wallet trade breakdown branch latest
-f204d7faea6fd3d21cb26abfffb6b20465645bd2 8c5a2d61591234f29c1c70eda609b992f27c2d9b Albert Mangiri <albertnanda1902@gmail.com> 1748278138 +0800	commit: checkout wallet trade breakdown branch latest

@@ -18,7 +18,7 @@ export const getRandomProxyUrl = (): string => {
 export const getProxyUrl = (
   src?: string,
   fallback?: string,
-): string => {
+): string | undefined => {
   // Helper function to remove emojis and special characters
   // Removes emoji Unicode ranges
   // Removes other special Unicode symbols
@@ -61,6 +61,6 @@ export const getProxyUrl = (
     return `${getRandomProxyUrl()}/proxy?url=${encodeURIComponent(cleanSrc)}&fallback=${cleanFallback}`.trimEnd();
   } catch (error) {
     console.error("Failed to encode URL:", error);
-    return "/logo.png";
+    return undefined;
   }
 };

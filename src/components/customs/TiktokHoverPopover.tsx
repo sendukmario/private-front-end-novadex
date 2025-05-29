@@ -60,7 +60,7 @@ const TiktokContent = ({ url }: { url: string }) => {
 
   if (isLoading) {
     return (
-      <div className="z-[1000] mt-4 flex h-24 items-center justify-center">
+      <div className="mt-4 flex h-24 items-center justify-center">
         <div className="relative size-6 animate-spin">
           <Image
             src="/icons/search-loading.png"
@@ -257,7 +257,6 @@ const TiktokHoverPopover = React.memo(
             side="bottom"
             className="gb__white__popover z-[1000] max-h-[50dvh] w-[300px] overflow-y-auto rounded-[6px] border border-border bg-[#17171F] p-0 !transition-none"
           >
-            <iframe className="absolute left-0 top-0 size-full" />
             <TiktokContent url={url} />
           </TooltipContent>
         </Tooltip>

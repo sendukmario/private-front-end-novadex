@@ -2,7 +2,6 @@ import { BadgeType } from "@/components/customs/AvatarWithBadges";
 import axios from "@/libraries/axios";
 import { AxiosError } from "axios";
 import { getBaseURLBasedOnRegion } from "../../utils/getBaseURLBasedOnRegion";
-import { DEX, LAUNCHPAD } from "@/types/ws-general";
 
 interface TokenInfo {
   name: string;
@@ -22,8 +21,19 @@ export interface WalletTracker {
   name: string;
   symbol: string;
   image: string;
-  dex: DEX;
-  launchpad: LAUNCHPAD;
+  dex:
+    | "Pump.Fun"
+    | "Believe"
+    | "Bonk"
+    | "Moonshot"
+    | "LaunchLab"
+    | "Boop"
+    | "Dynamic Bonding Curve"
+    | "Meteora AMM V2"
+    | "Meteora AMM"
+    | "Raydium"
+    | "Pump.Swap";
+  launchpad: "" | "Bonk" | "Believe";
   mint: string;
   solAmount: string;
   tokenAmount: string;

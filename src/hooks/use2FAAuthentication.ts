@@ -8,11 +8,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface Use2FAAuthProps {
-  onSuccess?: (res: {
-    token: string;
-    isNew: boolean;
-    isTelegramConnected: boolean;
-  }) => void;
+  onSuccess?: (token: string) => void;
   onError?: (error: Error) => void;
   redirectAfterLogin?: string;
 }
@@ -51,11 +47,7 @@ export function use2FAAuthentication({
           setWalletAuthenticated(true);
 
           if (onSuccess) {
-            onSuccess({
-              token: response.token,
-              isNew: response.isNew || false,
-              isTelegramConnected: response.isTelegramConnected || false,
-            });
+            onSuccess(response.token);
           }
 
           localStorage.setItem("authToken", response.token);

@@ -69,7 +69,7 @@ export default function CosmoQuickBuyButton({
     setIsLargeScreen(mediaQuery.matches);
 
     // Add listener for changes
-    const handleMediaChange = (e: MediaQueryListEvent) => {
+    const handleMediaChange = (e) => {
       setIsLargeScreen(e.matches);
     };
 

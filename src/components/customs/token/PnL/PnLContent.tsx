@@ -383,20 +383,15 @@ const PnLContent = ({
           <main className="pnl-main font-outfit">
             <div className="main-container">
               <div className="token-container">
-                {templateData.symbol !== "ALL HOLDINGS" && (
-                  <div
-                    className="token-logo relative"
-                    id="token-logo-container"
-                  >
-                    <Image
-                      // id="token-logo"
-                      src={image as string}
-                      className="token-logo-image"
-                      alt="token-logo"
-                      fill
-                    />
-                  </div>
-                )}
+                <div className="token-logo relative" id="token-logo-container">
+                  <Image
+                    // id="token-logo"
+                    src={image as string}
+                    className="token-logo-image"
+                    alt="token-logo"
+                    fill
+                  />
+                </div>
 
                 <span className="token-name">{templateData.symbol}</span>
               </div>
@@ -523,7 +518,7 @@ const PnLContent = ({
               </div>
 
               <div className="footer-container">
-                <div className="nova-website">nova.trade</div>
+                <div className="nova-website">tradeonnova.io</div>
               </div>
             </div>
           </main>
@@ -784,7 +779,7 @@ const PnLContent = ({
                               transform: `scale(${scale})`,
                               transformOrigin: "top left",
                             }}
-                          >
+                          > 
                             {renderedTemplate}
                           </div>
                         </div>
@@ -810,7 +805,7 @@ const PnLContent = ({
                         transform: `scale(${scale})`,
                         transformOrigin: "top left",
                       }}
-                    >
+                    > 
                       {renderedTemplate}
                     </div>
                   </div>

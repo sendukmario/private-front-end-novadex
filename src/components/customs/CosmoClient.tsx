@@ -3,7 +3,6 @@
 
 // ######## Libraries 📦 & Hooks 🪝 ########
 import React, { useState, useCallback, useEffect } from "react";
-import { useWhatsNewStore } from "@/stores/use-whats-new.store";
 import cookies from "js-cookie";
 // ######## Components 🧩 ########
 import Preloader from "@/components/customs/Preloader";
@@ -25,12 +24,8 @@ interface CosmoClientProps {
 const CosmoClient = ({ initialIsNewUser }: CosmoClientProps) => {
   const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
   const [isInitialFetchFinished] = useState<boolean>(true);
-  // const [isNewFeatureModalOpen, setIsNewFeatureModalOpen] =
-  //   useState<boolean>(false);
-  const isShowWhatsNew = useWhatsNewStore((state) => state.isShowWhatsNew);
-  const setIsShowWhatsNew = useWhatsNewStore(
-    (state) => state.setIsShowWhatsNew,
-  );
+  const [isNewFeatureModalOpen, setIsNewFeatureModalOpen] =
+    useState<boolean>(false);
 
   // Check localStorage to see if we should show the new features modal
   useEffect(() => {
@@ -38,8 +33,7 @@ const CosmoClient = ({ initialIsNewUser }: CosmoClientProps) => {
       const shouldShowModal =
         localStorage.getItem("show_new_features_modal") === "true";
       if (shouldShowModal) {
-        // setIsNewFeatureModalOpen(true);
-        setIsShowWhatsNew(true);
+        setIsNewFeatureModalOpen(true);
         // Clear the flag so it only shows once after login
         localStorage.removeItem("show_new_features_modal");
       }
@@ -47,8 +41,7 @@ const CosmoClient = ({ initialIsNewUser }: CosmoClientProps) => {
   }, []);
 
   const handleCloseNewFeatureModal = useCallback(() => {
-    // setIsNewFeatureModalOpen(false);
-    setIsShowWhatsNew(false);
+    setIsNewFeatureModalOpen(false);
     // You can set a cookie here to remember that the user has seen the modal
     cookies.set("_has_seen_new_feature_modal", "true", { expires: 30 });
   }, []);
@@ -96,7 +89,7 @@ const CosmoClient = ({ initialIsNewUser }: CosmoClientProps) => {
       )}
 
       <NewFeatureModal
-        isOpen={isShowWhatsNew}
+        isOpen={isNewFeatureModalOpen}
         onClose={handleCloseNewFeatureModal}
       />
     </>

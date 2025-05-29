@@ -7,7 +7,6 @@ import { useTokenMessageStore } from "@/stores/token/use-token-messages.store";
 import { useWatchlistTokenStore } from "@/stores/use-watchlist-token.store";
 import { useCustomizeSettingsStore } from "@/stores/setting/use-customize-settings.store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useHiddenTokensStore } from "@/stores/cosmo/use-hidden-tokens.store";
 import { useWindowSize } from "@/hooks/use-window-size";
 import toast from "react-hot-toast";
 // ######## APIs 🛜 ########
@@ -17,8 +16,6 @@ import {
 } from "@/apis/rest/tokens";
 import { TokenInformationSetting } from "@/apis/rest/settings/settings";
 import { addToWatchlist, removeFromWatchlist } from "@/apis/rest/watchlist";
-import { getHiddenTokens } from "@/apis/rest/cosmo";
-import { hideCosmoToken } from "@/apis/rest/cosmo";
 // ######## Components 🧩 ########
 import Image from "next/image";
 import Link from "next/link";
@@ -131,29 +128,6 @@ export default React.memo(function TokenInformation({
   const currentTokenInformationPreset =
     customizedSettingPresets[customizedSettingActivePreset]
       .tokenInformationSetting || "normal";
-
-  const setGlobalHiddenTokens = useHiddenTokensStore(
-    (state) => state.setHiddenTokens,
-  );
-  const hiddenTokens = useHiddenTokensStore((state) => state.hiddenTokens);
-  const hideToken = useHiddenTokensStore((state) => state.hideToken);
-  const unhideToken = useHiddenTokensStore((state) => state.unhideToken);
-  const isTokenHidden = useHiddenTokensStore((state) =>
-    state.isTokenHidden(tokenMint),
-  );
-  const { data: hiddenTokensData, isLoading: isLoadingHiddenTokens } = useQuery(
-    {
-      queryKey: ["hidden-tokens"],
-      queryFn: getHiddenTokens,
-      retry: 3,
-    },
-  );
-  useEffect(() => {
-    if (hiddenTokensData && !isLoadingHiddenTokens) {
-      setGlobalHiddenTokens(hiddenTokensData);
-      console.log({ hiddenTokensData });
-    }
-  }, [hiddenTokensData, isLoadingHiddenTokens, setGlobalHiddenTokens]);
 
   const queryClient = useQueryClient();
   const addToWatchlistMutation = useMutation({
@@ -309,7 +283,7 @@ export default React.memo(function TokenInformation({
                   symbol={finalTokenInfo?.symbol}
                   alt="Token Detail Image"
                   leftType={
-                    finalTokenInfo?.dex === "Launch a Coin" ||
+                    finalTokenInfo?.dex === "Believe" ||
                     finalTokenInfo?.dex === "Raydium" ||
                     finalTokenInfo?.dex === "Meteora AMM V2" ||
                     finalTokenInfo?.dex === "Meteora AMM" ||
@@ -319,8 +293,8 @@ export default React.memo(function TokenInformation({
                         ? "bonk"
                         : finalTokenInfo?.origin_dex ===
                               "Dynamic Bonding Curve" &&
-                            finalTokenInfo?.launchpad === "Launch a Coin"
-                          ? "launch_a_coin"
+                            finalTokenInfo?.launchpad === "Believe"
+                          ? "believe"
                           : (finalTokenInfo?.origin_dex
                               ?.replace(/\./g, "")
                               ?.replace(/ /g, "_")
@@ -332,8 +306,8 @@ export default React.memo(function TokenInformation({
                     finalTokenInfo?.launchpad === "Bonk"
                       ? "bonk"
                       : finalTokenInfo?.dex === "Dynamic Bonding Curve" &&
-                          finalTokenInfo?.launchpad === "Launch a Coin"
-                        ? "launch_a_coin"
+                          finalTokenInfo?.launchpad === "Believe"
+                        ? "believe"
                         : (finalTokenInfo?.dex
                             ?.replace(/\./g, "")
                             ?.replace(/ /g, "_")
@@ -412,8 +386,8 @@ export default React.memo(function TokenInformation({
                         className="z-[10000] w-full max-w-[260px] rounded-[4px] bg-[#202037] px-2 py-1"
                       >
                         <p className="inline-block text-xs">
-                          Watch up to 10 tokens at a time. If you add more than
-                          10 tokens, the newest watched token will replace the
+                          Watch up to 5 tokens at a time. If you add more than 5
+                          tokens, the newest watched token will replace the
                           oldest
                         </p>
                       </TooltipContent>
@@ -433,67 +407,6 @@ export default React.memo(function TokenInformation({
                       className="object-contain"
                     />
                   </Link>
-
-                  <button
-                    title="Hide Token"
-                    className="relative z-[10] aspect-square size-[18px] flex-shrink-0"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        if (isTokenHidden) {
-                          unhideToken(tokenMint); // Store update
-                          toast.custom((t: any) => (
-                            <CustomToast
-                              tVisibleState={t.visible}
-                              message="Successfully unhidden token"
-                              state="SUCCESS"
-                            />
-                          ));
-                          await hideCosmoToken(
-                            hiddenTokens.filter(
-                              (hiddenToken) => hiddenToken !== tokenMint,
-                            ),
-                          ).then(() => {}); // API call (should be updated to unhide)
-                        } else {
-                          hideToken(tokenMint); // Store update
-                          toast.custom((t: any) => (
-                            <CustomToast
-                              tVisibleState={t.visible}
-                              message="Successfully hidden token"
-                              state="SUCCESS"
-                            />
-                          ));
-                          await hideCosmoToken([
-                            ...hiddenTokens,
-                            tokenMint,
-                          ]).then(() => {}); // API call
-                        }
-                      } catch (error) {
-                        console.warn("Error toggling token visibility:", error);
-                      }
-                    }}
-                  >
-                    <CachedImage
-                      src={
-                        isTokenHidden
-                          ? "/icons/eye-show.svg"
-                          : "/icons/eye-hide.svg"
-                      }
-                      alt={
-                        isTokenHidden ? "Show Token Icon" : "Hide Token Icon"
-                      }
-                      height={18}
-                      width={18}
-                      quality={100}
-                      className="object-contain grayscale-[0.1] saturate-0"
-                    />
-                  </button>
-
-                  {/* <div className="flex h-[100px] w-[200px] flex-col bg-red-500">
-                    {hiddenTokens.map((t) => (
-                      <span key={t}>{t}</span>
-                    ))}
-                  </div> */}
                 </div>
               </div>
               <span className="inline-block text-nowrap text-xs text-[#9191A4]">

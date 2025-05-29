@@ -21,7 +21,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQuickBuySettingsStore } from "@/stores/setting/use-quick-buy-settings.store";
 import { useLatestTransactionMessageStore } from "@/stores/use-latest-transactions.store";
 import { useNotificationSettingsStore } from "@/stores/setting/use-notification-settings.store";
-import { useWatchlistTokenStore } from "@/stores/use-watchlist-token.store";
 import toast from "react-hot-toast";
 import cookies from "js-cookie";
 import axios from "axios";
@@ -290,9 +289,6 @@ export default function AllWSProvider({
   // const notificationsMuted = useNotificationToggleStore(
   //   (state) => state.isNotMuted,
   // );
-  const setWatchlistToken = useWatchlistTokenStore(
-    (state) => state.setWatchlistToken,
-  );
   const setFeeTipData = useFeeTip((state) => state.setFeeTipData);
 
   useQuery({
@@ -876,7 +872,7 @@ export default function AllWSProvider({
             );
 
             // If we already have 3 or more toasts, dismiss all and reset counter
-            if (isTabActiveRef.current && isNotMutedRef.current) {
+            if (isTabActiveRef.current) {
               if (toastCounterRef.current >= 3) {
                 toast.dismiss();
                 toastCounterRef.current = 0;
@@ -1003,24 +999,6 @@ export default function AllWSProvider({
             timestamp: Math.floor(Date.now() / 1000),
           });
         }
-      }
-    },
-  });
-
-  useWebSocket({
-    channel: "watchlist",
-    initialMessage: {
-      channel: "watchlist",
-      action: "join",
-    },
-    onMessage: (event) => {
-      if (event?.channel === "ping" && event.success === true) {
-        return;
-      }
-      const message: { channel: "watchlist"; data: any } = event;
-      if (message.channel === "watchlist" && message.data) {
-        console.log("WATCHLIST ⭐", message);
-        setWatchlistToken(message?.data?.data);
       }
     },
   });
@@ -1313,7 +1291,6 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
-          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error")
         ) {
@@ -1359,7 +1336,6 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
-          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error")
         ) {
@@ -1405,7 +1381,6 @@ export default function AllWSProvider({
         if (
           event.data.includes("success") ||
           event.data.includes("Ping") ||
-          event.data.includes("ping") ||
           event.data.includes("UpdateType") ||
           event.data.includes("error") ||
           event.data.includes("subscribe")
@@ -2081,9 +2056,9 @@ export default function AllWSProvider({
       if (type === "twitter-init") {
         const result = await getTwitterMonitorAccounts();
 
-        setAccounts(result || []);
+        setAccounts(result);
 
-        if ((result && result.length === 0) || !result) {
+        if (result.length === 0) {
           setTwitterMonitorIsLoading(false);
           return;
         }
@@ -2098,9 +2073,9 @@ export default function AllWSProvider({
       } else if (type === "ts-init") {
         const result = await getTSMonitorAccounts();
 
-        setTSAccounts(result || []);
+        setTSAccounts(result);
 
-        if ((result && result.length === 0) || !result) {
+        if (result.length === 0) {
           setTSMonitorIsLoading(false);
           return;
         }
@@ -2115,9 +2090,9 @@ export default function AllWSProvider({
       } else if (type === "discord-init") {
         const result = await getDiscordMonitorChannel();
 
-        setDiscordAccounts(result || []);
+        setDiscordAccounts(result);
 
-        if ((result && result.length === 0) || !result) {
+        if (result.length === 0) {
           setDiscordMonitorIsLoading(false);
           return;
         }

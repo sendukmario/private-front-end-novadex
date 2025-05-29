@@ -60,7 +60,6 @@ import CustomToast from "../../toasts/CustomToast";
 import {
   convertNumberToPresetId,
   convertNumberToPresetKey,
-  convertPresetIdToKey,
   convertPresetIdToNumber,
   convertPresetKeyToNumber,
 } from "@/utils/convertPreset";
@@ -188,12 +187,7 @@ export default function BuyForm() {
     (state) => state.presets.autoFeeEnabled,
   );
   const feetipData = useFeeTip((state) => state.data);
-  const activePreset = useActivePresetStore(
-    (state) => state.buySellActivePreset,
-  );
-  const setActivePreset = useActivePresetStore(
-    (state) => state.setBuySellActivePreset,
-  );
+  const activePreset = useActivePresetStore((state) => state.cosmoActivePreset);
 
   // 🕍Preset Settings
   useEffect(() => {
@@ -251,28 +245,28 @@ export default function BuyForm() {
         !isEqual(previousSettingsRef.current, formValues)
       ) {
         // Check for minimum tip value when auto-tip is disabled
-        // if (!formValues.auto_tip && formValues.tip < 0.001) {
-        //   toast.custom((t: any) => (
-        //     <CustomToast
-        //       tVisibleState={t.visible}
-        //       message="We recommend a minimum tip of 0.001 for faster transaction"
-        //       state="ERROR"
-        //     />
-        //   ));
-        //   return; // Don't proceed with saving
-        // }
+        if (!formValues.auto_tip && formValues.tip < 0.0001) {
+          toast.custom((t: any) => (
+            <CustomToast
+              tVisibleState={t.visible}
+              message="Buy Tip must be at least 0.0001 SOL"
+              state="ERROR"
+            />
+          ));
+          return; // Don't proceed with saving
+        }
 
         // Check for minimum fee value when auto-fee is disabled
-        // if (!formValues.auto_tip && formValues.fee < 0.001) {
-        //   toast.custom((t: any) => (
-        //     <CustomToast
-        //       tVisibleState={t.visible}
-        //       message="We recommend a minimum tip of 0.001 for faster transaction"
-        //       state="ERROR"
-        //     />
-        //   ));
-        //   return; // Don't proceed with saving
-        // }
+        if (!formValues.auto_tip && formValues.fee < 0.0001) {
+          toast.custom((t: any) => (
+            <CustomToast
+              tVisibleState={t.visible}
+              message="Priority Fee must be at least 0.0001 SOL"
+              state="ERROR"
+            />
+          ));
+          return; // Don't proceed with saving
+        }
 
         if (!formValues?.slippage) {
           toast.custom((t: any) => (
@@ -341,11 +335,11 @@ export default function BuyForm() {
   // Handle form submission
   const onSubmit = (data: SubmitTransactionRequest) => {
     // Check if auto-tip is disabled and tip is less than the minimum
-    // if (!data.auto_tip && data.tip < 0.001 && data.tip !== 0) {
+    // if (!data.auto_tip && data.tip < 0.0001 && data.tip !== 0) {
     //   toast.custom((t: any) => (
     //     <CustomToast
     //       tVisibleState={t.visible}
-    //       message="We recommend a minimum tip of 0.001 for faster transaction"
+    //       message="Buy Tip must be at least 0.0001 SOL"
     //       state="ERROR"
     //     />
     //   ));
@@ -353,11 +347,11 @@ export default function BuyForm() {
     // }
 
     // Check if auto-tip is disabled and fee is less than the minimum
-    // if (!data.auto_tip && data.fee < 0.001 && data.fee !== 0) {
+    // if (!data.auto_tip && data.fee < 0.0001 && data.fee !== 0) {
     //   toast.custom((t: any) => (
     //     <CustomToast
     //       tVisibleState={t.visible}
-    //       message="We recommend a minimum tip of 0.001 for faster transaction"
+    //       message="Priority Fee must be at least 0.0001 SOL"
     //       state="ERROR"
     //     />
     //   ));
@@ -432,19 +426,12 @@ export default function BuyForm() {
               <FormItem className="w-fit">
                 <FormControl>
                   <PresetSelectionButtons
-                    activePreset={convertNumberToPresetKey(field.value)}
+                    activePreset={convertNumberToPresetId(field.value)}
                     setActivePreset={(value: string) => {
                       setPicker(0);
-                      console.log(
-                        "setActivePreset⭕⭕⭕",
-                        convertPresetIdToKey(value),
-                        value,
-                      );
                       setLastFocusOn("picker");
-                      setActivePreset(convertPresetIdToKey(value));
                       field.onChange(convertPresetIdToNumber(value));
                     }}
-                    isGlobal={false}
                   />
                 </FormControl>
                 <FormMessage />
@@ -646,19 +633,19 @@ export default function BuyForm() {
                                 field.onChange(newValue);
 
                                 // Show toast if value is invalid and not empty/zero
-                                // if (
-                                //   !form.getValues().auto_tip &&
-                                //   newValue < 0.001 &&
-                                //   newValue !== 0
-                                // ) {
-                                //   toast.custom((t: any) => (
-                                //     <CustomToast
-                                //       tVisibleState={t.visible}
-                                //       message="We recommend a minimum tip of 0.001 for faster transaction"
-                                //       state="ERROR"
-                                //     />
-                                //   ));
-                                // }
+                                if (
+                                  !form.getValues().auto_tip &&
+                                  newValue < 0.0001 &&
+                                  newValue !== 0
+                                ) {
+                                  toast.custom((t: any) => (
+                                    <CustomToast
+                                      tVisibleState={t.visible}
+                                      message="Priority Fee must be at least 0.0001 SOL"
+                                      state="ERROR"
+                                    />
+                                  ));
+                                }
 
                                 form.trigger("fee");
                               }}
@@ -676,14 +663,6 @@ export default function BuyForm() {
                               }
                             />
                           </FormControl>
-                          {form.watch("fee") < 0.001 ? (
-                            <FormMessage className="leading-4">
-                              We recommend a minimum tip of 0.001 for faster
-                              transaction
-                            </FormMessage>
-                          ) : (
-                            <FormMessage />
-                          )}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -712,19 +691,19 @@ export default function BuyForm() {
                                 field.onChange(newValue);
 
                                 // Show toast if value is invalid and not empty/zero
-                                // if (
-                                //   !form.getValues().auto_tip &&
-                                //   newValue < 0.001 &&
-                                //   newValue !== 0
-                                // ) {
-                                //   toast.custom((t: any) => (
-                                //     <CustomToast
-                                //       tVisibleState={t.visible}
-                                //       message="We recommend a minimum tip of 0.001 for faster transaction"
-                                //       state="ERROR"
-                                //     />
-                                //   ));
-                                // }
+                                if (
+                                  !form.getValues().auto_tip &&
+                                  newValue < 0.0001 &&
+                                  newValue !== 0
+                                ) {
+                                  toast.custom((t: any) => (
+                                    <CustomToast
+                                      tVisibleState={t.visible}
+                                      message="Buy Tip must be at least 0.0001 SOL"
+                                      state="ERROR"
+                                    />
+                                  ));
+                                }
 
                                 form.trigger("tip");
                               }}
@@ -742,14 +721,7 @@ export default function BuyForm() {
                               }
                             />
                           </FormControl>
-                          {form.watch("tip") < 0.001 ? (
-                            <FormMessage className="leading-4">
-                              We recommend a minimum tip of 0.001 for faster
-                              transaction
-                            </FormMessage>
-                          ) : (
-                            <FormMessage />
-                          )}
+                          <FormMessage />
                         </FormItem>
                       )}
                     />

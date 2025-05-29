@@ -1,7 +1,7 @@
 "use client";
 
 // ######## Libraries 📦 & Hooks 🪝 ########
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -9,71 +9,211 @@ import {
   YAxis,
   ResponsiveContainer,
   CartesianGrid,
-  CartesianAxis,
+  Tooltip,
 } from "recharts";
 import { cn } from "@/libraries/utils";
+import { useWindowSizeStore } from "@/stores/use-window-size.store";
+import { usePopupStore } from "@/stores/use-popup-state";
+import {
+  availableTimeframe,
+  getWalletPnLChart,
+  Timeframe,
+} from "@/apis/rest/wallet-trade";
+import { useQuery } from "@tanstack/react-query";
+import { useTradesWalletModalStore } from "@/stores/token/use-trades-wallet-modal.store";
+import { formatAmountDollarPnL } from "@/utils/formatAmount";
+import { ChartLine, Loader2, LoaderCircle } from "lucide-react";
+import { useParams } from "next/navigation";
 
 // Sample data
 const data = [
-  { name: "1", value: 1000 },
-  { name: "2", value: 1400 },
-  { name: "3", value: 800 },
-  { name: "4", value: 750 },
-  { name: "5", value: 1200 },
-  { name: "6", value: 400 },
-  { name: "7", value: 2800 },
-  { name: "8", value: 2500 },
-  { name: "9", value: 2000 },
-  { name: "10", value: 1500 },
-  { name: "11", value: 3200 },
-  { name: "12", value: 3700 },
-  { name: "13", value: 4200 },
+  { name: "1", value: 120 },
+  { name: "2", value: 250 },
+  { name: "3", value: 380 },
+  { name: "4", value: 450 },
+  { name: "5", value: 520 },
+  { name: "6", value: 670 },
+  { name: "7", value: 730 },
+  { name: "8", value: 810 },
+  { name: "9", value: 890 },
+  { name: "10", value: 950 },
+  { name: "11", value: 1020 },
+  { name: "12", value: 1150 },
+  { name: "13", value: 1230 },
+  { name: "14", value: 1320 },
+  { name: "15", value: 1440 },
+  { name: "16", value: 1560 },
+  { name: "17", value: 1630 },
+  { name: "18", value: 1720 },
+  { name: "19", value: 1810 },
+  { name: "20", value: 1890 },
+  { name: "21", value: 1940 },
+  { name: "22", value: 1980 },
+  { name: "23", value: 2010 },
+  { name: "24", value: 2050 },
+  { name: "25", value: 2120 },
+  { name: "26", value: 2180 },
+  { name: "27", value: 2240 },
+  { name: "28", value: 2310 },
+  { name: "29", value: 2370 },
+  { name: "30", value: 2450 },
 ];
 
-const timePresetOptions = ["All", "7D", "24H", "12H", "6H", "1H"];
+// const timePresetOptions = ["All", "7D", "24H", "12H", "6H", "1H"];
 
-export default function AllRealizedPLChart() {
-  const [selectedTimePreset, setSelectedTimePreset] = useState<
-    "All" | "7D" | "24H" | "12H" | "6H" | "1H"
-  >("All");
+export default function AllRealizedPLChart({
+  isModalContent = true,
+}: {
+  isModalContent?: boolean;
+}) {
+  const params = useParams<{ "wallet-address": string }>();
+  const { width } = useWindowSizeStore();
+  const { remainingScreenWidth } = usePopupStore();
+  const { selectedTimeframe, setSelectedTimeframe } =
+    useTradesWalletModalStore();
+  // const walletAddress = useTradesWalletModalStore((state) => state.wallet);
+  // const walletAddress = "GiwAGiwBiWZvi8Lrd7HmsfjYA6YgjJgXWR26z6ffTykJ"; // use hardcoded wallet address from docs
+
+  const walletAddressState = useTradesWalletModalStore((state) => state.wallet);
+  const walletAddress = isModalContent
+    ? walletAddressState
+    : params["wallet-address"];
+  const {
+    data: chartData,
+    refetch,
+    isLoading,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["wallet-pnl-chart", walletAddress],
+    queryFn: async () => {
+      const res = await getWalletPnLChart(walletAddress, selectedTimeframe);
+
+      return res;
+    },
+  });
+
+  const dataMax = useMemo(() => {
+    if (!chartData) return 0;
+
+    const max = Math.max(
+      ...chartData?.data.data.map((item) => Number(item.realizedProfitUsd)),
+    );
+    if (max === 0) {
+      return 10_000;
+    }
+
+    return Math.ceil(max * 1.2);
+  }, [chartData]);
+
+  const dataMin = useMemo(() => {
+    if (!chartData) return 0;
+
+    const min = Math.min(
+      ...chartData?.data.data.map((item) => Number(item.realizedProfitUsd)),
+    );
+    if (min === 0) {
+      return 0;
+    }
+
+    return Math.ceil(min * 1.5);
+  }, [chartData]);
+
+  const allRealizedPnL = useMemo(() => {
+    if (!chartData)
+      return {
+        formattedPercentage: 0,
+        formattedProfit: 0,
+        percentageRealizedPnl: 0,
+      };
+    let totalRealizedProfit = 0;
+    let totalVolume = 0;
+
+    chartData.data.data.forEach((entry) => {
+      totalRealizedProfit += parseFloat(String(entry.realizedProfitUsd));
+      totalVolume += parseFloat(String(entry.volumeUsdAll));
+    });
+
+    let formattedProfit = formatAmountDollarPnL(totalRealizedProfit);
+
+    let realizedPnlPercentage =
+      totalVolume !== 0 ? (totalRealizedProfit / totalVolume) * 100 : 0;
+
+    let formattedPercentage =
+      realizedPnlPercentage > 0
+        ? `(+${realizedPnlPercentage.toFixed(2)}%)`
+        : `(${realizedPnlPercentage.toFixed(2)}%)`;
+    return {
+      formattedProfit,
+      formattedPercentage,
+      percentageRealizedPnl: realizedPnlPercentage,
+    };
+  }, [chartData]);
+
+  useEffect(() => {
+    if (selectedTimeframe) {
+      refetch();
+    }
+  }, [selectedTimeframe]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-y-5 rounded-t-[20px] bg-[#080811] p-2 md:gap-y-3 md:p-[12px]">
-      <div className="md:gap-0z flex h-8 w-full flex-col justify-between gap-[8px] md:flex-row md:items-center">
+    <div
+      className={cn(
+        "flex h-full w-full flex-col gap-y-3 rounded-t-[20px] bg-[#080811] p-3 md:gap-y-3 md:p-[12px]",
+        !isModalContent && "rounded-[8px]",
+      )}
+    >
+      <div
+        className={cn(
+          "flex h-fit w-full flex-col justify-between gap-[8px] md:flex-row md:items-center md:gap-0",
+          remainingScreenWidth < 800 &&
+            !isModalContent &&
+            "md:flex-col md:items-start md:gap-2",
+        )}
+      >
         <div className="flex items-center gap-x-2">
           <h4 className="line-clamp-1 font-geistSemiBold text-base text-fontColorPrimary">
             All Realized P&L
           </h4>
-          <span className="font-geistSemiBold text-sm text-success">
-            {"$13.98K (+0.2%)"}
+          <span
+            className={cn(
+              "font-geistSemiBold text-sm",
+              allRealizedPnL.percentageRealizedPnl > 0
+                ? "text-success"
+                : "text-destructive",
+            )}
+          >
+            {allRealizedPnL.formattedProfit}
+            {allRealizedPnL.formattedPercentage}
           </span>
         </div>
 
-        <div className="flex h-[32px] flex-shrink-0 items-center overflow-hidden rounded-[8px] border border-border">
+        <div className="flex h-[32px] w-fit flex-shrink-0 items-center overflow-hidden rounded-[8px] border border-border">
           <div className="flex h-full items-center justify-center pl-4 pr-3.5">
-            <span className="inline-block text-nowrap font-geistSemiBold text-sm text-fontColorSecondary">
+            <span
+              className={cn(
+                "inline-block text-nowrap font-geistSemiBold text-sm text-fontColorSecondary",
+                width! < 400 && "text-xs",
+              )}
+            >
               Presets
             </span>
           </div>
           <div className="h-full p-[2px]">
-            <div className="flex h-full items-center rounded-[6px] bg-white/[8%]">
-              {timePresetOptions?.map((option, index) => {
-                const isActive = selectedTimePreset === option;
+            <div className="flex h-full flex-row-reverse items-center rounded-[6px] bg-white/[8%]">
+              {availableTimeframe?.map((option, index) => {
+                const isActive = selectedTimeframe === option;
 
                 return (
                   <button
                     key={index + option}
-                    onClick={() =>
-                      setSelectedTimePreset(
-                        option as "All" | "7D" | "24H" | "12H" | "6H" | "1H",
-                      )
-                    }
+                    onClick={() => setSelectedTimeframe(option as Timeframe)}
                     className={cn(
-                      "h-full rounded-[6px] px-3 font-geistSemiBold text-sm text-fontColorPrimary duration-300",
+                      "h-full rounded-[6px] px-3 font-geistSemiBold text-sm uppercase text-fontColorPrimary duration-300",
                       isActive ? "bg-white/[8%]" : "bg-transparent",
+                      width! < 400 && "text-xs",
                     )}
                   >
-                    {option}
+                    {option === "30d" ? "1M" : option === "1y" ? "ALL" : option}
                   </button>
                 );
               })}
@@ -82,19 +222,51 @@ export default function AllRealizedPLChart() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={100}>
-        <AreaChart data={data}>
-          {/* Gradient and Glow Filter */}
-          <defs>
-            {/* Gradient for the area */}
-            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00C9B3" stopOpacity={1} />
-              <stop offset="50%" stopColor="#00C9B3" stopOpacity={1} />
-              <stop offset="100%" stopColor="#006358" stopOpacity={1} />
-            </linearGradient>
+      <div className="relative">
+        {isLoading ||
+          (isRefetching && (
+            <div className="absolute inset-0 z-10 flex w-full items-center justify-center bg-white/[4%] backdrop-blur-md">
+              <span className="flex items-center gap-2 text-sm text-fontColorSecondary">
+                <LoaderCircle className="size-4 animate-spin" />
+                <span>Loading chart ...</span>
+              </span>
+            </div>
+          ))}
 
-            {/* Additional "Plus Lighter" Gradient */}
-            <linearGradient
+        <ResponsiveContainer
+          width="100%"
+          height={
+            !isModalContent && width! > 768 && remainingScreenWidth > 800
+              ? 155
+              : 100
+          }
+        >
+          <AreaChart data={chartData?.data.data}>
+            {/* Gradient and Glow Filter */}
+            <defs>
+              {/* Gradient for the area */}
+              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#F65B93" stopOpacity={1} />
+                <stop offset="20%" stopColor="#F65B93" stopOpacity={1} />
+                <stop offset="50%" stopColor="#F65B93" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#F65B93" stopOpacity={0.2} />
+              </linearGradient>
+
+              <linearGradient
+                id="areaGradientSuccess"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor="#00C9B3" stopOpacity={1} />
+                <stop offset="20%" stopColor="#00C9B3" stopOpacity={1} />
+                <stop offset="50%" stopColor="#00C9B3" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#006358" stopOpacity={0.2} />
+              </linearGradient>
+
+              {/* Additional "Plus Lighter" Gradient */}
+              {/*         <linearGradient
               id="plusLighterGradient"
               x1="0"
               y1="0"
@@ -103,7 +275,7 @@ export default function AllRealizedPLChart() {
             >
               <stop
                 offset="0%"
-                stopColor="rgba(255, 255, 255, 0.8)"
+                stopColor="rgba(255, 255, 255, 0.7)"
                 stopOpacity={0.8}
               />
               <stop
@@ -116,74 +288,96 @@ export default function AllRealizedPLChart() {
                 stopColor="rgba(255, 255, 255, 0)"
                 stopOpacity={0}
               />
-            </linearGradient>
+            </linearGradient> */}
 
-            {/* Glow Effect */}
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur
-                in="SourceGraphic"
-                stdDeviation="3"
-                result="blur"
-              />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
+              {/* Glow Effect */}
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="3"
+                  result="blur"
+                />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-          {/* Grid */}
-          <CartesianGrid
-            horizontal={true}
-            vertical={false}
-            strokeDasharray="7 5"
-            stroke="#202037"
-          />
+            {/* <Tooltip /> */}
 
-          {/* Axes */}
-          <XAxis
-            hide={true}
-            dataKey="name"
-            stroke="#8884d8"
-            tick={{ fill: "#aaa", fontSize: 13 }}
-          />
-          <YAxis
-            orientation="right"
-            stroke="#FFFFFF"
-            tick={{ fill: "foreground", fontSize: 13 }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `+$${value.toLocaleString()}`}
-          />
+            {/* Grid */}
+            <CartesianGrid
+              horizontal={true}
+              vertical={false}
+              strokeDasharray="7 5"
+              stroke="#202037"
+            />
 
-          {/* Area with Gradient */}
-          <Area
-            type="linear"
-            dataKey="value"
-            stroke="url(#areaGradient)"
-            strokeWidth={2}
-            fillOpacity={0.08}
-            fill="url(#areaGradient)"
-            style={{ filter: "url(#glow)" }}
-            dot={false}
-            isAnimationActive={false}
-          />
+            {/* Axes */}
+            <XAxis
+              hide={true}
+              dataKey="timestamp"
+              stroke="#8884d8"
+              tick={{ fill: "#aaa", fontSize: 13 }}
+              tickFormatter={(value) =>
+                new Date(value * 1000).toLocaleDateString()
+              }
+            />
+            <YAxis
+              orientation="right"
+              dataKey="realizedProfitUsd"
+              stroke="#FFFFFF"
+              tick={{ fill: "#9191A4", fontSize: 13 }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) =>
+                `${formatAmountDollarPnL(Number(value))}`
+              }
+              tickCount={6}
+              domain={[dataMin, dataMax]} // Start Y-Axis from 0 and max value
+            />
 
-          {/* "Plus Lighter" Effect */}
-          <Area
-            type="linear"
-            dataKey="value"
-            stroke="url(#plusLighterGradient)"
-            strokeWidth={2.5}
-            fillOpacity={0}
-            style={{
-              mixBlendMode: "lighten",
-            }}
-            dot={false}
-            isAnimationActive={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+            {/* Area with Gradient */}
+            <Area
+              type="linear"
+              dataKey="realizedProfitUsd"
+              stroke={
+                allRealizedPnL.percentageRealizedPnl > 0
+                  ? "url(#areaGradientSuccess)"
+                  : "url(#areaGradient)"
+              }
+              strokeWidth={2}
+              fillOpacity={0.08}
+              fill={
+                allRealizedPnL.percentageRealizedPnl > 0
+                  ? "url(#areaGradientSuccess)"
+                  : "url(#areaGradient)"
+              }
+              style={{ filter: "url(#glow)" }}
+              dot={false}
+              isAnimationActive={false}
+            />
+
+            {/* "Plus Lighter" Effect */}
+            <Area
+              type="linear"
+              dataKey="realizedProfitUsd"
+              // stroke="#8CD9B6"
+              stroke={
+                allRealizedPnL.percentageRealizedPnl > 0 ? "#8CD9B6" : "#F65B93"
+              }
+              strokeWidth={2}
+              fillOpacity={0}
+              style={{
+                mixBlendMode: "lighten",
+              }}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
