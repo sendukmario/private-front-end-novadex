@@ -108,6 +108,7 @@ type DataItem = {
   timestamp: number;
   volumeUsd: number;
   volumeUsdAll: number;
+  cumulativePnlUsd: number;
 };
 
 type WalletPnLChartResponse = {
@@ -117,6 +118,8 @@ type WalletPnLChartResponse = {
     range: Range;
     networkId: number;
     data: DataItem[];
+    pnlPercentage: string;
+    pnlUsd: number;
   };
 };
 

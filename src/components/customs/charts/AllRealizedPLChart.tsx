@@ -86,7 +86,10 @@ export default function AllRealizedPLChart({
   } = useQuery({
     queryKey: ["wallet-pnl-chart", walletAddress],
     queryFn: async () => {
-      const res = await getWalletPnLChart(walletAddress, selectedTimeframe);
+      const res = await getWalletPnLChart(
+        "679pL3P3nqq5wr4zAyfCYPmyRXhfYC8LH65P7XrRwx3q",
+        selectedTimeframe,
+      );
 
       return res;
     },
@@ -96,7 +99,7 @@ export default function AllRealizedPLChart({
     if (!chartData) return 0;
 
     const max = Math.max(
-      ...chartData?.data.data.map((item) => Number(item.realizedProfitUsd)),
+      ...chartData?.data.data.map((item) => Number(item.cumulativePnlUsd)),
     );
     if (max === 0) {
       return 10_000;
@@ -109,7 +112,7 @@ export default function AllRealizedPLChart({
     if (!chartData) return 0;
 
     const min = Math.min(
-      ...chartData?.data.data.map((item) => Number(item.realizedProfitUsd)),
+      ...chartData?.data.data.map((item) => Number(item.cumulativePnlUsd)),
     );
     if (min === 0) {
       return 0;
@@ -129,7 +132,7 @@ export default function AllRealizedPLChart({
     let totalVolume = 0;
 
     chartData.data.data.forEach((entry) => {
-      totalRealizedProfit += parseFloat(String(entry.realizedProfitUsd));
+      totalRealizedProfit += parseFloat(String(entry.cumulativePnlUsd));
       totalVolume += parseFloat(String(entry.volumeUsdAll));
     });
 
@@ -182,8 +185,8 @@ export default function AllRealizedPLChart({
                 : "text-destructive",
             )}
           >
-            {allRealizedPnL.formattedProfit}
-            {allRealizedPnL.formattedPercentage}
+            {formatAmountDollarPnL(chartData?.data.pnlUsd as number)} (
+            {chartData?.data.pnlPercentage})
           </span>
         </div>
 
@@ -326,7 +329,7 @@ export default function AllRealizedPLChart({
             />
             <YAxis
               orientation="right"
-              dataKey="realizedProfitUsd"
+              dataKey="cumulativePnlUsd"
               stroke="#FFFFFF"
               tick={{ fill: "#9191A4", fontSize: 13 }}
               tickLine={false}
@@ -341,7 +344,7 @@ export default function AllRealizedPLChart({
             {/* Area with Gradient */}
             <Area
               type="linear"
-              dataKey="realizedProfitUsd"
+              dataKey="cumulativePnlUsd"
               stroke={
                 allRealizedPnL.percentageRealizedPnl > 0
                   ? "url(#areaGradientSuccess)"
@@ -362,7 +365,7 @@ export default function AllRealizedPLChart({
             {/* "Plus Lighter" Effect */}
             <Area
               type="linear"
-              dataKey="realizedProfitUsd"
+              dataKey="cumulativePnlUsd"
               // stroke="#8CD9B6"
               stroke={
                 allRealizedPnL.percentageRealizedPnl > 0 ? "#8CD9B6" : "#F65B93"

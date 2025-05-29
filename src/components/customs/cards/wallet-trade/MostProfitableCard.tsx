@@ -4,7 +4,8 @@ import { type ProfitableToken } from "@/apis/rest/wallet-trade";
 import Separator from "@/components/customs/Separator";
 import { cn } from "@/libraries/utils";
 import { usePopupStore } from "@/stores/use-popup-state";
-import { formatNumber } from "@/utils/formatNumber";
+import { formatAmountDollar } from "@/utils/formatAmount";
+import { truncateString } from "@/utils/truncateString";
 import Image from "next/image";
 import { useMemo } from "react";
 import AvatarWithBadges from "../../AvatarWithBadges";
@@ -32,6 +33,15 @@ export default function MostProfitableCard({
     return "";
   }, [data.dex, data.launchpad]);
 
+  // Memoize formatted values
+  const formattedValues = useMemo(() => ({
+    boughtUsd: formatAmountDollar(data.boughtUsd),
+    soldUsd: formatAmountDollar(data.soldUsd),
+    pnlUsd: formatAmountDollar(data.pnlUsd),
+    pnlPercentage: `${data.pnlPercentage >= 0 ? "+" : ""}${data.pnlPercentage}%`,
+    truncatedName: truncateString(data.name, 20),
+  }), [data.boughtUsd, data.soldUsd, data.pnlUsd, data.pnlPercentage, data.name]);
+
   const MostProfitableCardDesktopContent = () => (
     <>
       <div className="hidden h-full w-full min-w-[220px] items-center md:flex">
@@ -46,7 +56,7 @@ export default function MostProfitableCard({
           <div className="flex-col">
             <div className="flex gap-2">
               <h1 className="text-nowrap font-geistBold text-xs text-fontColorPrimary">
-                {data.name}
+                {formattedValues.truncatedName}
               </h1>
               <h2 className="text-nowrap font-geistLight text-xs text-fontColorSecondary">
                 {data.symbol}
@@ -64,12 +74,12 @@ export default function MostProfitableCard({
       </div>
       <div className="hidden h-full w-full min-w-[95px] items-center md:flex">
         <span className="inline-block text-nowrap font-geistSemiBold text-sm text-success">
-          ${formatNumber(data.boughtUsd)}
+          {formattedValues.boughtUsd}
         </span>
       </div>
       <div className="hidden h-full w-full min-w-[95px] items-center md:flex">
         <span className="inline-block text-nowrap font-geistSemiBold text-sm text-destructive">
-          ${formatNumber(data.soldUsd)}
+          {formattedValues.soldUsd}
         </span>
       </div>
       <div className="hidden h-full w-full min-w-[115px] items-center md:flex">
@@ -89,8 +99,7 @@ export default function MostProfitableCard({
               data.pnlUsd >= 0 ? "text-success" : "text-destructive",
             )}
           >
-            {/* {formatNumber(data.pnlUsd)} */}
-            {data.pnlUsd}
+            {formattedValues.pnlUsd}
           </span>
         </div>
       </div>
@@ -101,9 +110,7 @@ export default function MostProfitableCard({
             data.pnlPercentage >= 0 ? "text-success" : "text-destructive",
           )}
         >
-          {data.pnlPercentage >= 0 ? "+" : ""}
-          {/* {formatNumber(data.pnlPercentage)}% */}
-          {data.pnlPercentage}
+          {formattedValues.pnlPercentage}
         </span>
       </div>
       <div className="hidden h-full w-full min-w-[140px] items-center md:flex">
@@ -159,7 +166,7 @@ export default function MostProfitableCard({
           <div className="flex-col">
             <div className="flex gap-2">
               <h1 className="text-nowrap font-geistBold text-xs text-fontColorPrimary">
-                {data.name}
+                {formattedValues.truncatedName}
               </h1>
               <h2 className="text-nowrap font-geistLight text-xs text-fontColorSecondary">
                 {data.symbol}
@@ -183,8 +190,7 @@ export default function MostProfitableCard({
             Bought
           </span>
           <span className="font-geistSemiBold text-sm text-success">
-            {/* ${formatNumber(data.boughtUsd)} */}
-            ${data.boughtUsd}
+            {formattedValues.boughtUsd}
           </span>
         </div>
 
@@ -193,8 +199,7 @@ export default function MostProfitableCard({
             Sold
           </span>
           <span className="font-geistSemiBold text-sm text-destructive">
-            {/* ${formatNumber(data.soldUsd)} */}
-            ${data.soldUsd}
+            {formattedValues.soldUsd}
           </span>
         </div>
 
@@ -218,8 +223,7 @@ export default function MostProfitableCard({
                 data.pnlUsd >= 0 ? "text-success" : "text-destructive",
               )}
             >
-              {/* {formatNumber(data.pnlUsd)} */}
-              {data.pnlUsd}
+              {formattedValues.pnlUsd}
             </span>
           </div>
         </div>
@@ -234,9 +238,7 @@ export default function MostProfitableCard({
               data.pnlPercentage >= 0 ? "text-success" : "text-destructive",
             )}
           >
-            {data.pnlPercentage >= 0 ? "+" : ""}
-            {/* {formatNumber(data.pnlPercentage)}% */}
-            {data.pnlPercentage}%
+            {formattedValues.pnlPercentage}
           </span>
         </div>
 

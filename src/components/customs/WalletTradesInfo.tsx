@@ -56,7 +56,9 @@ const WalletTradesInfo = ({
   } = useQuery({
     queryKey: ["wallet-stats", walletAddress],
     queryFn: async () => {
-      const res = await getWalletStats(walletAddress);
+      const res = await getWalletStats(
+        "679pL3P3nqq5wr4zAyfCYPmyRXhfYC8LH65P7XrRwx3q",
+      );
       return res;
     },
   });
