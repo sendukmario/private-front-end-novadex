@@ -89,7 +89,8 @@ export default function MostProfitableCard({
               data.pnlUsd >= 0 ? "text-success" : "text-destructive",
             )}
           >
-            {formatNumber(data.pnlUsd)}
+            {/* {formatNumber(data.pnlUsd)} */}
+            {data.pnlUsd}
           </span>
         </div>
       </div>
@@ -101,7 +102,8 @@ export default function MostProfitableCard({
           )}
         >
           {data.pnlPercentage >= 0 ? "+" : ""}
-          {formatNumber(data.pnlPercentage)}%
+          {/* {formatNumber(data.pnlPercentage)}% */}
+          {data.pnlPercentage}
         </span>
       </div>
       <div className="hidden h-full w-full min-w-[140px] items-center md:flex">
@@ -181,7 +183,8 @@ export default function MostProfitableCard({
             Bought
           </span>
           <span className="font-geistSemiBold text-sm text-success">
-            ${formatNumber(data.boughtUsd)}
+            {/* ${formatNumber(data.boughtUsd)} */}
+            ${data.boughtUsd}
           </span>
         </div>
 
@@ -190,7 +193,8 @@ export default function MostProfitableCard({
             Sold
           </span>
           <span className="font-geistSemiBold text-sm text-destructive">
-            ${formatNumber(data.soldUsd)}
+            {/* ${formatNumber(data.soldUsd)} */}
+            ${data.soldUsd}
           </span>
         </div>
 
@@ -214,7 +218,8 @@ export default function MostProfitableCard({
                 data.pnlUsd >= 0 ? "text-success" : "text-destructive",
               )}
             >
-              {formatNumber(data.pnlUsd)}
+              {/* {formatNumber(data.pnlUsd)} */}
+              {data.pnlUsd}
             </span>
           </div>
         </div>
@@ -230,7 +235,8 @@ export default function MostProfitableCard({
             )}
           >
             {data.pnlPercentage >= 0 ? "+" : ""}
-            {formatNumber(data.pnlPercentage)}%
+            {/* {formatNumber(data.pnlPercentage)}% */}
+            {data.pnlPercentage}%
           </span>
         </div>
 
@@ -273,8 +279,8 @@ export default function MostProfitableCard({
         "max-md:rounded-[8px] max-md:border max-md:border-border max-md:bg-card",
         "md:flex md:h-[56px] md:min-w-max md:pl-4 md:hover:bg-white/[4%]",
         remainingScreenWidth < 700 &&
-          !isModalContent &&
-          "mb-2 rounded-[8px] border border-border bg-card md:h-fit md:pl-0",
+        !isModalContent &&
+        "mb-2 rounded-[8px] border border-border bg-card md:h-fit md:pl-0",
       )}
     >
       <MostProfitableCardDesktopContent />

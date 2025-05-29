@@ -208,34 +208,47 @@ type DeployedTokensResponse = {
     walletAddress: string;
   };
 };
-
+// {
+//   'walletAddress': '679pL3P3nqq5wr4zAyfCYPmyRXhfYC8LH65P7XrRwx3q',
+//   'results': [
+//     {
+//       'pairAddress': '3bG5vhHw1qgv5ckzz6NJbQpYGKAuWQDJvFHf4WSZEeRf',
+//       'eventType': 'Swap',
+//       'direction': 'buy',
+//       'timestamp': 1748388049,
+//       'usd': 483.56,
+//       'amount': '298K',
+//       'pairSymbol': 'greg-SOL',
+//       'pairName': 'greg/Wrapped SOL',
+//       'pairImage': 'https://crypto-token-logos-production.s3.us-west-2.amazonaws.com/1399811149_k6Uxr9oeVDm5qKy8EmPP1e9zaAj4nSRDHSHRCD1pump:1399811149_small.png',
+//       'dex': 'Pump.Swap',
+//       'origin_dex': 'Pump',
+//       'launchpad': ''
+//     },
 /* Wallet Trade History Types */
 export type TradeHistoryItem = {
-  address: string;
-  amount: string;
-  dex: string;
-  direction: "buy" | "sell";
-  eventType: string;
-  exchanges: Array<{
-    address: string;
-    name: string;
-  }>;
-  image: string | null;
-  launchpad: string;
-  name: string;
-  origin_dex: string;
   pairAddress: string;
-  quoteToken: "token0" | "token1";
-  symbol: string;
+  eventType: string;
+  direction: "buy" | "sell";
   timestamp: number;
-  token0SwapValueUsd: string;
   usd: number;
+  amount: string;
+  pairSymbol: string;
+  pairName: string;
+  pairImage: string;
+  exchanges: Array<{
+    name: string;
+    address: string;
+  }>;
+  dex: string;
+  origin_dex: string;
+  launchpad: string;
 };
 
 type WalletTradeHistoryResponse = {
   data: {
-    results: TradeHistoryItem[];
     walletAddress: string;
+    results: TradeHistoryItem[];
   };
 };
 

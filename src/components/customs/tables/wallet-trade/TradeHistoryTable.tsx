@@ -15,10 +15,14 @@ import { cn } from "@/libraries/utils";
 import { useTradesWalletModalStore } from "@/stores/token/use-trades-wallet-modal.store";
 import { usePopupStore } from "@/stores/use-popup-state";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { formatAmountDollar } from "@/utils/formatAmount";
+import {
+  formatAmountDollar,
+  formatAmountWithoutLeadingZero,
+} from "@/utils/formatAmount";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SortButton from "../../SortButton";
+import { useSolPriceMessageStore } from "@/stores/use-solprice-message.store";
 
 export type CommonTableProps = {
   isModalContent?: boolean;
@@ -85,6 +89,7 @@ export default function TradeHistoryTable({
   const [tradesValue, setTradesValue] = useState("SOL");
   const [totalValue, setTotalValue] = useState("SOL");
 
+  const solPrice = useSolPriceMessageStore((state) => state.messages.price);
   // Get wallet address from path params
   const walletAddress = useMemo(() => {
     if (!params) return null;
@@ -92,35 +97,60 @@ export default function TradeHistoryTable({
     return params["wallet-address"] as string;
   }, [params, isModalContent, walletAddressState]);
 
+  // Get SOL price from localStorage
+  const getSolPrice = useCallback(() => {
+    if (typeof window === "undefined") return 0;
+    const price = localStorage.getItem("current_solana_price");
+    return price ? parseFloat(price) : 0;
+  }, []);
+
   // Memoize the formatted value to prevent unnecessary recalculations
   const formatValue = useMemo(() => {
-    return (value: number, tokenPriceUsd: string) => {
+    return (value: number) => {
       if (isNaN(value)) return "0";
 
       if (tradesValue === "SOL") {
-        return convertUsdToSol(value, tokenPriceUsd);
+        const solPrice = getSolPrice();
+        if (solPrice === 0) return "0";
+        const solValue = value / solPrice;
+        return formatAmountWithoutLeadingZero(solValue, 4);
       }
       // Keep as USD
       return formatAmountDollar(value.toString());
     };
-  }, [tradesValue]);
+  }, [tradesValue, getSolPrice]);
 
   // Separate formatter for Total column
   const formatTotal = useMemo(() => {
-    return (value: number, tokenPriceUsd: string) => {
+    return (value: number) => {
       if (isNaN(value)) return "0";
 
       if (totalValue === "SOL") {
-        return convertUsdToSol(value, tokenPriceUsd);
+        const solPrice = getSolPrice();
+        if (solPrice === 0) return "0";
+        const solValue = value / solPrice;
+        return formatAmountWithoutLeadingZero(solValue, 4);
       }
       // Keep as USD
       return formatAmountDollar(value.toString());
     };
-  }, [totalValue]);
+  }, [totalValue, getSolPrice]);
 
-  // Fetch trade history data
+  // Add effect to update when SOL price changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // Force re-render when SOL price changes
+      setTradeHistoryData((prev) => [...prev]);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Fetch trade history data with cleanup
   useEffect(() => {
     let isMounted = true;
+    let controller = new AbortController();
 
     const fetchTradeHistory = async () => {
       if (!walletAddress) {
@@ -155,6 +185,7 @@ export default function TradeHistoryTable({
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [walletAddress]);
 
@@ -188,19 +219,41 @@ export default function TradeHistoryTable({
     };
   }, []);
 
-  // Get visible items
-  const visibleItems = useMemo(() => {
+  // Filter and sort transactions based on type
+  const filteredAndSortedTransactions = useMemo(() => {
     if (!tradeHistoryData?.length) return [];
-    return tradeHistoryData.slice(visibleRange.start, visibleRange.end);
-  }, [tradeHistoryData, visibleRange]);
 
-  // Filter transactions based on type
-  const filteredTransactions = useMemo(() => {
-    if (type === "ALL") return tradeHistoryData;
-    return tradeHistoryData.filter(
-      (item) => item.direction === type.toLowerCase(),
-    );
+    // First filter based on type
+    const filtered =
+      type === "ALL"
+        ? tradeHistoryData
+        : tradeHistoryData.filter(
+            (item) => item.direction === type.toLowerCase(),
+          );
+
+    // Then sort based on type if needed
+    if (type !== "ALL") {
+      return [...filtered].sort((a, b) => {
+        // If type is "BUY", put all buys first
+        if (type === "BUY") {
+          return a.direction === "buy" ? -1 : 1;
+        }
+        // If type is "SELL", put all sells first
+        return a.direction === "sell" ? -1 : 1;
+      });
+    }
+
+    return filtered;
   }, [tradeHistoryData, type]);
+
+  // Get visible items from filtered and sorted data
+  const visibleItems = useMemo(() => {
+    if (!filteredAndSortedTransactions?.length) return [];
+    return filteredAndSortedTransactions.slice(
+      visibleRange.start,
+      visibleRange.end,
+    );
+  }, [filteredAndSortedTransactions, visibleRange]);
 
   const HeaderData = [
     {
@@ -235,7 +288,7 @@ export default function TradeHistoryTable({
         </div>
       ),
       tooltipContent: "The type of transaction made.",
-      className: "min-w-[200px] lg:min-w-[220px] px-0",
+      className: "min-w-[200px] lg:min-w-[240px] px-0",
     },
     {
       label: "Value",
@@ -311,7 +364,7 @@ export default function TradeHistoryTable({
               {error}
             </p>
           </div>
-        ) : !filteredTransactions?.length ? (
+        ) : !filteredAndSortedTransactions?.length ? (
           <EmptyState />
         ) : (
           <div
@@ -321,13 +374,13 @@ export default function TradeHistoryTable({
               width: "100%",
               overflowX: "hidden",
               overflowY: "auto",
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#4a4b50 rgba(26, 27, 30, 0.4)',
-              borderRadius: '10px'
+              scrollbarWidth: "thin",
+              scrollbarColor: "#4a4b50 rgba(26, 27, 30, 0.4)",
+              borderRadius: "10px",
             }}
             className="scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70]"
           >
-            {visibleItems.map((item, index) => {
+            {filteredAndSortedTransactions.map((item, index) => {
               const actualIndex = visibleRange.start + index;
 
               return (
@@ -344,12 +397,8 @@ export default function TradeHistoryTable({
                     data={item}
                     tradesValue={tradesValue}
                     totalValue={totalValue}
-                    formatValue={(value) =>
-                      formatValue(value, item.token0SwapValueUsd)
-                    }
-                    formatTotal={(value) =>
-                      formatTotal(value, item.token0SwapValueUsd)
-                    }
+                    formatValue={(value) => formatValue(value)}
+                    formatTotal={(value) => formatTotal(value)}
                   />
                 </div>
               );

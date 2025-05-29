@@ -191,7 +191,7 @@ const WalletTradesInfo = ({
           {isLoading ? (
             <>
               <div
-                className="grid grid-cols-3 gap-2 px-1 py-1 md:w-auto md:grid-flow-col md:p-2"
+                className="grid grid-cols-3 gap-2 px-1 py-1 md:w-auto md:grid-flow-col"
                 style={{
                   width: "inherit",
                 }}
@@ -268,7 +268,7 @@ const WalletTradesInfo = ({
           ) : (
             <>
               <div
-                className="grid grid-cols-3 gap-2 px-1 py-1 md:w-auto md:grid-flow-col md:p-2"
+                className="grid grid-cols-3 gap-2 px-1 py-1 md:w-auto md:grid-flow-col"
                 style={{
                   width: "inherit",
                 }}

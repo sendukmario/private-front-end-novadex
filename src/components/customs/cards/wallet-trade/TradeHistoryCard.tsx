@@ -3,7 +3,7 @@
 import { type TradeHistoryItem } from "@/apis/rest/wallet-trade";
 import { cn } from "@/libraries/utils";
 import { usePopupStore } from "@/stores/use-popup-state";
-import { formatAmountWithoutLeadingZero } from "@/utils/formatAmount";
+import { truncateString } from "@/utils/truncateString";
 import { useMemo } from "react";
 import AddressWithEmojis from "../../AddressWithEmojis";
 import AvatarWithBadges from "../../AvatarWithBadges";
@@ -11,6 +11,7 @@ import { CachedImage } from "../../CachedImage";
 import CircleCount from "../../CircleCount";
 import Copy from "../../Copy";
 import SellBuyBadge from "../../SellBuyBadge";
+import { truncateAddress } from "@/utils/truncateAddress";
 
 type TradeHistoryCardProps = {
   isModalContent?: boolean;
@@ -35,7 +36,7 @@ export default function TradeHistoryCard({
   const timeAgo = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
     const diff = now - data.timestamp;
-    
+
     if (diff < 60) return `${diff}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
@@ -44,7 +45,7 @@ export default function TradeHistoryCard({
 
   // Get token amount and format it
   const formattedTokenAmount = useMemo(() => {
-    return formatAmountWithoutLeadingZero(data.amount, 4);
+    return data.amount;
   }, [data.amount]);
 
   // Memoize the badge type based on dex and launchpad
@@ -56,6 +57,11 @@ export default function TradeHistoryCard({
     if (data.dex.toLowerCase().includes("orca")) return "moonshot";
     return "";
   }, [data.dex, data.launchpad]);
+
+  // Memoize the truncated pair name
+  const truncatedPairName = useMemo(() => {
+    return truncateString(data.pairName, 20); // Adjust maxLength as needed
+  }, [data.pairName]);
 
   const TradeHistoryCardDesktopContent = () => (
     <>
@@ -80,25 +86,27 @@ export default function TradeHistoryCard({
           <SellBuyBadge type={data.direction} size="sm" />
           <AvatarWithBadges
             classNameParent={`size-8`}
-            symbol={data.symbol}
-            src={data.image || undefined}
-            alt={`${data.name} Image`}
+            symbol={data.pairSymbol}
+            src={data.pairImage || undefined}
+            alt={`${data.pairName} Image`}
             rightType={badgeType}
           />
           <div className="flex-col">
             <div className="flex gap-2">
               <h1 className="text-nowrap font-geistBold text-xs text-fontColorPrimary">
-                {data.name}
+                {truncatedPairName}
               </h1>
               <h2 className="text-nowrap font-geistLight text-xs text-fontColorSecondary">
-                {data.symbol}
+                {data.pairSymbol}
               </h2>
             </div>
-            <div className="flex gap-x-2 overflow-x-auto scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]">
+            <div className="scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] flex gap-x-2 overflow-x-auto rounded-[10px]">
               <p className="font-geistRegular text-xs text-fontColorSecondary">
-                {data.address ? `${data.address.slice(0, 8)}...${data.address.slice(-4)}` : 'N/A'}
+                {data.pairAddress
+                  ? `${data.pairAddress.slice(0, 8)}...${data.pairAddress.slice(-4)}`
+                  : "N/A"}
               </p>
-              {data.address && <Copy value={data.address} />}
+              {data.pairAddress && <Copy value={data.pairAddress} />}
             </div>
           </div>
         </div>
@@ -170,25 +178,25 @@ export default function TradeHistoryCard({
           <div className="flex items-center gap-x-2">
             <AvatarWithBadges
               classNameParent={`size-8`}
-              symbol={data.symbol}
-              src={data.image || undefined}
-              alt={`${data.name} Image`}
+              symbol={data.pairSymbol}
+              src={data.pairImage || undefined}
+              alt={`${data.pairName} Image`}
               rightType={badgeType}
             />
             <div className="flex-col">
               <div className="flex gap-2">
                 <h1 className="text-nowrap font-geistBold text-xs text-fontColorPrimary">
-                  {data.name}
+                  {truncatedPairName}
                 </h1>
                 <h2 className="text-nowrap font-geistLight text-xs text-fontColorSecondary">
-                  {data.symbol}
+                  {data.pairSymbol}
                 </h2>
               </div>
-              <div className="flex gap-x-2 overflow-x-auto scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]">
+              <div className="scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] flex gap-x-2 overflow-x-auto rounded-[10px]">
                 <p className="font-geistRegular text-xs text-fontColorSecondary">
-                  {data.address ? `${data.address.slice(0, 8)}...${data.address.slice(-4)}` : 'N/A'}
+                  {data.pairAddress ? truncateAddress(data.pairAddress) : "N/A"}
                 </p>
-                {data.address && <Copy value={data.address} />}
+                {data.pairAddress && <Copy value={data.pairAddress} />}
               </div>
             </div>
           </div>
@@ -268,9 +276,9 @@ export default function TradeHistoryCard({
         <AddressWithEmojis
           color="success"
           address={
-            data.address 
-              ? `${data.address.slice(0, 3)}...${data.address.slice(-3)}`
-              : 'N/A'
+            data.pairAddress
+              ? `${data.pairAddress.slice(0, 3)}...${data.pairAddress.slice(-3)}`
+              : "N/A"
           }
           emojis={["whale.png", "dolphin.png"]}
         />
@@ -288,7 +296,7 @@ export default function TradeHistoryCard({
         remainingScreenWidth < 700 &&
           !isModalContent &&
           "mb-2 rounded-[8px] border border-border bg-card md:h-fit md:pl-0",
-        "scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]"
+        "scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]",
       )}
     >
       {remainingScreenWidth < 700 && !isModalContent ? null : (
