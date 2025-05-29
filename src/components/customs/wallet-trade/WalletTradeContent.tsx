@@ -1,23 +1,23 @@
 "use client";
 
-import { lazy, useState, memo } from "react";
-import AllRealizedPLChart from "../charts/AllRealizedPLChart";
-import TradeHistoryTable, {
-  CommonTableProps,
-} from "../tables/wallet-trade/TradeHistoryTable";
-import WalletTradesInfo from "../WalletTradesInfo";
-import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { cn } from "@/libraries/utils";
-import { CachedImage } from "../CachedImage";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import MostProfitableTable from "../tables/wallet-trade/MostProfitableTable";
-import HoldingTable from "../tables/wallet-trade/HoldingTable";
+import { cn } from "@/libraries/utils";
+import { useWindowSizeStore } from "@/stores/use-window-size.store";
+import { memo, useState } from "react";
+import { CachedImage } from "../CachedImage";
+import AllRealizedPLChart from "../charts/AllRealizedPLChart";
 import DeployedTokensTable from "../tables/wallet-trade/DeployedTokensTable";
+import HoldingTable from "../tables/wallet-trade/HoldingTable";
+import MostProfitableTable from "../tables/wallet-trade/MostProfitableTable";
+import TradeHistoryTable, {
+  CommonTableProps,
+} from "../tables/wallet-trade/TradeHistoryTable";
+import WalletTradesInfo from "../WalletTradesInfo";
 
 type TabLabel =
   | "Trade History"

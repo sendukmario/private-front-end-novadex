@@ -1,16 +1,16 @@
-import { memo, useState } from "react";
-import TradeHistoryTable from "../tables/wallet-trade/TradeHistoryTable";
-import MostProfitableTable from "../tables/wallet-trade/MostProfitableTable";
-import HoldingTable from "../tables/wallet-trade/HoldingTable";
-import DeployedTokensTable from "../tables/wallet-trade/DeployedTokensTable";
-import { cn } from "@/libraries/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/libraries/utils";
+import { memo, useState } from "react";
 import { CachedImage } from "../CachedImage";
+import DeployedTokensTable from "../tables/wallet-trade/DeployedTokensTable";
+import HoldingTable from "../tables/wallet-trade/HoldingTable";
+import MostProfitableTable from "../tables/wallet-trade/MostProfitableTable";
+import TradeHistoryTable from "../tables/wallet-trade/TradeHistoryTable";
 
 type TabLabel =
   | "Trade History"
@@ -53,7 +53,7 @@ export default memo(function WalletTradeTabs() {
   const [activeTab, setActiveTab] = useState<TabLabel>("Trade History");
   return (
     <div className="flex h-[370px] w-full flex-col">
-      <div className="relative flex h-[49px] w-full flex-shrink-0 items-center gap-x-4 overflow-y-hidden overflow-x-scroll border-b border-border bg-white/[4%]">
+      <div className="relative flex h-[49px] w-full flex-shrink-0 items-center gap-x-4 overflow-hidden border-b border-border bg-white/[4%]">
         {tabList.map((tab) => {
           const isActive = activeTab === tab.label;
 

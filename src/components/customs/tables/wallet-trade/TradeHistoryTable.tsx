@@ -12,13 +12,13 @@ import {
 } from "@/apis/rest/wallet-trade";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/libraries/utils";
+import { useTradesWalletModalStore } from "@/stores/token/use-trades-wallet-modal.store";
 import { usePopupStore } from "@/stores/use-popup-state";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
 import { formatAmountDollar } from "@/utils/formatAmount";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import SortButton from "../../SortButton";
-import { useTradesWalletModalStore } from "@/stores/token/use-trades-wallet-modal.store";
 
 export type CommonTableProps = {
   isModalContent?: boolean;
@@ -316,9 +316,16 @@ export default function TradeHistoryTable({
         ) : (
           <div
             style={{
-              height: `${filteredTransactions.length * 56}px`,
+              height: `266px`,
               position: "relative",
+              width: "100%",
+              overflowX: "hidden",
+              overflowY: "auto",
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#4a4b50 rgba(26, 27, 30, 0.4)',
+              borderRadius: '10px'
             }}
+            className="scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70]"
           >
             {visibleItems.map((item, index) => {
               const actualIndex = visibleRange.start + index;
@@ -327,7 +334,7 @@ export default function TradeHistoryTable({
                 <div
                   key={`trade-history-${actualIndex}`}
                   className={cn(
-                    "absolute w-full bg-card max-md:mb-2",
+                    "absolute left-0 right-0 bg-card max-md:mb-2",
                     actualIndex % 2 === 0 ? "bg-white/[4%]" : "",
                   )}
                   style={{ top: `${actualIndex * 56}px` }}

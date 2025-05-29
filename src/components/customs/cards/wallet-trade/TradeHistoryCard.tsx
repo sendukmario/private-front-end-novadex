@@ -94,12 +94,11 @@ export default function TradeHistoryCard({
                 {data.symbol}
               </h2>
             </div>
-            <div className="flex gap-x-2 overflow-hidden">
+            <div className="flex gap-x-2 overflow-x-auto scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]">
               <p className="font-geistRegular text-xs text-fontColorSecondary">
-                {data.address.slice(0, 8)}...
-                {data.address.slice(-4)}
+                {data.address ? `${data.address.slice(0, 8)}...${data.address.slice(-4)}` : 'N/A'}
               </p>
-              <Copy value={data.address} />
+              {data.address && <Copy value={data.address} />}
             </div>
           </div>
         </div>
@@ -185,12 +184,11 @@ export default function TradeHistoryCard({
                   {data.symbol}
                 </h2>
               </div>
-              <div className="flex gap-x-2 overflow-hidden">
+              <div className="flex gap-x-2 overflow-x-auto scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]">
                 <p className="font-geistRegular text-xs text-fontColorSecondary">
-                  {data.address.slice(0, 8)}...
-                  {data.address.slice(-4)}
+                  {data.address ? `${data.address.slice(0, 8)}...${data.address.slice(-4)}` : 'N/A'}
                 </p>
-                <Copy value={data.address} />
+                {data.address && <Copy value={data.address} />}
               </div>
             </div>
           </div>
@@ -270,9 +268,9 @@ export default function TradeHistoryCard({
         <AddressWithEmojis
           color="success"
           address={
-            data.address.slice(0, 3) +
-            "..." +
-            data.address.slice(-3)
+            data.address 
+              ? `${data.address.slice(0, 3)}...${data.address.slice(-3)}`
+              : 'N/A'
           }
           emojis={["whale.png", "dolphin.png"]}
         />
@@ -290,6 +288,7 @@ export default function TradeHistoryCard({
         remainingScreenWidth < 700 &&
           !isModalContent &&
           "mb-2 rounded-[8px] border border-border bg-card md:h-fit md:pl-0",
+        "scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70] rounded-[10px]"
       )}
     >
       {remainingScreenWidth < 700 && !isModalContent ? null : (

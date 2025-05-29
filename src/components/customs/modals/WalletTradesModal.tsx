@@ -16,29 +16,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import AllRealizedPLChart from "../charts/AllRealizedPLChart";
-import DeployedTokensTable from "../tables/wallet-trade/DeployedTokensTable";
-import HoldingTable from "../tables/wallet-trade/HoldingTable";
-import MostProfitableTable from "../tables/wallet-trade/MostProfitableTable";
-import TradeHistoryTable from "../tables/wallet-trade/TradeHistoryTable";
 // ######## Utils & Helpers 🤝 ########
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { cn } from "@/libraries/utils";
+import WalletTradesTabs from "@/components/customs/wallet-trade/WalletTradeTabs";
 import { useTradesWalletModalStore } from "@/stores/token/use-trades-wallet-modal.store";
 import { useWindowSizeStore } from "@/stores/use-window-size.store";
-import { CachedImage } from "../CachedImage";
-import WalletTradesInfo from "../WalletTradesInfo";
-import WalletTradesTabs from "@/components/customs/wallet-trade/WalletTradeTabs";
-import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
 import { DialogClose } from "@radix-ui/react-dialog";
 import Link from "next/link";
+import WalletTradesInfo from "../WalletTradesInfo";
 
 export default memo(function WalletTradesModal({
   onOpenChange,
@@ -62,6 +47,8 @@ export default memo(function WalletTradesModal({
   useEffect(() => {
     if (walletAddress) {
       setIsOpen(true);
+    } else {
+      setIsOpen(false);
     }
   }, [walletAddress]);
 
@@ -75,30 +62,40 @@ export default memo(function WalletTradesModal({
 
   const handleOpenChange = (isOpen: boolean) => {
     if (onOpenChange) {
-      onOpenChange(!true);
+      onOpenChange(isOpen);
     }
+    
+    setIsOpen(isOpen);
+    
     if (!isOpen) {
       setWalletAddress("");
-      setIsOpen((prev) => !prev);
+      cleanUp();
     }
   };
 
-  const WalletTradesContent = () => (
-    <div className="flex w-full flex-col">
-      <div className="flex w-full flex-col gap-4 p-4 pb-0">
-        {/* Header */}
-        <WalletTradesInfo />
+  const WalletTradesContent = () => {
+    // Add check for walletAddress
+    if (!walletAddress) {
+      return <div>No wallet address provided</div>;
+    }
 
-        {/* Graph */}
-        <div className="flex w-full flex-col items-center justify-center rounded-t-[8px] border border-border border-b-transparent md:h-[177px] md:flex-row">
-          <AllRealizedPLChart />
+    return (
+      <div className="flex w-full flex-col">
+        <div className="flex w-full flex-col gap-4 p-4 pb-0">
+          {/* Header */}
+          <WalletTradesInfo />
+
+          {/* Graph */}
+          <div className="flex w-full flex-col items-center justify-center rounded-t-[8px] border border-border border-b-transparent md:h-[177px] md:flex-row">
+            <AllRealizedPLChart />
+          </div>
         </div>
-      </div>
 
-      {/* Table Tabs */}
-      <WalletTradesTabs />
-    </div>
-  );
+        {/* Table Tabs */}
+        {walletAddress && <WalletTradesTabs />}
+      </div>
+    );
+  };
 
   if (width && width > 768) {
     return (

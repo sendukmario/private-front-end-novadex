@@ -472,10 +472,17 @@ export default function HoldingTable({
           <EmptyState />
         ) : (
           <div
-            style={{
-              height: `${sortedHoldings.length * 56}px`,
-              position: "relative",
-            }}
+          style={{
+            height: `266px`,
+            position: "relative",
+            width: "100%",
+            overflowX: "hidden",
+            overflowY: "auto",
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#4a4b50 rgba(26, 27, 30, 0.4)',
+            borderRadius: '10px'
+          }}
+          className="scrollbar scrollbar-w-[5px] scrollbar-track-[#1a1b1e]/40 scrollbar-thumb-[#4a4b50] hover:scrollbar-thumb-[#5a5b60] active:scrollbar-thumb-[#6a6b70]"
           >
             {visibleItems.map((holding, index) => {
               const actualIndex = visibleRange.start + index;
